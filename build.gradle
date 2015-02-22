@@ -2,10 +2,13 @@ buildscript {
     repositories {
         jcenter()
     }
-
     dependencies {
         classpath 'com.palantir:gradle-gitsemver:0.1.2'
     }
+}
+
+repositories {
+    jcenter()
 }
 
 apply plugin: 'scala'
