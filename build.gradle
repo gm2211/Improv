@@ -1,23 +1,25 @@
-// Apply the scala plugin to add support for Scala
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.palantir:gradle-gitsemver:0.1.2'
+    }
+}
+
 apply plugin: 'scala'
 apply plugin: 'idea'
 apply plugin: 'distribution'
+apply plugin: 'gitsemver'
 
-version = 0.1
-
-// In this section you declare where to find the dependencies of your project
-repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
-}
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    // Scala
     compile "org.scala-lang:scala-library:$scala_version"
     compile "org.scala-lang:scala-compiler:$scala_version"
     compile "jline:jline:$jline_version"
-
 
     // We use Scalatest for testing our library
     testCompile "junit:junit:$junit_version"
