@@ -1,0 +1,41 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply from: 'idea.gradle'
+
+repositories {
+    jcenter()
+    maven { url 'https://clojars.org/repo' }
+}
+
+
+dependencies {
+    compile 'overtone:overtone:0.9.1'
+    compile 'org.clojure:clojure:1.6.0'
+
+    // Tests
+    testCompile 'junit:junit:4.11'
+}
+
+task explodeDeps(type: Copy) {
+    // Extracting native libraries for scsynth
+    configurations.runtime.filter { it.name.contains ('scsynth') }.each {
+        from zipTree(it).matching  {
+            include 'native/macosx/**'
+        }
+        into "$projectDir/libs/overtone"
+    }
+}
+
+test {
+    useJUnit {
+        excludeCategories 'overtone.wrapper.SlowTest'
+    }
+}
+
+task integrationTest(type: Test) {
+    useJUnit {
+        includeCategories 'overtone.wrapper.SlowTest'
+    }
+}
+
+build.dependsOn explodeDeps
