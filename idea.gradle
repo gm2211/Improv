@@ -1,0 +1,14 @@
+idea {
+    project {
+        languageLevel = '8'
+    }
+    module {
+        sourceDirs += file('src/main/scala')
+        sourceDirs += file('src/main/java')
+
+        testSourceDirs += file('src/test/scala')
+        testSourceDirs += file('src/test/java')
+
+        jdkName = '1.8'
+    }
+}

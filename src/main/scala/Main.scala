@@ -1,3 +1,4 @@
 object Main extends App {
-    println("Hello!")
+  var overtone = new OvertoneWrapper()
+  overtone.sendCommand("(demo (sin-osc))")
 }
