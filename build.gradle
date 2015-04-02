@@ -1,9 +1,18 @@
+allprojects { 
+    apply plugin: "idea" 
+    apply from: "idea.gradle"
+
+    task wrapper(type: Wrapper) {
+        gradleVersion = 2.3
+    }
+}
+
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-        classpath 'com.palantir:gradle-gitsemver:0.1.2'
+        classpath "com.palantir:gradle-gitsemver:$git_semver_version"
     }
 }
 
@@ -11,14 +20,16 @@ repositories {
     jcenter()
 }
 
-apply plugin: 'scala'
-apply plugin: 'idea'
-apply plugin: 'distribution'
-apply plugin: 'gitsemver'
+apply plugin: "gitsemver"
+apply plugin: "scala"
+apply plugin: "distribution"
 
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    // Overtone Wrapper
+    compile(project(':overtone-wrapper'))
+
     // Scala
     compile "org.scala-lang:scala-library:$scala_version"
     compile "org.scala-lang:scala-compiler:$scala_version"
@@ -30,8 +41,10 @@ dependencies {
     testRuntime "org.scala-lang.modules:scala-xml_2.11:$scalaxml_version"
 }
 
+
+
 task run(type: JavaExec, dependsOn: classes) {
-    main = 'Main'
+    main = "Main"
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.runtime
 }

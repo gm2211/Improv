@@ -1,3 +1,6 @@
+import players.{Player, DemoPlayer}
+
 object Main extends App {
-    println("Hello!")
+  var demoPlayer: Player = new DemoPlayer
+  demoPlayer.play();
 }
