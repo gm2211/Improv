@@ -1,7 +1,6 @@
 package instruments
 
-import overtone.wrapper.OvertoneWrapper
-
-class DemoInstrument extends Instrument {
-  override def play(): Unit = overtoneWrapper.sendCommand(OvertoneWrapper.DEMO);
+class DemoInstrument extends OvertoneInstrument {
+  val DEMO = "(demo (sin-osc))"
+  override def play(): Unit = overtoneWrapper.sendCommand(DEMO)
 }
