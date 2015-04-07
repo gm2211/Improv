@@ -17,7 +17,7 @@ class MessagePassingTest extends FlatSpec with MockFactory with Matchers {
     val orchestra = ActorSystem("orchestra")
     val musician = TestActorRef.create(orchestra, AIMusician.props(instrument), "MyMusician")
 
-    (instrument.play _).expects().returning().once()
+    (instrument.play _).expects(*).returning().once()
     // Directly injecting message in order to avoid concurrency issues
     musician.receive(new SyncMessage())
   }

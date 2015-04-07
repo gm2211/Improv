@@ -1,15 +1,14 @@
-import akka.actor.ActorSystem
-import instruments.Instrument
-import messages.SyncMessage
-import players.AIMusician
+import instruments.OvertoneInstrumentType._
+import players.{Musician, Orchestra}
 
-object Main {
-  def main(args: Array[String]): Unit = {
-    val instrument = new Instrument {
-      override def play(): Unit = println("Play")
-    }
-    val orchestra = ActorSystem("orchestra")
-    val musician = orchestra.actorOf(AIMusician.props(instrument), "MyMusician")
-    musician ! new SyncMessage
-  }
+object Main extends App {
+  val orchestra = new Orchestra()
+  val instrSet = Set(PIANO, TICKER, KICK)
+
+  instrSet
+    .map(Musician.createAIMusicianWithInstrType(orchestra.system, _))
+    .foreach(orchestra.registerMusician)
+
+  orchestra.start()
+  orchestra.shutdown(20000L)
 }

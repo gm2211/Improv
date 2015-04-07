@@ -37,8 +37,9 @@ dependencies {
     compile "jline:jline:$jline_version"
 
     // Concurrency
-    compile "com.typesafe.akka:akka-testkit_2.11:$akka_testkit_version"
-    compile "com.typesafe.akka:akka-actor_2.11:$akka_actors_version"
+    compile "com.typesafe.akka:akka-testkit_2.11:$akka_version"
+    compile "com.typesafe.akka:akka-actor_2.11:$akka_version"
+    compile "com.typesafe.akka:akka-remote_2.11:$akka_version"
 
     // Groovy
     runtime "org.codehaus.groovy:groovy-all:$groovy_version"
@@ -47,7 +48,7 @@ dependencies {
     //compile "net.codingwell:scala-guice_2.10:$scala_guice_version"
 
     // Logging
-    compile ("com.typesafe.akka:akka-slf4j_2.11:$akka_slf4j_version") {
+    compile ("com.typesafe.akka:akka-slf4j_2.11:$akka_version") {
         exclude group: "org.slf4j"
     }
     compile "ch.qos.logback:logback-classic:$logback_version"

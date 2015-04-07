@@ -1,5 +1,7 @@
 package instruments
 
+import representation.Note
+
 trait Instrument {
-  def play(): Unit
+  def play(note: Note): Unit
 }
