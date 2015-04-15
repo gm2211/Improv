@@ -1,8 +1,7 @@
 package instruments
 
-import overtone.wrapper.OvertoneWrapper
+import representation.Note
 
 trait Instrument {
-  val overtoneWrapper = new OvertoneWrapper()
-  def play(): Unit
+  def play(note: Note): Unit
 }
