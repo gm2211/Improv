@@ -12,12 +12,14 @@ object OvertoneUtils {
       "sampled-piano"
     case KICK =>
       "drum"
-    case TICKER =>
+    case PING =>
       "synth"
   }
+
   def useInstrument(instrument: OvertoneInstrumentType): String = {
     s"(use 'overtone.inst.${getInstPackage(instrument)})"
   }
+
   def useInstrument(instrument: OvertoneInstrumentType, wrapper: OvertoneWrapper): Unit = {
     wrapper.sendCommand(useInstrument(instrument))
   }

@@ -5,5 +5,5 @@ object OvertoneInstrumentType extends Enumeration {
   val PIANO = Value("piano")
   val SAMPLED_PIANO = Value("sampled-piano")
   val KICK = Value("kick")
-  val TICKER = Value("ticker")
+  val PING = Value("ping")
 }
