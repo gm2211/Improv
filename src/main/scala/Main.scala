@@ -17,5 +17,5 @@ object Main extends App {
   Thread.sleep(2000)
   println("starting again")
   orchestra.start()
-  //orchestra.shutdown(20000L)
+  orchestra.shutdown(10000L)
 }

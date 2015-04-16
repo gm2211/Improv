@@ -17,5 +17,5 @@ object Note {
   }
 }
 
-case class Note(name: Note.Name.Value, octave: Int = 3) {
+case class Note(name: Note.Name.Value, octave: Int = 3) extends MusicalElement {
 }

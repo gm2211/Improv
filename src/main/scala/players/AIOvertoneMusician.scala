@@ -2,12 +2,10 @@ package players
 
 import java.util.UUID
 
-import akka.actor.{ActorLogging, ActorRef, ActorSystem, Props}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import instruments.OvertoneInstrumentType.OvertoneInstrumentType
 import instruments.{Instrument, OvertoneInstrument}
-import messages.SyncMessage
 import overtone.wrapper.OvertoneWrapper
-import representation.Note
 
 import scala.language.implicitConversions
 
@@ -15,7 +13,8 @@ import scala.language.implicitConversions
 object AIOvertoneMusician {
   implicit def createActorSystem(name: String = "actorSystem"): ActorSystem = ActorSystem(name)
 
-  def props(instrument: Instrument): Props = Props(new AIOvertoneMusician(instrument))
+  def props(instrument: Instrument, composer: Option[Composer] = None): Props =
+    Props(new AIMusician(instrument, composer))
 
   def createAIMusicianWithInstrument(actorSystem: ActorSystem,
                                      instrument: Option[Instrument],
@@ -37,15 +36,4 @@ object AIOvertoneMusician {
   }
 }
 
-class AIOvertoneMusician(var instrument: Instrument) extends Musician with ActorLogging {
-  override def play(note: Note): Unit = {
-    instrument.play(note)
-  }
 
-  override def receive = {
-    case m: SyncMessage =>
-      log.debug("Received Sync")
-      log.debug("instrument {}", instrument)
-      play(Note.genRandNote())
-  }
-}
