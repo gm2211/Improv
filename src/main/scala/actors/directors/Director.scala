@@ -1,4 +1,4 @@
-package players
+package actors.directors
 
 trait Director {
   def start(): Unit

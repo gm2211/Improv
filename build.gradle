@@ -19,6 +19,7 @@ buildscript {
 repositories {
     jcenter()
     maven { url "https://clojars.org/repo" }
+    flatDir { dirs 'lib' }
 }
 
 apply plugin: "gitsemver"
@@ -44,6 +45,9 @@ dependencies {
     // Groovy
     runtime "org.codehaus.groovy:groovy-all:$groovy_version"
 
+    // MIDI
+    compile name: "jfugue-5.0.1"
+
     // Dependency Injection
     //compile "net.codingwell:scala-guice_2.10:$scala_guice_version"
 
@@ -66,8 +70,4 @@ task run(type: JavaExec, dependsOn: classes) {
     main = "Main"
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.runtime
-}
-
-task cleanTemp(type: Delete) {
-    delete 'hs*.log'
 }

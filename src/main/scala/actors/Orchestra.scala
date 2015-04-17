@@ -1,7 +1,9 @@
-package players
+package actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import messages.Message
+import actors.directors.{SimpleDirector, Director}
+import utils.ActorUtils
 import utils.ImplicitConversions._
 
 import scala.language.implicitConversions

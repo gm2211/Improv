@@ -1,8 +1,9 @@
-package players
+package actors.directors
 
-import akka.actor.{Cancellable, ActorSystem}
-import utils.ImplicitConversions._
+import akka.actor.{ActorSystem, Cancellable}
 import messages.SyncMessage
+import utils.ActorUtils
+import utils.ImplicitConversions._
 
 class SimpleDirector( val actorSystem: ActorSystem,
                       val syncFrequency: Long = 10) extends Director {

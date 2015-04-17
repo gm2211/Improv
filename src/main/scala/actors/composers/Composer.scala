@@ -1,4 +1,4 @@
-package players
+package actors.composers
 
 import representation.Phrase
 

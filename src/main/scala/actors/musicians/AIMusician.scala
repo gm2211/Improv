@@ -1,13 +1,15 @@
-package players
+package actors.musicians
 
+import actors.composers.{Composer, RandomComposer}
 import akka.actor.ActorLogging
 import instruments.Instrument
 import messages.SyncMessage
-import representation.{Phrase, Note}
+import representation.Phrase
 
 class AIMusician( val instrument: Instrument,
                   composer1: Option[Composer] = None) extends Musician with ActorLogging {
   val composer = composer1.getOrElse(new RandomComposer)
+
   override def play(): Unit = {
     composer.compose(Phrase.builder.build()).foreach(instrument.play)
   }

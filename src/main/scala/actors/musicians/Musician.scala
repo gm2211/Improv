@@ -1,4 +1,4 @@
-package players
+package actors.musicians
 
 import akka.actor.Actor
 

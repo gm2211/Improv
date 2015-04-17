@@ -1,7 +1,8 @@
-package players
+package actors.musicians
 
 import java.util.UUID
 
+import actors.composers.Composer
 import akka.actor.{ActorRef, ActorSystem, Props}
 import instruments.OvertoneInstrumentType.OvertoneInstrumentType
 import instruments.{Instrument, OvertoneInstrument}
@@ -18,14 +19,13 @@ object AIOvertoneMusician {
 
   def createAIMusicianWithInstrument(actorSystem: ActorSystem,
                                      instrument: Option[Instrument],
-                                     name: String): ActorRef = {
-    return actorSystem.actorOf(AIOvertoneMusician.props(instrument.getOrElse(new OvertoneInstrument)), name)
-  }
+                                     name: String): ActorRef =
+    actorSystem.actorOf(AIOvertoneMusician.props(instrument.getOrElse(new OvertoneInstrument)), name)
 
   def createAIMusician(actorSystem: ActorSystem,
-                       name: String = UUID.randomUUID().toString): ActorRef = {
-    return createAIMusicianWithInstrument(actorSystem, None, name)
-  }
+                       name: String = UUID.randomUUID().toString): ActorRef =
+    createAIMusicianWithInstrument(actorSystem, None, name)
+
 
   def createAIMusicianWithInstrType(actorSystem: ActorSystem,
                                     instrumentType: OvertoneInstrumentType,

@@ -1,5 +1,6 @@
+import actors.musicians.AIOvertoneMusician
 import instruments.OvertoneInstrumentType._
-import players.{AIOvertoneMusician, Orchestra}
+import actors.Orchestra
 
 object Main extends App {
   val orchestra = new Orchestra()

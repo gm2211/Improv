@@ -1,3 +1,4 @@
+import actors.musicians.AIOvertoneMusician
 import akka.actor.ActorSystem
 import akka.pattern.Patterns
 import akka.testkit.{TestKit, TestActorRef}
@@ -6,7 +7,6 @@ import instruments.Instrument
 import messages.SyncMessage
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, Matchers}
-import players.AIOvertoneMusician
 
 import scala.concurrent.Await
 import scala.concurrent.duration.{FiniteDuration, Duration}
