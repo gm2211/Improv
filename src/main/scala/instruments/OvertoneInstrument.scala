@@ -12,9 +12,9 @@ class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrap
   override def play(musicalElement: MusicalElement): Unit = musicalElement match {
     case note: Note =>
       OvertoneUtils.play (
-      note = note,
-      instrument = instrumentType.get,
-      wrapper = overtoneWrapper)
+        note = note,
+        instrument = instrumentType.get,
+        wrapper = overtoneWrapper)
     case _ =>
       ()
   }

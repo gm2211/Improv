@@ -1,36 +1,31 @@
 package players
 
-import akka.actor.{ActorRef, ActorSystem, Cancellable}
+import akka.actor.{ActorRef, ActorSystem}
 import messages.Message
+import utils.ImplicitConversions._
 
 import scala.language.implicitConversions
 
 class Orchestra(val name: String = "orchestra") {
   val system: ActorSystem = ActorSystem.create(name)
   private val director: Director  = new SimpleDirector(system)
-  private var scheduledDirector: Option[Cancellable] = None
 
   def registerMusician(musician: ActorRef): Unit = {
     system.eventStream.subscribe(musician, classOf[Message])
   }
 
   def start(): Unit = {
-    scheduledDirector = ActorUtils.schedule(system, 0L, Some(1000L), director)
+    director.start()
   }
-
 
   def shutdown(): Unit = {
     system.log.debug("Shutting down..")
     system.shutdown()
   }
 
-  def pause(): Unit = scheduledDirector.foreach(_.cancel())
+  def pause(): Unit = director.stop()
 
-  implicit def anyToRunnable[F](f: () => F): Runnable = new Runnable {
-    override def run(): Unit = f()
-  }
   def shutdown(delay: Long): Unit = {
     ActorUtils.schedule(system, delayMS = delay, task = () => shutdown())
   }
-
 }

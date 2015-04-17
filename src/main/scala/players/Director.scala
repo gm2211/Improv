@@ -1,6 +1,6 @@
 package players
 
-trait Director extends Runnable {
-  def sync(): Unit
-  override def run(): Unit = sync()
+trait Director {
+  def start(): Unit
+  def stop(): Unit
 }
