@@ -47,6 +47,8 @@ dependencies {
 
     // MIDI
     compile name: "jfugue-5.0.1"
+    compile name: "jMusic1.6.4"
+
 
     // Dependency Injection
     //compile "net.codingwell:scala-guice_2.10:$scala_guice_version"
