@@ -1,9 +1,11 @@
 package actors.musicians
 
-import akka.actor.Actor
+import java.util.UUID
 
-import scala.language.implicitConversions
+import akka.actor.Actor
+import representation.MusicalElement
+
 
 trait Musician extends Actor {
-  def play(): Unit
+  def play(musicalElement: MusicalElement): Unit
 }

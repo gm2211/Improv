@@ -2,7 +2,7 @@ package representation
 
 import scala.collection.mutable.ListBuffer
 
-class PhraseBuilder() {
+class PhraseBuilder {
     private var _musicalElements = ListBuffer[MusicalElement]()
     def musicalElements: List[MusicalElement] = _musicalElements.toList
 
@@ -23,7 +23,7 @@ object Phrase {
     def builder = new PhraseBuilder()
 }
 
-class Phrase(builder: PhraseBuilder) extends Iterable[MusicalElement] {
+case class Phrase(builder: PhraseBuilder) extends MusicalElement with Iterable[MusicalElement] {
     val musicalElements: List[MusicalElement] = builder.musicalElements
 
     override def iterator: Iterator[MusicalElement] = musicalElements.iterator

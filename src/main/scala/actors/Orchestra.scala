@@ -1,10 +1,11 @@
 package actors
 
-import akka.actor.{ActorRef, ActorSystem}
+import actors.directors.{Director, SimpleDirector}
+import actors.musicians.Musician
+import akka.actor.{ActorSystem, Props}
 import messages.Message
-import actors.directors.{SimpleDirector, Director}
 import utils.ActorUtils
-import utils.ImplicitConversions._
+import utils.ImplicitConversions.anyToRunnable
 
 import scala.language.implicitConversions
 
@@ -12,8 +13,9 @@ class Orchestra(val name: String = "orchestra") {
   val system: ActorSystem = ActorSystem.create(name)
   private val director: Director  = new SimpleDirector(system)
 
-  def registerMusician(musician: ActorRef): Unit = {
-    system.eventStream.subscribe(musician, classOf[Message])
+  def registerMusician(musician: => Musician): Unit = {
+    val actor = system.actorOf(Props(musician))
+    system.eventStream.subscribe(actor, classOf[Message])
   }
 
   def start(): Unit = {
@@ -28,6 +30,6 @@ class Orchestra(val name: String = "orchestra") {
   def pause(): Unit = director.stop()
 
   def shutdown(delay: Long): Unit = {
-    ActorUtils.schedule(system, delayMS = delay, task = () => shutdown())
+    ActorUtils.scheduleOnce(system, delay, () => shutdown())
   }
 }

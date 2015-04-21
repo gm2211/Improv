@@ -5,13 +5,16 @@ import messages.SyncMessage
 import utils.ActorUtils
 import utils.ImplicitConversions._
 
-class SimpleDirector( val actorSystem: ActorSystem,
-                      val syncFrequency: Long = 10) extends Director {
+class SimpleDirector(val actorSystem: ActorSystem,
+                     val syncFrequencyMS: Long = 1000) extends Director {
   var task: Option[Cancellable] = None
+  var tickCount: Long = 0
 
   override def start(): Unit = {
-    ActorUtils.schedule(actorSystem,
-      syncFrequency,
+    ActorUtils.schedule(
+      actorSystem,
+      delayMS = 0,
+      intervalMS = syncFrequencyMS,
       task = () => sync())
   }
 
@@ -19,5 +22,9 @@ class SimpleDirector( val actorSystem: ActorSystem,
     task.foreach(_.cancel())
   }
 
-  def sync(): Unit = ActorUtils.broadcast(actorSystem, SyncMessage())
+
+  def sync(): Unit = {
+    ActorUtils.broadcast(actorSystem, SyncMessage(tickCount))
+    tickCount += 1
+  }
 }
