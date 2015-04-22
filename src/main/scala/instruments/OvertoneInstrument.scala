@@ -1,13 +1,14 @@
 package instruments
 
-import instruments.OvertoneInstrumentType._
+import instruments.InstrumentType._
 import overtone.wrapper.OvertoneWrapper
 import representation.{Phrase, MusicalElement, Note}
 import utils.OvertoneUtils
 
 class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrapper(),
-                         val instrumentType: Option[OvertoneInstrumentType] = Some(PIANO)) extends Instrument {
-  OvertoneUtils.useInstrument(instrumentType.get, overtoneWrapper)
+                         override val instrumentType: InstrumentType = PIANO) extends Instrument {
+  private val overtoneInstrumentType = OvertoneInstrumentType.fromInstrumentType(instrumentType)
+  OvertoneUtils.useInstrument(overtoneInstrumentType, overtoneWrapper)
 
   override def play(musicalElement: MusicalElement): Unit = musicalElement match {
     case note: Note =>
@@ -19,7 +20,7 @@ class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrap
   def play(note: Note): Unit = {
     OvertoneUtils.play(
       note = note,
-      instrument = instrumentType.get,
+      instrument = overtoneInstrumentType,
       wrapper = overtoneWrapper)
   }
 }

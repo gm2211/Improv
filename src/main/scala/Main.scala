@@ -1,7 +1,8 @@
 import actors.Orchestra
 import actors.musicians.AIMusician
-import instruments.OvertoneInstrument
-import instruments.OvertoneInstrumentType._
+import akka.actor.ActorSystem
+import instruments.InstrumentType._
+import instruments.JFugueInstrument
 import utils.ImplicitConversions.wrapInOption
 
 object Main extends App {
@@ -12,10 +13,10 @@ object Main extends App {
 object DemoOrchestra {
   def run() = {
     val orchestra = new Orchestra()
-    val instrSet = Set(PIANO, PING, KICK)
+    val instrSet = Set(PIANO, PIANO, KICK)
 
-    val musicianBuilder = (instrType: OvertoneInstrumentType) => {
-      val instrument = new OvertoneInstrument(instrumentType = instrType)
+    val musicianBuilder = (instrType: InstrumentType) => {
+      val instrument = new JFugueInstrument(instrType)
       AIMusician.builder.withInstrument(instrument)
     }
 

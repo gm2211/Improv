@@ -3,7 +3,7 @@ package utils
 import scala.util.Random
 
 object CollectionUtils {
-  def choose[T](collection: Iterable[T]): Option[T] = {
+  def chooseRandom[T](collection: Iterable[T]): Option[T] = {
     def selectRandom(iter: Iterable[T]): Option[T] = {
       val idx = Random.nextInt(iter.size - 1)
       iter.view.zipWithIndex.find { case (elem, index) => idx == index }.map(_._1)
@@ -15,11 +15,12 @@ object CollectionUtils {
                   upperBound: Int = 1000): Range = {
     require(lowerBound >= 0, "Only non-negative bounds are accepted")
     require(upperBound >= 0, "Only non-negative bounds are accepted")
+    require(upperBound >= lowerBound, "Cannot have a range with upper-bound smaller than lower-bound")
 
-    val lb = math.min(lowerBound, Int.MaxValue)
-    val ub = math.min(upperBound, Int.MaxValue)
+    val upperbound_ = math.min(upperBound, Int.MaxValue)
+    val lb = Random.nextInt(upperbound_)
+    val ub = lb + Random.nextInt(upperbound_ - lb)
 
-    require(ub >= lb, "Cannot have a range with upper-bound smaller than lower-bound")
     lb to ub
   }
 }

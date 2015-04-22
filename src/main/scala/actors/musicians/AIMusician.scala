@@ -2,34 +2,44 @@ package actors.musicians
 
 import actors.composers.{Composer, RandomComposer}
 import akka.actor.{ActorLogging, ActorSystem, Props}
-import instruments.{Instrument, OvertoneInstrument}
+import instruments.{Instrument, JFugueInstrument}
 import messages.{MusicInfoMessage, SyncMessage}
 import representation.{MusicalElement, Phrase}
 import utils.ActorUtils
+import utils.builders.{Once, Zero, IsOnce, Count}
 
 import scala.collection.mutable
 
-case class AIMusicianBuilder(
-                              var instrument: Option[Instrument] = None,
-                              var actorSystem: Option[ActorSystem] = None,
-                              var composer: Option[Composer] = None) {
-  def withInstrument(instrument: Option[Instrument]) = copy(instrument = instrument)
-  def withActorSystem(actorSystem: Option[ActorSystem]) = copy(actorSystem = actorSystem)
-  def withComposer(composer: Option[Composer]) = copy(composer = composer)
+case class AIMusicianBuilder
+  [InstrumentCount <: Count,
+   ActorSysCount <: Count](
+        var instrument: Option[Instrument] = None,
+        var actorSystem: Option[ActorSystem] = None,
+        var composer: Option[Composer] = None) {
+  def withInstrument(instrument: Option[Instrument]) = copy[Once, ActorSysCount](instrument = instrument)
 
-  def build: AIMusician = {
-    require(actorSystem.isDefined)
-    new AIMusician(this)
+  def withActorSystem(actorSystem: Option[ActorSystem]) = copy[InstrumentCount, Once](actorSystem = actorSystem)
+
+  def withComposer(composer: Option[Composer]) = copy[InstrumentCount, ActorSysCount](composer = composer)
+
+  def build[
+    A <: InstrumentCount : IsOnce,
+    B <: ActorSysCount: IsOnce]: AIMusician = {
+    new AIMusician(this.asInstanceOf[AIMusicianBuilder[Once, Once]])
   }
-  def buildProps: Props = Props(build)
+
+  def buildProps[
+    A <: InstrumentCount : IsOnce,
+    B <: ActorSysCount: IsOnce]: Props = Props(build)
 }
 
 object AIMusician {
-  def builder: AIMusicianBuilder = new AIMusicianBuilder
+  def builder: AIMusicianBuilder[Zero, Zero] = new AIMusicianBuilder[Zero, Zero]
 
   def props(instrument: Option[Instrument],
             actorSystem: Option[ActorSystem],
             composer: Option[Composer]): Props = {
+
     val musician = AIMusician.builder
       .withInstrument(instrument)
       .withActorSystem(actorSystem)
@@ -39,8 +49,8 @@ object AIMusician {
   }
 }
 
-class AIMusician(builder: AIMusicianBuilder) extends Musician with ActorLogging {
-  private val instrument: Instrument = builder.instrument.getOrElse(new OvertoneInstrument)
+class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with ActorLogging {
+  private val instrument: Instrument = builder.instrument.get
   private val actorSystem: ActorSystem = builder.actorSystem.get
   private val musicComposer: Composer = builder.composer.getOrElse(new RandomComposer)
 
@@ -59,7 +69,6 @@ class AIMusician(builder: AIMusicianBuilder) extends Musician with ActorLogging 
 
     play(musicComposer.compose(phraseBuilder.build()))
   }
-
 
   override def play(musicalElement: MusicalElement): Unit = {
     instrument.play(musicalElement)
