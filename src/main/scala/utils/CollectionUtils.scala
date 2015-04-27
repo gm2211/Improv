@@ -5,7 +5,10 @@ import scala.util.Random
 object CollectionUtils {
   def chooseRandom[T](collection: Iterable[T]): Option[T] = {
     def selectRandom(iter: Iterable[T]): Option[T] = {
-      val idx = Random.nextInt(iter.size - 1)
+      if (iter.size <= 0)
+        return None
+
+      val idx = Random.nextInt(iter.size)
       iter.view.zipWithIndex.find { case (elem, index) => idx == index }.map(_._1)
     }
     Option(collection).flatMap(selectRandom)

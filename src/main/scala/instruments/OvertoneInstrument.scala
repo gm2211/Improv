@@ -2,7 +2,7 @@ package instruments
 
 import instruments.InstrumentType._
 import overtone.wrapper.OvertoneWrapper
-import representation.{Phrase, MusicalElement, Note}
+import representation.{MusicalElement, Note, Phrase}
 import utils.OvertoneUtils
 
 class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrapper(),

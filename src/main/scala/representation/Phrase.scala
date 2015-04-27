@@ -2,17 +2,14 @@ package representation
 
 import scala.collection.mutable.ListBuffer
 
-class PhraseBuilder {
-    private var _musicalElements = ListBuffer[MusicalElement]()
-    def musicalElements: List[MusicalElement] = _musicalElements.toList
+case class PhraseBuilder(private val musicalElementsBuf: ListBuffer[MusicalElement] = ListBuffer()) {
+    def musicalElements: List[MusicalElement] = musicalElementsBuf.toList
 
-    def withMusicalElements(musElems: List[MusicalElement]) = {
-        _musicalElements = musElems.to[ListBuffer]
-        this
-    }
+    def withMusicalElements(musicalElements: Iterable[MusicalElement]) =
+        copy(musicalElementsBuf = musicalElements.to[ListBuffer])
 
     def addMusicalElement(musicalElement: MusicalElement) = {
-        _musicalElements += musicalElement
+        musicalElementsBuf += musicalElement
         this
     }
 

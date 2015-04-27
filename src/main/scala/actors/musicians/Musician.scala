@@ -1,7 +1,5 @@
 package actors.musicians
 
-import java.util.UUID
-
 import akka.actor.Actor
 import representation.MusicalElement
 

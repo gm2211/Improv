@@ -6,7 +6,7 @@ import utils.ActorUtils
 import utils.ImplicitConversions._
 
 class SimpleDirector(val actorSystem: ActorSystem,
-                     val syncFrequencyMS: Long = 1000) extends Director {
+                     val syncFrequencyMS: Long = 200) extends Director {
   var task: Option[Cancellable] = None
   var tickCount: Long = 0
 

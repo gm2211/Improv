@@ -1,9 +1,10 @@
 package midi
 
 object MIDIInstrumentCategory {
+  type MIDIInstrumentCategory = InstrumentCategory
 
   sealed abstract class InstrumentCategory(val instrumentNumber: Int)
-  case class PIANO(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber)
+  case class PIANO(override val instrumentNumber: Int = 0) extends InstrumentCategory(instrumentNumber)
   case class CHROMATIC_PERCUSSION (override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber)
   case class ORGAN(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber)
   case class GUITAR(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber)
@@ -20,7 +21,6 @@ object MIDIInstrumentCategory {
   case class PERCUSSIVE(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber)
   case class SOUND_EFFECTS(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber)
   case class UNKNOWN(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber)
-
 
   def classify(instrNumber: Int): InstrumentCategory = instrNumber + 1 match {
     case it if 1 to 8 contains it => PIANO(instrNumber)
@@ -42,3 +42,4 @@ object MIDIInstrumentCategory {
     case _ => UNKNOWN(instrNumber)
   }
 }
+

@@ -2,11 +2,11 @@ package actors.musicians
 
 import actors.composers.{Composer, RandomComposer}
 import akka.actor.{ActorLogging, ActorSystem, Props}
-import instruments.{Instrument, JFugueInstrument}
+import instruments.Instrument
 import messages.{MusicInfoMessage, SyncMessage}
 import representation.{MusicalElement, Phrase}
 import utils.ActorUtils
-import utils.builders.{Once, Zero, IsOnce, Count}
+import utils.builders.{Count, IsOnce, Once, Zero}
 
 import scala.collection.mutable
 
@@ -63,11 +63,12 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
     val addMusicalElement = (m: MusicInfoMessage) => phraseBuilder.addMusicalElement(m.musicalElement)
 
     musicInfoMessageCache.get(time)
-      .foreach(_.foreach(addMusicalElement))
+      .foreach(messages => messages.foreach(addMusicalElement))
 
     musicInfoMessageCache.remove(time)
 
-    play(musicComposer.compose(phraseBuilder.build()))
+    val responsePhrase = musicComposer.compose(phraseBuilder.build())
+    play(responsePhrase)
   }
 
   override def play(musicalElement: MusicalElement): Unit = {

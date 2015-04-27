@@ -1,8 +1,9 @@
 import actors.Orchestra
+import actors.composers.MIDIReaderComposer
 import actors.musicians.AIMusician
-import akka.actor.ActorSystem
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
+import midi.{MIDIInstrumentCategory => MidiType}
 import utils.ImplicitConversions.wrapInOption
 
 object Main extends App {
@@ -13,25 +14,21 @@ object Main extends App {
 object DemoOrchestra {
   def run() = {
     val orchestra = new Orchestra()
-    val instrSet = Set(PIANO, PIANO, KICK)
+    val instrSet = Set((PIANO, MidiType.PIANO(0)), (PIANO, MidiType.PIANO(7)), (KICK, MidiType.CHROMATIC_PERCUSSION(11)))
 
-    val musicianBuilder = (instrType: InstrumentType) => {
+    val musicianBuilder = (instrType: InstrumentType, instrCat: MidiType.MIDIInstrumentCategory) => {
       val instrument = new JFugueInstrument(instrType)
-      AIMusician.builder.withInstrument(instrument)
+      AIMusician.builder
+        .withInstrument(instrument)
+        .withComposer(new MIDIReaderComposer(getClass.getClassLoader.getResource("musicScores/test.mid").getPath, instrCat))
     }
 
     instrSet
-      .map(musicianBuilder(_).withActorSystem(orchestra.system))
+      .map{case (t, c) => musicianBuilder(t,c).withActorSystem(orchestra.system)}
       .foreach(m => orchestra.registerMusician(m.build))
 
     orchestra.start()
 
-    Thread.sleep(2000)
-    println("pausing")
-    orchestra.pause()
-    Thread.sleep(2000)
-    println("starting again")
-    orchestra.start()
-    orchestra.shutdown(10000L)
+    //orchestra.shutdown(10000L)
   }
 }

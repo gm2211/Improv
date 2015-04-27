@@ -1,13 +1,35 @@
 package representation
 
+
+import representation.NoteName.NoteName
 import utils.CollectionUtils
 
-import scala.util.Random
+import scala.util.{Random, Try}
+
 
 object Note {
+  def pitchToOctave(pitch: Int): Int = math.floor(pitch / 12.0).toInt
+
   val MAX_OCTAVE: Int = 8
   val MAX_DURATION: Int = 1
 
+  /**
+   * This method converts a string like "Ab", "A#", "Ab3"
+   * @param noteString String representing a note
+   * @return note represented by the string
+   */
+  def parseString(noteString: String): (Option[NoteName], Option[Intonation], Option[Int]) = {
+    val regex = "([A-Z]){1}([b#])?(\\d)?".r
+    noteString match {
+      case regex(name, intonation, octave) =>
+        (Try(NoteName.withName(name)).toOption,
+         Some(Intonation(intonation)),
+        Try(octave.toInt).toOption)
+
+      case _ =>
+        (None, None, None)
+    }
+  }
 
   def genRandNote(): Note = {
     val octave = Random.nextInt(MAX_OCTAVE)
@@ -15,23 +37,19 @@ object Note {
     val intonation = CollectionUtils
       .chooseRandom(List(Flat, Sharp, Natural))
       .getOrElse(Natural)
-    val note = CollectionUtils.chooseRandom(List(A, B, C, D, E, F, G)).getOrElse(A)
+    val name = CollectionUtils.chooseRandom(List("A", "B", "C", "D", "E", "F", "G")).getOrElse("A")
 
-    note(octave, duration, intonation)
+    Note(NoteName.withName(name), octave, duration, intonation)
   }
 }
 
-sealed trait Note extends MusicalElement {
-  def name: String
-  def octave: Int
-  def duration: Int
-  def intonation: Intonation
+object NoteName extends Enumeration {
+  type NoteName = Value
+  val A, B, C, D, E, F, G = Value
 }
-case class A(octave: Int, duration: Int, intonation: Intonation) extends Note { val name = "A" }
-case class B(octave: Int, duration: Int, intonation: Intonation) extends Note { val name = "B" }
-case class C(octave: Int, duration: Int, intonation: Intonation) extends Note { val name = "C" }
-case class D(octave: Int, duration: Int, intonation: Intonation) extends Note { val name = "D" }
-case class E(octave: Int, duration: Int, intonation: Intonation) extends Note { val name = "E" }
-case class F(octave: Int, duration: Int, intonation: Intonation) extends Note { val name = "F" }
-case class G(octave: Int, duration: Int, intonation: Intonation) extends Note { val name = "G" }
+
+case class Note( name:       NoteName   = NoteName.A,
+                 octave:     Int        = 1,
+                 duration:   Double     = 1.0,
+                 intonation: Intonation = Natural     ) extends MusicalElement
 
