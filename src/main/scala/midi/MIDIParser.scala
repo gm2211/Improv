@@ -1,8 +1,10 @@
 package midi
 
+import instruments.InstrumentType
+import instruments.InstrumentType.InstrumentType
+import instruments.InstrumentType.InstrumentType
 import jm.music.{data => jmData}
 import jm.util.Read
-import midi.MIDIInstrumentCategory._
 import org.slf4j.LoggerFactory
 import representation._
 
@@ -54,13 +56,13 @@ class MIDIParser(val score: jmData.Score) {
     Phrase.builder.withMusicalElements(notes).build()
   }
 
-  def getPartIndexByInstrument: Map[MIDIInstrumentCategory, Array[Int]] =
-    score.getPartArray.groupBy(p => MIDIInstrumentCategory.classify(p.getInstrument))
+  def getPartIndexByInstrument: Map[InstrumentType, Array[Int]] =
+    score.getPartArray.groupBy(p => InstrumentType.classify(p.getInstrument))
       .mapValues(parts => parts.map(part => getPartIndex(part).getOrElse(-1)))
 
-  def getInstrumentsCounts: Map[MIDIInstrumentCategory.InstrumentCategory, Int] = {
+  def getInstrumentsCounts: Map[InstrumentType.InstrumentCategory, Int] = {
     val parts = score.getPartArray
-    val instruments = parts.map(i => MIDIInstrumentCategory.classify(i.getInstrument))
+    val instruments = parts.map(i => InstrumentType.classify(i.getInstrument))
     instruments.groupBy(identity).mapValues(_.length)
   }
 }
