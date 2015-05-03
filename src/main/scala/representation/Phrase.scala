@@ -24,4 +24,5 @@ case class Phrase(builder: PhraseBuilder) extends MusicalElement with Iterable[M
     val musicalElements: List[MusicalElement] = builder.musicalElements
 
     override def iterator: Iterator[MusicalElement] = musicalElements.iterator
+    override def isEmpty: Boolean = musicalElements.isEmpty
 }

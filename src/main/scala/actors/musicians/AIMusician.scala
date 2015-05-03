@@ -2,6 +2,7 @@ package actors.musicians
 
 import actors.composers.{Composer, RandomComposer}
 import akka.actor.{ActorLogging, ActorSystem, Props}
+import com.google.common.collect.MapMaker
 import instruments.Instrument
 import messages.{MusicInfoMessage, SyncMessage}
 import representation.{MusicalElement, Phrase}
@@ -54,7 +55,7 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
   private val actorSystem: ActorSystem = builder.actorSystem.get
   private val musicComposer: Composer = builder.composer.getOrElse(new RandomComposer)
 
-  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] =
+  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
     new mutable.HashMap[Long, mutable.Set[MusicInfoMessage]]() with mutable.MultiMap[Long, MusicInfoMessage]
   private var currentMusicTime: Long = 0
 
@@ -78,14 +79,10 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
 
   override def receive = {
     case m: SyncMessage =>
-      log.debug(s"Received Sync at time: ${m.time}")
-      log.debug(s"instrument: $instrument")
-
       currentMusicTime = m.time
       play(m.time)
 
     case m: MusicInfoMessage =>
-      log.debug(s"At time ${m.time}, received music info: $m")
       musicInfoMessageCache.addBinding(m.time, m)
   }
 }

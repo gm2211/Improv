@@ -1,24 +1,42 @@
 package instruments
 
-import instruments.InstrumentType.{PIANO, InstrumentType}
-import org.jfugue.player.Player
+import instruments.InstrumentType.{InstrumentType, PIANO}
+import org.jfugue.player.{PlayerListener, Player}
 import org.jfugue.theory
+import org.slf4j.LoggerFactory
 import representation.{MusicalElement, Note, Phrase, Rest}
+import utils.ImplicitConversions.anyToRunnable
 
-class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument {
+class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with PlayerListener {
+  private val log = LoggerFactory.getLogger(getClass)
   val player = new Player
+  var finishedPlaying = true
 
-  override def play(musicalElement: MusicalElement): Unit = musicalElement match {
-    case note: Note =>
-      val convertedNotePattern = JFugueUtils.convertNote(note).getPattern
-      convertedNotePattern.setInstrument(instrumentType.instrumentNumber)
-      player.play(convertedNotePattern)
-    case r: Rest =>
-      Thread.sleep(r.duration.toInt)
-    case p: Phrase =>
-      p.foreach(play)
+  player.addListener(this)
+
+  override def play(musicalElement: MusicalElement): Unit = {
+    if (! finishedPlaying) {
+      log.debug("Still playing old music. Ignoring..")
+      return
+    }
+    musicalElement match {
+      case note: Note =>
+        val convertedNotePattern = JFugueUtils.convertNote(note).getPattern
+        convertedNotePattern.setInstrument(instrumentType.instrumentNumber)
+        finishedPlaying = false
+        new Thread(() => player.play(convertedNotePattern)).start()
+      case r: Rest =>
+        finishedPlaying = false
+        new Thread(() => {Thread.sleep(r.duration.toInt); onFinished()}).start()
+      case p: Phrase =>
+        p.foreach(play)
+    }
   }
 
+
+  override def onFinished(): Unit = {
+    finishedPlaying = true
+  }
 }
 
 object JFugueUtils {

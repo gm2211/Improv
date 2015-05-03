@@ -1,8 +1,8 @@
 package instruments
 
-import instruments.InstrumentType.{PIANO, InstrumentType}
+import instruments.InstrumentType.{InstrumentType, PIANO}
 import overtone.wrapper.OvertoneWrapper
-import representation.{Rest, MusicalElement, Note, Phrase}
+import representation.{MusicalElement, Note, Phrase, Rest}
 import utils.OvertoneUtils
 
 class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrapper(),

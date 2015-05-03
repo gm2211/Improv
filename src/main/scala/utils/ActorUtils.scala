@@ -2,7 +2,7 @@ package utils
 
 import java.util.concurrent.{Executors, TimeUnit}
 
-import akka.actor.{ActorSystem, Cancellable}
+import akka.actor.{ActorRef, ActorSystem, Cancellable}
 import messages.Message
 
 import scala.concurrent.ExecutionContext
@@ -28,5 +28,9 @@ object ActorUtils {
                    task: Runnable): Option[Cancellable] = {
     val delay = FiniteDuration(delayMS, TimeUnit.MILLISECONDS)
     Some(system.scheduler.scheduleOnce(delay, task))
+  }
+
+  def subscribe(a: ActorRef, c: Class[_])(implicit sys: ActorSystem): Unit = {
+    sys.eventStream.subscribe(a, c)
   }
 }

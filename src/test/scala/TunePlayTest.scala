@@ -9,7 +9,7 @@ import utils.ImplicitConversions.wrapInOption
 
 class TunePlayTest extends FlatSpec with MockFactory with Matchers {
   "The orchestra" should "play a pre-composed tune distributedly" taggedAs SlowTest in {
-    val orchestra = new Orchestra()
+    val orchestra = Orchestra.builder.build
     val instrSet = Set(PIANO, PING, KICK)
 
 

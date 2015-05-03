@@ -7,5 +7,5 @@ object ImplicitConversions {
     override def run(): Unit = f()
   }
 
-  implicit def wrapInOption[A <: AnyRef](a: A): Option[A] = Option(a)
+  implicit def wrapInOption[A <: Any](a: A): Option[A] = Option(a)
 }

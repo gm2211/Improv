@@ -4,19 +4,13 @@ import instruments.{InstrumentType => instrType}
 import utils.CollectionUtils
 
 object OvertoneInstrumentType extends Enumeration {
-  def fromMIDIInstrument(instrumentType: instrType.InstrumentType) = instrumentType match {
+  def fromInstrumentType(instrumentType: instrType.InstrumentType): OvertoneInstrumentType = instrumentType match {
     case instrType.PIANO(_) =>
       SAMPLED_PIANO
     case instrType.PERCUSSIVE(_) | instrType.CHROMATIC_PERCUSSION(_) =>
       CollectionUtils.chooseRandom(List(KICK, KICK2, KICK3, KICK4, DRY_KICK, DUB_KICK, SNARE, CLAP)).get
     case _ =>
       PING
-  }
-  def fromInstrumentType(instrumentType: instrType.InstrumentType): OvertoneInstrumentType = instrumentType match {
-    case instrType.PIANO(_) =>
-      SAMPLED_PIANO
-    case instrType.PERCUSSIVE(_) =>
-      SNARE
   }
 
   type OvertoneInstrumentType = Value

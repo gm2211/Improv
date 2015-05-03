@@ -2,7 +2,6 @@ package midi
 
 import instruments.InstrumentType
 import instruments.InstrumentType.InstrumentType
-import instruments.InstrumentType.InstrumentType
 import jm.music.{data => jmData}
 import jm.util.Read
 import org.slf4j.LoggerFactory
