@@ -1,6 +1,6 @@
-package tests.utils
+package utils
 
-import tests.instruments.OvertoneInstrumentType._
+import instruments.OvertoneInstrumentType._
 import overtone.wrapper.OvertoneWrapper
 import representation.Note
 

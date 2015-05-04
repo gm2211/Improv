@@ -1,7 +1,7 @@
 package midi
 
-import tests.instruments.InstrumentType
-import tests.instruments.InstrumentType.InstrumentType
+import instruments.InstrumentType
+import instruments.InstrumentType.InstrumentType
 import jm.music.{data => jmData}
 import jm.util.Read
 import org.slf4j.LoggerFactory
@@ -71,7 +71,7 @@ object JMUtils {
 
   def convertNote(jmNote: jmData.Note): Option[MusicalElement] = {
     if (jmNote.isRest)
-      Some(Rest(jmNote.getDuration * jmNote.getMyPhrase.getMyPart.getMyScore.getTempo))
+      Some(Rest(jmNote.getDuration))
     else {
       val notePitch = if (!jmNote.getPitchType) jmNote.getPitch else jmData.Note.freqToMidiPitch(jmNote.getFrequency)
       val intonation = if (jmNote.isFlat) Flat else if (jmNote.isSharp) Sharp else Natural

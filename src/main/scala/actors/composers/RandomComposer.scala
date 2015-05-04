@@ -1,7 +1,7 @@
 package actors.composers
 
 import representation.{Note, Phrase}
-import tests.utils.CollectionUtils
+import utils.CollectionUtils
 
 class RandomComposer extends Composer {
   override def compose(previousPhrase: Phrase): Phrase = {

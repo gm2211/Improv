@@ -1,9 +1,9 @@
-package tests.instruments
+package instruments
 
-import tests.instruments.InstrumentType.{InstrumentType, PIANO}
+import instruments.InstrumentType.{InstrumentType, PIANO}
 import overtone.wrapper.OvertoneWrapper
 import representation.{MusicalElement, Note, Phrase, Rest}
-import tests.utils.OvertoneUtils
+import utils.OvertoneUtils
 
 class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrapper(),
                          override val instrumentType: InstrumentType = PIANO()) extends Instrument {
@@ -14,7 +14,7 @@ class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrap
     case note: Note =>
       play(note)
     case rest: Rest =>
-      Thread.sleep(rest.durationMS.toInt)
+      Thread.sleep(rest.durationSec.toInt)
     case phrase: Phrase =>
       phrase.foreach(play)
   }

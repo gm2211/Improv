@@ -1,6 +1,6 @@
-package tests.instruments
+package instruments
 
-import tests.utils.CollectionUtils
+import utils.CollectionUtils
 
 import scala.reflect.ClassTag
 
@@ -56,23 +56,23 @@ object InstrumentType {
   case class UNKNOWN(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, UNKNOWN)
 
   def classify(instrNumber: Int): InstrumentCategory = instrNumber + 1 match {
-    case it if PIANO.range contains it => PIANO(instrNumber)
-    case it if CHROMATIC_PERCUSSION.range contains it => CHROMATIC_PERCUSSION(instrNumber)
-    case it if ORGAN.range contains it => ORGAN(instrNumber)
-    case it if GUITAR.range contains it => GUITAR(instrNumber)
-    case it if BASS.range contains it => BASS(instrNumber)
-    case it if STRINGS.range contains it => STRINGS(instrNumber)
-    case it if ENSEMBLE.range contains it => ENSEMBLE(instrNumber)
-    case it if BRASS.range contains it => BRASS(instrNumber)
-    case it if REED.range contains it => REED(instrNumber)
-    case it if PIPE.range contains it => PIPE(instrNumber)
-    case it if SYNTH_LEAD.range contains it => SYNTH_LEAD(instrNumber)
-    case it if SYNTH_PAD.range contains it => SYNTH_PAD(instrNumber)
-    case it if SYNTH_EFFECTS.range contains it => SYNTH_EFFECTS(instrNumber)
-    case it if ETHNIC.range contains it => ETHNIC(instrNumber)
-    case it if PERCUSSIVE.range contains it => PERCUSSIVE(instrNumber)
-    case it if SOUND_EFFECTS.range contains it => SOUND_EFFECTS(instrNumber)
-    case _ => UNKNOWN(instrNumber)
+    case it if PIANO.range contains it => PIANO(it)
+    case it if CHROMATIC_PERCUSSION.range contains it => CHROMATIC_PERCUSSION(it)
+    case it if ORGAN.range contains it => ORGAN(it)
+    case it if GUITAR.range contains it => GUITAR(it)
+    case it if BASS.range contains it => BASS(it)
+    case it if STRINGS.range contains it => STRINGS(it)
+    case it if ENSEMBLE.range contains it => ENSEMBLE(it)
+    case it if BRASS.range contains it => BRASS(it)
+    case it if REED.range contains it => REED(it)
+    case it if PIPE.range contains it => PIPE(it)
+    case it if SYNTH_LEAD.range contains it => SYNTH_LEAD(it)
+    case it if SYNTH_PAD.range contains it => SYNTH_PAD(it)
+    case it if SYNTH_EFFECTS.range contains it => SYNTH_EFFECTS(it)
+    case it if ETHNIC.range contains it => ETHNIC(it)
+    case it if PERCUSSIVE.range contains it => PERCUSSIVE(it)
+    case it if SOUND_EFFECTS.range contains it => SOUND_EFFECTS(it)
+    case _ => UNKNOWN(instrNumber + 1)
   }
 }
 

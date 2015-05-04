@@ -2,12 +2,11 @@ package actors.musicians
 
 import actors.composers.{Composer, RandomComposer}
 import akka.actor.{ActorLogging, ActorSystem, Props}
-import com.google.common.collect.MapMaker
-import tests.instruments.Instrument
+import instruments.Instrument
 import messages.{MusicInfoMessage, SyncMessage}
 import representation.{MusicalElement, Phrase}
-import tests.utils.ActorUtils
-import tests.utils.builders.{Count, IsOnce, Once, Zero}
+import utils.ActorUtils
+import utils.builders.{Count, Once, IsOnce, Zero}
 
 import scala.collection.mutable
 

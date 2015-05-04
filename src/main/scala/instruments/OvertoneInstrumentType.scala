@@ -1,7 +1,7 @@
-package tests.instruments
+package instruments
 
-import tests.instruments.{InstrumentType => instrType}
-import tests.utils.CollectionUtils
+import instruments.{InstrumentType => instrType}
+import utils.CollectionUtils
 
 object OvertoneInstrumentType extends Enumeration {
   def fromInstrumentType(instrumentType: instrType.InstrumentType): OvertoneInstrumentType = instrumentType match {

@@ -1,4 +1,4 @@
-package tests.utils
+package utils
 
 object OptionUtils {
   def getOrElse[A](default: A)(option: Option[A]) = option.getOrElse(default)

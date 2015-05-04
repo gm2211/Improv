@@ -1,6 +1,7 @@
 package tests.utils
 
 import org.scalatest.FlatSpec
+import utils.FunctionalUtils
 
 class FunctionalUtils$Test extends FlatSpec {
   def foo(i: Int, s: String) = s"$s$i"

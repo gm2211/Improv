@@ -1,3 +1,3 @@
 package representation
 
-case class Rest(durationMS: Double) extends MusicalElement
+case class Rest(durationSec: Double) extends MusicalElement

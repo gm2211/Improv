@@ -2,16 +2,15 @@ import actors.Orchestra
 import actors.composers.MIDIReaderComposer
 import actors.directors.SimpleDirector
 import actors.musicians.AIMusician
-import tests.instruments.InstrumentType.{InstrumentType, PIANO}
-import tests.instruments.{Instrument, JFugueInstrument}
+import instruments.InstrumentType.{InstrumentType, PIANO}
+import instruments.{Instrument, JFugueInstrument}
 import midi.MIDIParser
+import utils.ImplicitConversions.{anyToRunnable, wrapInOption}
 import org.slf4j.LoggerFactory
-import tests.utils.ImplicitConversions.{anyToRunnable, wrapInOption}
 
 object Main extends App {
-  //MIDIParser("/Users/gm2211/Documents/imperialCollege/fourthYear/finalProject/codebase/src/main/resources/musicScores/test.mid").getInstrumentsCounts
-//  DemoMIDIOrchestra.run(getClass.getClassLoader.getResource("musicScores/test.mid").getPath)
-  DemoRandomOrchestra.run()
+  DemoMIDIOrchestra.run(getClass.getClassLoader.getResource("musicScores/test.mid").getPath)
+//  DemoRandomOrchestra.run()
 //  DemoActors.run()
 }
 
@@ -67,7 +66,7 @@ object DemoActors {
 
 object DemoMIDIOrchestra {
   def run(filename: String) = {
-    val director = Option(SimpleDirector.builder.withSyncFrequencyMS(1000L))
+    val director = Option(SimpleDirector.builder.withSyncFrequencyMS(5000L))
     val orchestra = Orchestra.builder.withDirector(director).build
     val parser = MIDIParser(filename)
 

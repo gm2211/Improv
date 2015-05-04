@@ -1,4 +1,4 @@
-package tests.utils.builders
+package utils.builders
 
 
 sealed trait Count

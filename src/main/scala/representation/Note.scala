@@ -2,7 +2,7 @@ package representation
 
 
 import representation.NoteName.NoteName
-import tests.utils.CollectionUtils
+import utils.CollectionUtils
 
 import scala.util.{Random, Try}
 
