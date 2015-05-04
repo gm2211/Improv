@@ -2,9 +2,9 @@ package actors.directors
 
 import akka.actor.{ActorLogging, ActorSystem, Cancellable}
 import messages.{Stop, Start, MusicInfoMessage, SyncMessage}
-import utils.ActorUtils
-import utils.ImplicitConversions._
-import utils.builders.{Count, IsOnce, Once, Zero}
+import tests.utils.ActorUtils
+import tests.utils.ImplicitConversions._
+import tests.utils.builders.{Count, IsOnce, Once, Zero}
 
 import scala.collection.mutable
 

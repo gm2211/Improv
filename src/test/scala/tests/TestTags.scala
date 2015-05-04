@@ -1,3 +1,5 @@
+package tests
+
 import org.scalatest.Tag
 
 object TestTags {

@@ -1,11 +1,11 @@
-package instruments
+package tests.instruments
 
-import instruments.InstrumentType.{InstrumentType, PIANO}
+import tests.instruments.InstrumentType.{InstrumentType, PIANO}
 import org.jfugue.player.{PlayerListener, Player}
 import org.jfugue.theory
 import org.slf4j.LoggerFactory
 import representation.{MusicalElement, Note, Phrase, Rest}
-import utils.ImplicitConversions.anyToRunnable
+import tests.utils.ImplicitConversions.anyToRunnable
 
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with PlayerListener {
   private val log = LoggerFactory.getLogger(getClass)
@@ -27,9 +27,9 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
         new Thread(() => player.play(convertedNotePattern)).start()
       case r: Rest =>
         finishedPlaying = false
-        new Thread(() => {Thread.sleep(r.duration.toInt); onFinished()}).start()
+        new Thread(() => {Thread.sleep(r.durationMS.toInt); onFinished()}).start()
       case p: Phrase =>
-        p.foreach(play)
+        new Thread(() => p.foreach(play)).start()
     }
   }
 

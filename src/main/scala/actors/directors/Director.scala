@@ -1,7 +1,7 @@
 package actors.directors
 
 import akka.actor.{Actor, ActorSystem}
-import utils.builders.{Count, IsOnce, Once}
+import tests.utils.builders.{Count, IsOnce, Once}
 
 trait Director extends Actor {
   def start(): Unit

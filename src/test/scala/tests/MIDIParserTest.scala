@@ -1,3 +1,5 @@
+package tests
+
 import midi.MIDIParser
 import org.scalatest.FlatSpec
 

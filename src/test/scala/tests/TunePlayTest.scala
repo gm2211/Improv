@@ -1,11 +1,13 @@
-import TestTags.SlowTest
+package tests
+
 import actors.Orchestra
 import actors.musicians.AIMusician
-import instruments.{OvertoneInstrument, Instrument}
-import instruments.OvertoneInstrumentType._
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, FlatSpec}
-import utils.ImplicitConversions.wrapInOption
+import org.scalatest.{FlatSpec, Matchers}
+import tests.TestTags.SlowTest
+import tests.instruments.OvertoneInstrument
+import tests.instruments.OvertoneInstrumentType._
+import tests.utils.ImplicitConversions.wrapInOption
 
 class TunePlayTest extends FlatSpec with MockFactory with Matchers {
   "The orchestra" should "play a pre-composed tune distributedly" taggedAs SlowTest in {

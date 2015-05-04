@@ -1,6 +1,6 @@
-package instruments
+package tests.instruments
 
-import instruments.InstrumentType.InstrumentType
+import tests.instruments.InstrumentType.InstrumentType
 import representation.MusicalElement
 
 trait Instrument {

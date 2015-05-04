@@ -2,7 +2,7 @@ package representation
 
 
 import representation.NoteName.NoteName
-import utils.CollectionUtils
+import tests.utils.CollectionUtils
 
 import scala.util.{Random, Try}
 
@@ -65,5 +65,9 @@ case class Note( name:       NoteName   = Note.DEFAULT_NAME,
                  octave:     Int        = Note.DEFAULT_OCTAVE,
                  duration:   Double     = Note.DEFAULT_DURATION,
                  intonation: Intonation = Note.DEFAULT_INTONATION) extends MusicalElement {
+  def withName(newName: NoteName) = copy(name = newName)
+  def withOctave(newOctave: Int) = copy(octave = newOctave)
+  def withDuration(newDuration: Double) = copy(duration = newDuration)
+  def withIntonation(newIntonation: Intonation) = copy(intonation = newIntonation)
 }
 

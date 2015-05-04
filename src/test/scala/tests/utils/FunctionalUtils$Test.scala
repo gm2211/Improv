@@ -1,4 +1,4 @@
-package utils
+package tests.utils
 
 import org.scalatest.FlatSpec
 

@@ -4,8 +4,8 @@ import actors.directors.{Director, DirectorBuilder, SimpleDirector}
 import actors.musicians.Musician
 import akka.actor.{ActorRef, ActorSystem, Props}
 import messages.{Stop, Start, Message}
-import utils.ActorUtils
-import utils.ImplicitConversions.{anyToRunnable, wrapInOption}
+import tests.utils.ActorUtils
+import tests.utils.ImplicitConversions.{anyToRunnable, wrapInOption}
 
 import scala.language.implicitConversions
 
