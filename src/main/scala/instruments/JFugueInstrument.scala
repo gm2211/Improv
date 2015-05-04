@@ -1,39 +1,44 @@
 package instruments
 
 import designPatterns.observer.{EventNotification, Observable}
-import instruments.InstrumentType.{InstrumentType, PIANO}
+import instruments.InstrumentType.{CHROMATIC_PERCUSSION, PERCUSSIVE, InstrumentType, PIANO}
+import org.jfugue.async.Listener
 import org.jfugue.pattern.Pattern
-import org.jfugue.player.{Player, PlayerListener}
-import org.jfugue.theory
+import org.jfugue.player.Player
+import org.jfugue.player.PlayerEvents.FINISHED_PLAYING
+import org.jfugue.{async, theory}
 import org.slf4j.LoggerFactory
 import representation.{MusicalElement, Note, Phrase, Rest}
 import utils.ImplicitConversions.anyToRunnable
 
-class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with PlayerListener with Observable {
+class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
   private val log = LoggerFactory.getLogger(getClass)
   private var _finishedPlaying = true
   def finishedPlaying = _finishedPlaying
-  val player = new Player
 
-  player.addListener(this)
 
   override def play(musicalElement: MusicalElement): Unit = {
     if (! _finishedPlaying) {
       log.debug("Still busy. Ignoring..")
     } else {
       val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
-      _finishedPlaying = false
+//      _finishedPlaying = false
       playWithPlayer(musicPattern.toString)
     }
   }
 
   private def playWithPlayer(pattern: String): Unit = {
-    new Thread(() => player.delayPlay(150, pattern)).start()
+    new Thread(() => {
+      val player = new Player()
+      player.play(pattern)
+    }).start()
   }
 
-  override def onFinished(): Unit = {
-    _finishedPlaying = true
-    notifyObservers(FinishedPlaying)
+  override def notify(eventNotification: async.EventNotification): Unit = eventNotification match {
+    case FINISHED_PLAYING =>
+      _finishedPlaying = true
+      notifyObservers(FinishedPlaying)
+
   }
 }
 
@@ -53,11 +58,14 @@ object JFugueUtils {
   def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
     val pattern: Pattern = createPattern(musicalElement)
     pattern.setInstrument(instrumentNumber)
+    if (PERCUSSIVE.range.contains(instrumentNumber) || CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
+      pattern.setVoice(9)
+    }
     pattern
   }
 
   def convertNote(note: Note): theory.Note =
-    new theory.Note(s"${note.name.toString}").setDuration(note.duration)
+    new theory.Note(s"${note.name.toString}").setDuration(note.duration/5)
 
   def convertNote(note: Note, instrumentNumber: Int): Pattern = {
     val convertedNotePattern = convertNote(note).getPattern
