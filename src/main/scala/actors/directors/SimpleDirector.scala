@@ -3,8 +3,8 @@ package actors.directors
 import akka.actor.{ActorLogging, ActorSystem, Cancellable}
 import messages.{MusicInfoMessage, Start, Stop, SyncMessage}
 import utils.ActorUtils
-import utils.builders.{Count, IsOnce, Once, Zero}
 import utils.ImplicitConversions.anyToRunnable
+import utils.builders.{Count, IsOnce, Once, Zero}
 
 import scala.collection.mutable
 
@@ -28,7 +28,7 @@ object SimpleDirector {
 }
 
 class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with ActorLogging {
-  val actorSystem: ActorSystem = builder.actorSystem.get
+  implicit val actorSystem: ActorSystem = builder.actorSystem.get
   val syncFrequencyMS: Long = builder.syncFrequencyMS.getOrElse(SimpleDirector.DEFAULT_SYNC_FREQ_MS)
 
   private var task: Option[Cancellable] = None
@@ -39,7 +39,6 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
 
   override def start(): Unit = {
     task = ActorUtils.schedule(
-      actorSystem,
       delayMS = 0,
       intervalMS = syncFrequencyMS,
       task = () => sync())
@@ -64,7 +63,7 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
       stop()
       actorSystem.shutdown()
     } else {
-      ActorUtils.broadcast(actorSystem, SyncMessage(tickCount))
+      ActorUtils.broadcast(SyncMessage(tickCount))
       tickCount += 1
     }
   }

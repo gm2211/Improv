@@ -54,7 +54,7 @@ class Orchestra(val builder: OrchestraBuilder) {
   def pause(): Unit = director ! Stop
 
   def shutdown(delay: Long): Unit = {
-    ActorUtils.scheduleOnce(system, delay, () => shutdown())
+    ActorUtils.scheduleOnce(delay, () => shutdown())
   }
 }
 

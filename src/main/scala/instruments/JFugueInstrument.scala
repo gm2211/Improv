@@ -1,7 +1,7 @@
 package instruments
 
 import designPatterns.observer.{EventNotification, Observable}
-import instruments.InstrumentType.{CHROMATIC_PERCUSSION, PERCUSSIVE, InstrumentType, PIANO}
+import instruments.InstrumentType.{CHROMATIC_PERCUSSION, InstrumentType, PERCUSSIVE, PIANO}
 import org.jfugue.async.Listener
 import org.jfugue.pattern.Pattern
 import org.jfugue.player.Player
@@ -22,7 +22,7 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
       log.debug("Still busy. Ignoring..")
     } else {
       val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
-//      _finishedPlaying = false
+      _finishedPlaying = false
       playWithPlayer(musicPattern.toString)
     }
   }
@@ -38,13 +38,33 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
     case FINISHED_PLAYING =>
       _finishedPlaying = true
       notifyObservers(FinishedPlaying)
-
   }
 }
 
 case object FinishedPlaying extends EventNotification
 
 object JFugueUtils {
+
+  /**
+   * Takes a set of musical elements and generates a pattern that has a pattern corresponding to each on a different
+   * pattern voice
+   * e.g.: a set of {Phrase(...), Phrase(...), Note}
+   *       will result in
+   *       Pattern.voice(1) => <phrase_pattern>
+   *       Pattern.voice(2) => <phrase_pattern>
+   *       Pattern.voice(3) => <note_pattern>
+   * @param musicalElements A set of musical elements
+   * @return a Pattern
+   */
+  def createMultiVoicePattern(musicalElements: Set[(InstrumentType, MusicalElement)]) = {
+    val pattern = new Pattern
+    musicalElements.zipWithIndex.foreach { case ((instr, elem), idx) =>
+      val voicePattern = createPattern(elem, instr.instrumentNumber)
+      if (idx != 9) voicePattern.setVoice(idx)
+      pattern.add(voicePattern)
+    }
+    pattern
+  }
 
   def createPattern(element: MusicalElement): Pattern = element match {
     case note: Note =>
@@ -65,7 +85,7 @@ object JFugueUtils {
   }
 
   def convertNote(note: Note): theory.Note =
-    new theory.Note(s"${note.name.toString}").setDuration(note.duration/5)
+    new theory.Note(s"${note.name.toString}").setDuration(note.duration)
 
   def convertNote(note: Note, instrumentNumber: Int): Pattern = {
     val convertedNotePattern = convertNote(note).getPattern
