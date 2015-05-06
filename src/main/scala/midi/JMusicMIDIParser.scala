@@ -9,7 +9,7 @@ import representation._
 
 import scala.util.Try
 
-object JMusicMIDIParser {
+object JMusicMIDIParser extends MIDIParserFactory {
   // TODO: Define exactly what length means
   val DEFAULT_PHRASE_LENGTH = 10
 

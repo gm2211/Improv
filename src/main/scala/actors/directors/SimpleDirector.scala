@@ -51,11 +51,9 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
   }
 
   def isSystemHealthy: Boolean = {
-    val ticksBeforeTimeout = (SimpleDirector.TIMEOUT / syncFrequencyMS).toInt
-    println(s"ticksBeforeTimeout: $ticksBeforeTimeout")
-    println(s"tickCount: $tickCount")
-    tickCount < ticksBeforeTimeout ||
-      (1 to ticksBeforeTimeout).exists { delta =>
+    val toleratedSilenceDurationTicks = (SimpleDirector.TIMEOUT / syncFrequencyMS).toInt
+    tickCount < toleratedSilenceDurationTicks ||
+      (1 to toleratedSilenceDurationTicks).exists { delta =>
         musicInfoMessageCache.get(tickCount - delta).exists { messages =>
           messages.exists(message => !message.musicalElement.isEmpty)
         }

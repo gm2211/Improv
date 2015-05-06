@@ -4,15 +4,14 @@ import java.io.File
 import javax.sound.midi.MidiSystem
 
 import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
-import org.jfugue.midi.MidiFileManager
-import org.jfugue.parser.ParserListenerAdapter
+import org.jfugue.midi.MidiParser
+import org.jfugue.parser.ParserListener
 import org.jfugue.theory.{Chord, Note}
 import representation.Phrase
 
-object JFugueMIDIParser {
+object JFugueMIDIParser extends MIDIParserFactory {
   def apply(filename: String): JFugueMIDIParser = {
-    MidiFileManager.loadPatternFromMidi(new File(filename)).getPattern
-    val parser = new org.jfugue.midi.MidiParser()
+    val parser = new MidiParser()
     val parserListener = new JFugueParseListener
     parser.addParserListener(parserListener)
     parser.parse(MidiSystem.getSequence(new File(filename)))
@@ -30,15 +29,50 @@ class JFugueMIDIParser extends MIDIParser {
   override def getPhrase(phraseNum: Int, partNum: Int): Phrase = Phrase.builder.build
 }
 
-class JFugueParseListener extends ParserListenerAdapter {
+class JFugueParseListener extends ParserListener {
   def buildStructure: JFugueMIDIParser = new JFugueMIDIParser //TODO pass parsed content into class
 
-  override def onChordParsed(chord: Chord): Unit = super.onChordParsed(chord)
+  override def afterParsingFinished(): Unit = ()
 
-  override def onInstrumentParsed(instrument: Byte): Unit = super.onInstrumentParsed(instrument)
+  override def onTrackBeatTimeBookmarkRequested(timeBookmarkId: String): Unit = ()
 
-  override def onNoteParsed(note: Note): Unit = super.onNoteParsed(note)
+  override def onChordParsed(chord: Chord): Unit = println(s"Found chord: ${chord.toDebugString}")
 
-  override def onBarLineParsed(id: Long): Unit = super.onBarLineParsed(id)
+  override def beforeParsingStarts(): Unit = ()
 
+  override def onLyricParsed(lyric: String): Unit = ()
+
+  override def onTrackBeatTimeRequested(time: Double): Unit = ()
+
+  override def onControllerEventParsed(controller: Byte, value: Byte): Unit = ()
+
+  override def onInstrumentParsed(instrument: Byte): Unit = ()
+
+  override def onTimeSignatureParsed(numerator: Byte, powerOfTwo: Byte): Unit = ()
+
+  override def onLayerChanged(layer: Byte): Unit = ()
+
+  override def onTrackChanged(track: Byte): Unit = ()
+
+  override def onKeySignatureParsed(key: Byte, scale: Byte): Unit = ()
+
+  override def onBarLineParsed(id: Long): Unit = ()
+
+  override def onMarkerParsed(marker: String): Unit = ()
+
+  override def onNoteParsed(note: Note): Unit = ()
+
+  override def onTempoChanged(tempoBPM: Int): Unit = ()
+
+  override def onTrackBeatTimeBookmarked(timeBookmarkId: String): Unit = ()
+
+  override def onSystemExclusiveParsed(bytes: Byte*): Unit = ()
+
+  override def onChannelPressureParsed(pressure: Byte): Unit = ()
+
+  override def onPolyphonicPressureParsed(key: Byte, pressure: Byte): Unit = ()
+
+  override def onFunctionParsed(id: String, message: scala.Any): Unit = ()
+
+  override def onPitchWheelParsed(lsb: Byte, msb: Byte): Unit = ()
 }

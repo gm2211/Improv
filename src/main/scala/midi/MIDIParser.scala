@@ -3,6 +3,10 @@ package midi
 import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
 import representation.Phrase
 
+trait MIDIParserFactory {
+  def apply(filename: String): MIDIParser
+}
+
 trait MIDIParser {
 
   def getPhrases(partNum: Int): Iterator[Phrase]

@@ -20,7 +20,7 @@ object DemoMIDIOrchestra {
       val composer = MIDIReaderComposer.builder
         .withFilename(filename)
         .withPartNum(partNumber)
-        .withMIDIParser(new JFugueMIDIParser)
+        .withMIDIParser(JMusicMIDIParser)
         .build
 
       AIMusician.builder
