@@ -9,16 +9,18 @@ import utils.builders.{Count, IsOnce, Once, Zero}
 import scala.collection.mutable
 
 case class SimpleDirectorBuilder[ActorSysCount <: Count](
-                                  var actorSystem: Option[ActorSystem] = None,
-                                  var syncFrequencyMS: Option[Long] = None) extends DirectorBuilder[ActorSysCount] {
-    override def withActorSystem(actorSystem: Option[ActorSystem]) = copy[Once](actorSystem = actorSystem)
-    def withSyncFrequencyMS(syncFrequencyMS: Option[Long]) = copy[ActorSysCount](syncFrequencyMS = syncFrequencyMS)
+                                                          var actorSystem: Option[ActorSystem] = None,
+                                                          var syncFrequencyMS: Option[Long] = None) extends DirectorBuilder[ActorSysCount] {
+  override def withActorSystem(actorSystem: Option[ActorSystem]) = copy[Once](actorSystem = actorSystem)
 
-    override def build[A <: ActorSysCount : IsOnce]: Director = new SimpleDirector(this.asInstanceOf[SimpleDirectorBuilder[Once]])
+  def withSyncFrequencyMS(syncFrequencyMS: Option[Long]) = copy[ActorSysCount](syncFrequencyMS = syncFrequencyMS)
+
+  override def build[A <: ActorSysCount : IsOnce]: Director = new SimpleDirector(this.asInstanceOf[SimpleDirectorBuilder[Once]])
 }
 
 object SimpleDirector {
   def builder = new SimpleDirectorBuilder[Zero]()
+
   val DEFAULT_SYNC_FREQ_MS: Long = 200
 
   /**
@@ -51,15 +53,15 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
   def isSystemHealthy: Boolean = {
     val ticksBeforeTimeout = (SimpleDirector.TIMEOUT / SimpleDirector.DEFAULT_SYNC_FREQ_MS).toInt
     tickCount < ticksBeforeTimeout ||
-    (1 to ticksBeforeTimeout).exists{ delta =>
-      musicInfoMessageCache.get(tickCount - delta).exists{ messages =>
-        messages.exists(message => ! message.musicalElement.isEmpty)
+      (1 to ticksBeforeTimeout).exists { delta =>
+        musicInfoMessageCache.get(tickCount - delta).exists { messages =>
+          messages.exists(message => !message.musicalElement.isEmpty)
+        }
       }
-    }
   }
 
   def sync(): Unit = {
-    if (! isSystemHealthy) {
+    if (!isSystemHealthy) {
       stop()
       actorSystem.shutdown()
     } else {

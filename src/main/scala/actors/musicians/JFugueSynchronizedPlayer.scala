@@ -29,7 +29,7 @@ class JFugueSynchronizedPlayer extends Musician {
     case syncMessage: SyncMessage =>
       musicInfoMessageCache.get(syncMessage.time - 1)
         .map(merge)
-        .exists{pattern => println(pattern);new Player().play(pattern); true}
+        .exists { pattern => println(pattern); new Player().play(pattern); true }
       musicInfoMessageCache.remove(syncMessage.time - 1)
   }
 

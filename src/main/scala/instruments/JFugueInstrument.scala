@@ -14,11 +14,12 @@ import utils.ImplicitConversions.anyToRunnable
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
   private val log = LoggerFactory.getLogger(getClass)
   private var _finishedPlaying = true
+
   def finishedPlaying = _finishedPlaying
 
 
   override def play(musicalElement: MusicalElement): Unit = {
-    if (! _finishedPlaying) {
+    if (!_finishedPlaying) {
       log.debug("Still busy. Ignoring..")
     } else {
       val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
@@ -49,10 +50,10 @@ object JFugueUtils {
    * Takes a set of musical elements and generates a pattern that has a pattern corresponding to each on a different
    * pattern voice
    * e.g.: a set of {Phrase(...), Phrase(...), Note}
-   *       will result in
-   *       Pattern.voice(1) => <phrase_pattern>
-   *       Pattern.voice(2) => <phrase_pattern>
-   *       Pattern.voice(3) => <note_pattern>
+   * will result in
+   * Pattern.voice(1) => <phrase_pattern>
+   * Pattern.voice(2) => <phrase_pattern>
+   * Pattern.voice(3) => <note_pattern>
    * @param musicalElements A set of musical elements
    * @return a Pattern
    */

@@ -1,6 +1,6 @@
 package midi
+
 import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
-import jm.music.data.Part
 import representation.Phrase
 
 /**

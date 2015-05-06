@@ -10,6 +10,7 @@ import representation._
 object JMusicMIDIParser {
   // TODO: Define exactly what length means
   val DEFAULT_PHRASE_LENGTH = 10
+
   def apply(filename: String) = {
     val score: jmData.Score = new jmData.Score()
     Read.midi(score, filename)
@@ -32,13 +33,14 @@ class JMusicMIDIParser(val score: jmData.Score) extends MIDIParser {
     val phrases = score.getPart(partNum).getPhraseArray
     val phraseIterator: Iterator[Option[Phrase]] = new Iterator[Option[Phrase]] {
       val phrasesIterator = phrases.iterator
+
       override def hasNext: Boolean = phrasesIterator.hasNext
 
       override def next(): Option[Phrase] = {
         if (hasNext) {
           val musElems = phrasesIterator.next()
             .getNoteArray
-            .map{note => JMUtils.convertNote(note).getOrElse(Note())}
+            .map { note => JMUtils.convertNote(note).getOrElse(Note()) }
           return Some(Phrase.builder.withMusicalElements(musElems).build())
         }
         None
@@ -77,7 +79,7 @@ object JMUtils {
     else {
       val notePitch = if (!jmNote.getPitchType) jmNote.getPitch else jmData.Note.freqToMidiPitch(jmNote.getFrequency)
       val intonation = if (jmNote.isFlat) Flat else if (jmNote.isSharp) Sharp else Natural
-      val (noteName, _, _)  = Note.parseString(jmNote.getNote)
+      val (noteName, _, _) = Note.parseString(jmNote.getNote)
 
       noteName.flatMap(name => Some(Note(name = name,
         octave = Note.pitchToOctave(notePitch),

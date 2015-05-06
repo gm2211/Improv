@@ -6,4 +6,5 @@ object OptionUtils {
   object Optional {
     def unapply[T](a: T) = if (null == a) Some(None) else Some(Some(a))
   }
+
 }

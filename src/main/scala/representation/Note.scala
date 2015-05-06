@@ -11,12 +11,12 @@ object Note {
 
   def pitchToOctave(pitch: Int): Int = math.floor(pitch / 12.0).toInt
 
-  val MAX_OCTAVE   = 8
+  val MAX_OCTAVE = 8
   val MAX_DURATION = 1
 
-  val DEFAULT_NAME       = NoteName.A
-  val DEFAULT_OCTAVE     = 4
-  val DEFAULT_DURATION   = 1.0
+  val DEFAULT_NAME = NoteName.A
+  val DEFAULT_OCTAVE = 4
+  val DEFAULT_DURATION = 1.0
   val DEFAULT_INTONATION = Natural
 
   /**
@@ -29,8 +29,8 @@ object Note {
     noteString match {
       case regex(name, intonation, octave) =>
         (Try(NoteName.withName(name)).toOption,
-         Some(Intonation(intonation)),
-        Try(octave.toInt).toOption)
+          Some(Intonation(intonation)),
+          Try(octave.toInt).toOption)
 
       case _ =>
         (None, None, None)
@@ -39,10 +39,10 @@ object Note {
 
   def fromString(noteString: String): Note = {
     val (name, intonation, octave) = parseString(noteString)
-    Note(name       = name.getOrElse(Note.DEFAULT_NAME),
-         intonation = intonation.getOrElse(Note.DEFAULT_INTONATION),
-         octave     = octave.getOrElse(Note.DEFAULT_OCTAVE))
-   }
+    Note(name = name.getOrElse(Note.DEFAULT_NAME),
+      intonation = intonation.getOrElse(Note.DEFAULT_INTONATION),
+      octave = octave.getOrElse(Note.DEFAULT_OCTAVE))
+  }
 
   def genRandNote(): Note = {
     val octave = Random.nextInt(MAX_OCTAVE)
@@ -61,13 +61,16 @@ object NoteName extends Enumeration {
   val A, B, C, D, E, F, G = Value
 }
 
-case class Note( name:       NoteName   = Note.DEFAULT_NAME,
-                 octave:     Int        = Note.DEFAULT_OCTAVE,
-                 duration:   Double     = Note.DEFAULT_DURATION,
-                 intonation: Intonation = Note.DEFAULT_INTONATION) extends MusicalElement {
+case class Note(name: NoteName = Note.DEFAULT_NAME,
+                octave: Int = Note.DEFAULT_OCTAVE,
+                duration: Double = Note.DEFAULT_DURATION,
+                intonation: Intonation = Note.DEFAULT_INTONATION) extends MusicalElement {
   def withName(newName: NoteName) = copy(name = newName)
+
   def withOctave(newOctave: Int) = copy(octave = newOctave)
+
   def withDuration(newDuration: Double) = copy(duration = newDuration)
+
   def withIntonation(newIntonation: Intonation) = copy(intonation = newIntonation)
 }
 

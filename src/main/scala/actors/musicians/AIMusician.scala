@@ -11,12 +11,12 @@ import utils.builders.{Count, IsOnce, Once, Zero}
 import scala.collection.mutable
 
 case class AIMusicianBuilder
-  [InstrumentCount <: Count,
-   ActorSysCount <: Count](
-        var instrument: Option[Instrument] = None,
-        var actorSystem: Option[ActorSystem] = None,
-        var composer: Option[Composer] = None,
-        var messageOnly: Option[Boolean] = Some(false)) {
+[InstrumentCount <: Count,
+ActorSysCount <: Count](
+                         var instrument: Option[Instrument] = None,
+                         var actorSystem: Option[ActorSystem] = None,
+                         var composer: Option[Composer] = None,
+                         var messageOnly: Option[Boolean] = Some(false)) {
   def withInstrument(instrument: Option[Instrument]) = copy[Once, ActorSysCount](instrument = instrument)
 
   def withActorSystem(actorSystem: Option[ActorSystem]) = copy[InstrumentCount, Once](actorSystem = actorSystem)
@@ -26,14 +26,14 @@ case class AIMusicianBuilder
   def isMessageOnly = copy[InstrumentCount, ActorSysCount](messageOnly = Some(true))
 
   def build[
-    A <: InstrumentCount : IsOnce,
-    B <: ActorSysCount: IsOnce]: AIMusician = {
+  A <: InstrumentCount : IsOnce,
+  B <: ActorSysCount : IsOnce]: AIMusician = {
     new AIMusician(this.asInstanceOf[AIMusicianBuilder[Once, Once]])
   }
 
   def buildProps[
-    A <: InstrumentCount : IsOnce,
-    B <: ActorSysCount: IsOnce]: Props = Props(build)
+  A <: InstrumentCount : IsOnce,
+  B <: ActorSysCount : IsOnce]: Props = Props(build)
 }
 
 object AIMusician {
@@ -60,13 +60,13 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
     musicInfoMessageCache.remove(time)
 
     val responsePhrase = musicComposer.compose(phraseBuilder.build())
-    if (! responsePhrase.isEmpty) {
+    if (!responsePhrase.isEmpty) {
       play(responsePhrase)
     }
   }
 
   override def play(musicalElement: MusicalElement): Unit = {
-    if (! messageOnly) instrument.play(musicalElement)
+    if (!messageOnly) instrument.play(musicalElement)
 
     ActorUtils.broadcast(
       MusicInfoMessage(

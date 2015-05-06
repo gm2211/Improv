@@ -5,5 +5,6 @@ import representation.MusicalElement
 
 trait Instrument {
   def play(musicalElement: MusicalElement): Unit
+
   val instrumentType: InstrumentType
 }
