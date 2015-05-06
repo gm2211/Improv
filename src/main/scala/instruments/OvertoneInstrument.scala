@@ -6,7 +6,7 @@ import representation.{MusicalElement, Note, Phrase, Rest}
 import utils.OvertoneUtils
 
 class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrapper(),
-                         override val instrumentType: InstrumentType = PIANO()) extends Instrument {
+  override val instrumentType: InstrumentType = PIANO()) extends Instrument {
   private val overtoneInstrumentType = OvertoneInstrumentType.fromInstrumentType(instrumentType)
   OvertoneUtils.useInstrument(overtoneInstrumentType, overtoneWrapper)
 

@@ -9,8 +9,8 @@ import utils.builders.{Count, IsOnce, Once, Zero}
 import scala.collection.mutable
 
 case class SimpleDirectorBuilder[ActorSysCount <: Count](
-                                                          var actorSystem: Option[ActorSystem] = None,
-                                                          var syncFrequencyMS: Option[Long] = None) extends DirectorBuilder[ActorSysCount] {
+  var actorSystem: Option[ActorSystem] = None,
+  var syncFrequencyMS: Option[Long] = None) extends DirectorBuilder[ActorSysCount] {
   override def withActorSystem(actorSystem: Option[ActorSystem]) = copy[Once](actorSystem = actorSystem)
 
   def withSyncFrequencyMS(syncFrequencyMS: Option[Long]) = copy[ActorSysCount](syncFrequencyMS = syncFrequencyMS)

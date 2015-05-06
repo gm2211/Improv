@@ -62,9 +62,9 @@ object NoteName extends Enumeration {
 }
 
 case class Note(name: NoteName = Note.DEFAULT_NAME,
-                octave: Int = Note.DEFAULT_OCTAVE,
-                duration: Double = Note.DEFAULT_DURATION,
-                intonation: Intonation = Note.DEFAULT_INTONATION) extends MusicalElement {
+  octave: Int = Note.DEFAULT_OCTAVE,
+  duration: Double = Note.DEFAULT_DURATION,
+  intonation: Intonation = Note.DEFAULT_INTONATION) extends MusicalElement {
   def withName(newName: NoteName) = copy(name = newName)
 
   def withOctave(newOctave: Int) = copy(octave = newOctave)

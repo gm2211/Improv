@@ -13,10 +13,10 @@ import scala.collection.mutable
 case class AIMusicianBuilder
 [InstrumentCount <: Count,
 ActorSysCount <: Count](
-                         var instrument: Option[Instrument] = None,
-                         var actorSystem: Option[ActorSystem] = None,
-                         var composer: Option[Composer] = None,
-                         var messageOnly: Option[Boolean] = Some(false)) {
+  var instrument: Option[Instrument] = None,
+  var actorSystem: Option[ActorSystem] = None,
+  var composer: Option[Composer] = None,
+  var messageOnly: Option[Boolean] = Some(false)) {
   def withInstrument(instrument: Option[Instrument]) = copy[Once, ActorSysCount](instrument = instrument)
 
   def withActorSystem(actorSystem: Option[ActorSystem]) = copy[InstrumentCount, Once](actorSystem = actorSystem)

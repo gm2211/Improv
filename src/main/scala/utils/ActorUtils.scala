@@ -14,8 +14,8 @@ object ActorUtils {
   def broadcast(message: Message)(implicit system: ActorSystem): Unit = system.eventStream.publish(message)
 
   def schedule(delayMS: Long,
-               intervalMS: Long,
-               task: Runnable)(implicit system: ActorSystem): Option[Cancellable] = {
+    intervalMS: Long,
+    task: Runnable)(implicit system: ActorSystem): Option[Cancellable] = {
     val delay = FiniteDuration(delayMS, TimeUnit.MILLISECONDS)
     val duration = FiniteDuration(intervalMS, TimeUnit.MILLISECONDS)
 
@@ -23,7 +23,7 @@ object ActorUtils {
   }
 
   def scheduleOnce(delayMS: Long,
-                   task: Runnable)(implicit system: ActorSystem): Option[Cancellable] = {
+    task: Runnable)(implicit system: ActorSystem): Option[Cancellable] = {
     val delay = FiniteDuration(delayMS, TimeUnit.MILLISECONDS)
     Some(system.scheduler.scheduleOnce(delay, task))
   }

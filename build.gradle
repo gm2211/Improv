@@ -26,7 +26,6 @@ apply plugin: "gitsemver"
 apply plugin: "scala"
 apply plugin: "distribution"
 
-
 // In this section you declare the dependencies for your production and test code
 dependencies {
     // Overtone Wrapper
@@ -40,7 +39,6 @@ dependencies {
     // Guava
     //compile "com.google.guava:guava:$guava_version"
 
-
     // Concurrency
     compile "com.typesafe.akka:akka-testkit_2.11:$akka_version"
     compile "com.typesafe.akka:akka-actor_2.11:$akka_version"
@@ -53,12 +51,11 @@ dependencies {
     compile name: "jfugue-5.0.1"
     compile name: "jMusic1.6.4"
 
-
     // Dependency Injection
     //compile "net.codingwell:scala-guice_2.10:$scala_guice_version"
 
     // Logging
-    compile ("com.typesafe.akka:akka-slf4j_2.11:$akka_version") {
+    compile("com.typesafe.akka:akka-slf4j_2.11:$akka_version") {
         exclude group: "org.slf4j"
     }
     compile "ch.qos.logback:logback-classic:$logback_version"

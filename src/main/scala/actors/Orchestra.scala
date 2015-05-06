@@ -10,9 +10,9 @@ import utils.ImplicitConversions.{anyToRunnable, wrapInOption}
 import scala.language.implicitConversions
 
 case class OrchestraBuilder(
-                             var name: Option[String] = None,
-                             var actorSystem: Option[ActorSystem] = None,
-                             var director: Option[DirectorBuilder[_]] = None) {
+  var name: Option[String] = None,
+  var actorSystem: Option[ActorSystem] = None,
+  var director: Option[DirectorBuilder[_]] = None) {
   def withName(name: Option[String]) = copy(name = name)
 
   def withActorSystem(actorSystem: Option[ActorSystem]) = copy(actorSystem = actorSystem)
