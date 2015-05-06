@@ -8,6 +8,9 @@ import org.jfugue.midi.MidiParser
 import org.jfugue.parser.ParserListener
 import org.jfugue.theory.{Chord, Note}
 import representation.Phrase
+import utils.CollectionUtils
+
+import scala.collection.mutable
 
 object JFugueMIDIParser extends MIDIParserFactory {
  override def apply(filename: String, phraseLength: Int): JFugueMIDIParser = {
@@ -23,11 +26,11 @@ object JFugueMIDIParser extends MIDIParserFactory {
 class JFugueMIDIParser extends MIDIParser {
   override def getInstrumentsCounts: Map[InstrumentCategory, Int] = Map()
 
-  override def getPartIndexByInstrument: Map[InstrumentType, Array[Int]] = Map()
+  override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = CollectionUtils.createHashMultimap
 
   override def getPhrases(partNum: Int): Iterator[Phrase] = List().iterator
 
-  override def getPhrase(partNum: Int, phraseNum: Int): Phrase = Phrase.builder.build
+  override def getPhrase(partNum: Int, phraseNum: Int): Option[Phrase] = Some(Phrase.builder.build)
 }
 
 class JFugueParseListener extends ParserListener {

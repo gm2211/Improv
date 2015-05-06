@@ -6,9 +6,9 @@ import jm.music.{data => jmData}
 import jm.util.Read
 import org.slf4j.LoggerFactory
 import representation._
+import utils.CollectionUtils
 
 import scala.collection.mutable
-import scala.util.Try
 
 object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String, phraseLength: Int) = {
@@ -19,15 +19,6 @@ object JMusicMIDIParser extends MIDIParserFactory {
 }
 
 class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends MIDIParser {
-  /**
-   * Returns the index of the provided part in the score
-   * @param part part
-   * @return index of the part in the score
-   */
-  private def getPartIndex(part: jmData.Part): Option[Int] = {
-    val index = score.getPartArray.toList.indexOf(part)
-    if (index >= 0) Some(index) else None
-  }
 
   override def getPhrases(partNum: Int): Iterator[Phrase] = {
     val phrases = score.getPart(partNum).getPhraseArray
@@ -62,22 +53,27 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
   }
 
   override def getPhrase(partNum: Int, phraseNum: Int): Option[Phrase] = {
-//    val phrases = Try{ score.getPart(partNum).getPhraseArray.toList }.toOption
-//    phrases.get.head.get
-//    val notes: List[MusicalElement] = {
-//      phrase.map { p =>
-//        p.getNoteArray.map{ note =>
-//          JMusicParserUtils.convertNote(note).getOrElse(Note()) }.toList
-//      }.getOrElse(List())
-//    }
-//
-//    Phrase.builder.withMusicalElements(notes).build
+    //    val phrases = Try{ score.getPart(partNum).getPhraseArray.toList }.toOption
+    //    phrases.get.head.get
+    //    val notes: List[MusicalElement] = {
+    //      phrase.map { p =>
+    //        p.getNoteArray.map{ note =>
+    //          JMusicParserUtils.convertNote(note).getOrElse(Note()) }.toList
+    //      }.getOrElse(List())
+    //    }
+    //
+    //    Phrase.builder.withMusicalElements(notes).build
     None
   }
 
-  override def getPartIndexByInstrument: Map[InstrumentType, Array[Int]] = {
-    score.getPartArray.groupBy(p => InstrumentType.classify(p.getInstrument))
-      .mapValues(parts => parts.map(part => getPartIndex(part).getOrElse(-1)))
+  override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = {
+    val partsArray = score.getPartArray
+    val partsIndexByInstrument = (0 until partsArray.size)
+      .foldLeft(CollectionUtils.createHashMultimap[InstrumentType, Int]){ case (mmap, index) =>
+        mmap.addBinding(InstrumentType.classify(partsArray(index).getInstrument), index)
+    }
+
+    partsIndexByInstrument
   }
 
   override def getInstrumentsCounts: Map[InstrumentType.InstrumentCategory, Int] = {
@@ -104,9 +100,13 @@ object JMusicParserUtils {
         intonation = intonation)))
     }
   }
-  
-//  def getNotesByStartTime(phrase: jmData.Phrase): mutable.MultiMap[] = {
-//
-//  }
+
+  def getNotesByStartTime(phrase: jmData.Phrase): mutable.MultiMap[Double, Note] = {
+//    phrase.getNoteArray.toList.zipWithIndex.groupBy()
+    phrase.getNoteArray.toList.zipWithIndex.foreach { case (note, index) =>
+//      phrase.getNoteStartTime()
+    }
+    null
+  }
 }
 

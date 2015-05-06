@@ -3,6 +3,8 @@ package midi
 import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
 import representation.Phrase
 
+import scala.collection.mutable
+
 trait MIDIParserFactory {
   // TODO: Define exactly what length means
   val DEFAULT_PHRASE_LENGTH = 10
@@ -16,7 +18,7 @@ trait MIDIParser {
 
   def getPhrase(partNum: Int, phraseNum: Int): Option[Phrase]
 
-  def getPartIndexByInstrument: Map[InstrumentType, Array[Int]]
+  def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int]
 
   def getInstrumentsCounts: Map[InstrumentCategory, Int]
 }

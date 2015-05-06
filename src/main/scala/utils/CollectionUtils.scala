@@ -17,8 +17,8 @@ object CollectionUtils {
 
   def randomRange(lowerBound: Int = 1,
     upperBound: Int = 1000): Range = {
-    require(lowerBound >= 0, "Only non-negative bounds are accepted")
-    require(upperBound >= 0, "Only non-negative bounds are accepted")
+    require(lowerBound >= 0, "Only a non-negative lower-bound is accepted")
+    require(upperBound >= 0, "Only a non-negative upper-bound is accepted")
     require(upperBound >= lowerBound, "Cannot have a range with upper-bound smaller than lower-bound")
 
     val upperbound_ = math.min(upperBound, Int.MaxValue)

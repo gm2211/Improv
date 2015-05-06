@@ -11,7 +11,7 @@ object InstrumentType {
     val range: Range
 
     def apply(): InstrumentType = {
-      val instrumentNumber = new Integer(CollectionUtils.chooseRandom(range).getOrElse(0))
+      val instrumentNumber = new Integer(CollectionUtils.chooseRandom(range).getOrElse(1))
       m.runtimeClass.getConstructors()(0).newInstance(instrumentNumber).asInstanceOf[InstrumentType]
     }
   }
