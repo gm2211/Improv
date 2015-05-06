@@ -17,7 +17,10 @@ case class MIDIReaderComposerBuilder[
 
   def withPartNum(partNum: Int) = copy[FileNameCount, Once](partNum = Some(partNum))
 
-  def build[A <: FileNameCount : IsOnce, B <: PartNumCount : IsOnce] = new MIDIReaderComposer(this)
+  def withMIDIParser(midiParser: MIDIParser) = copy[FileNameCount, PartNumCount](midiParser = Some(midiParser))
+
+  def build[A <: FileNameCount : IsOnce, B <: PartNumCount : IsOnce] =
+    new MIDIReaderComposer(this.asInstanceOf[MIDIReaderComposerBuilder[Once, Once]])
 }
 
 object MIDIReaderComposer {

@@ -6,7 +6,7 @@ import actors.directors.SimpleDirector
 import actors.musicians.AIMusician
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
-import midi.JMusicMIDIParser
+import midi.{JFugueMIDIParser, JMusicMIDIParser}
 import utils.ImplicitConversions.wrapInOption
 
 object DemoMIDIOrchestra {
@@ -17,9 +17,15 @@ object DemoMIDIOrchestra {
 
     val musicianBuilder = (instrType: InstrumentType, partNumber: Int) => {
       val instrument = new JFugueInstrument(instrType)
+      val composer = MIDIReaderComposer.builder
+        .withFilename(filename)
+        .withPartNum(partNumber)
+        .withMIDIParser(new JFugueMIDIParser)
+        .build
+
       AIMusician.builder
         .withInstrument(instrument)
-        .withComposer(new MIDIReaderComposer(filename, partNumber))
+        .withComposer(composer)
     }
 
     for ((instrument, parts) <- parser.getPartIndexByInstrument) {
