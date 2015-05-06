@@ -1,5 +1,6 @@
 package utils
 
+import scala.collection.mutable
 import scala.util.Random
 
 object CollectionUtils {
@@ -26,4 +27,9 @@ object CollectionUtils {
 
     lb to ub
   }
+
+  def createHashMultimap[Keys, Values]: mutable.HashMap[Keys, Array[Values]] with mutable.MultiMap[Keys, Values] = {
+    new mutable.HashMap[Keys, Array[Values]]() with mutable.MultiMap[Keys, Values]
+  }
+
 }

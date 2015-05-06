@@ -1,6 +1,6 @@
 package actors.composers
 
-import midi.{MIDIParserFactory, JMusicMIDIParser, MIDIParser}
+import midi.{JMusicMIDIParser, MIDIParser, MIDIParserFactory}
 import representation.Phrase
 import utils.builders.{Count, IsOnce, Once, Zero}
 

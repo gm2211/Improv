@@ -2,9 +2,9 @@ package actors.directors
 
 import akka.actor.{ActorLogging, ActorSystem, Cancellable}
 import messages.{MusicInfoMessage, Start, Stop, SyncMessage}
-import utils.ActorUtils
 import utils.ImplicitConversions.anyToRunnable
 import utils.builders.{Count, IsOnce, Once, Zero}
+import utils.{ActorUtils, CollectionUtils}
 
 import scala.collection.mutable
 
@@ -36,8 +36,8 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
   private var task: Option[Cancellable] = None
   private var tickCount: Long = 0
 
-  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
-    new mutable.HashMap[Long, mutable.Set[MusicInfoMessage]]() with mutable.MultiMap[Long, MusicInfoMessage]
+  //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
+  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = CollectionUtils.createHashMultimap
 
   override def start(): Unit = {
     task = ActorUtils.schedule(

@@ -6,7 +6,7 @@ import actors.directors.SimpleDirector
 import actors.musicians.AIMusician
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
-import midi.{JFugueMIDIParser, JMusicMIDIParser}
+import midi.JMusicMIDIParser
 import utils.ImplicitConversions.wrapInOption
 
 object DemoMIDIOrchestra {

@@ -5,8 +5,8 @@ import midi.JMusicMIDIParser
 object DemoJMusicMIDIPlayer {
   def run(filename: String): Unit = {
     import jm.util.Play
-    val score = JMusicMIDIParser(filename).score
-    println(score.getTempo)
-    Play.midi(score)
+    val parser = JMusicMIDIParser(filename)
+    parser.getPhrase(0, 0)
+    Play.midi(parser.score)
   }
 }

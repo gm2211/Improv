@@ -10,13 +10,14 @@ import org.jfugue.theory.{Chord, Note}
 import representation.Phrase
 
 object JFugueMIDIParser extends MIDIParserFactory {
-  def apply(filename: String): JFugueMIDIParser = {
+ override def apply(filename: String, phraseLength: Int): JFugueMIDIParser = {
     val parser = new MidiParser()
     val parserListener = new JFugueParseListener
     parser.addParserListener(parserListener)
     parser.parse(MidiSystem.getSequence(new File(filename)))
     parserListener.buildStructure
   }
+
 }
 
 class JFugueMIDIParser extends MIDIParser {
@@ -26,7 +27,7 @@ class JFugueMIDIParser extends MIDIParser {
 
   override def getPhrases(partNum: Int): Iterator[Phrase] = List().iterator
 
-  override def getPhrase(phraseNum: Int, partNum: Int): Phrase = Phrase.builder.build
+  override def getPhrase(partNum: Int, phraseNum: Int): Phrase = Phrase.builder.build
 }
 
 class JFugueParseListener extends ParserListener {

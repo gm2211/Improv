@@ -5,6 +5,7 @@ import messages.{MusicInfoMessage, SyncMessage}
 import org.jfugue.pattern.Pattern
 import org.jfugue.player.Player
 import representation.MusicalElement
+import utils.CollectionUtils
 
 import scala.collection.mutable
 
@@ -13,8 +14,8 @@ import scala.collection.mutable
  * next sync message (this kind of acts like a sync barrier)
  */
 class JFugueSynchronizedPlayer extends Musician {
-  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
-    new mutable.HashMap[Long, mutable.Set[MusicInfoMessage]]() with mutable.MultiMap[Long, MusicInfoMessage]
+  //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
+  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = CollectionUtils.createHashMultimap
 
   def merge(messages: mutable.Set[MusicInfoMessage]): Pattern = {
     val instrElemSet = messages

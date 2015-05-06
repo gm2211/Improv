@@ -8,6 +8,9 @@ object DemoJFugueMIDIPlayer {
     import org.jfugue.player.Player
     val player = new Player()
     val pattern = MidiFileManager.loadPatternFromMidi(new File(filename))
+    println(pattern.toString)
     player.play(pattern)
   }
+
+
 }

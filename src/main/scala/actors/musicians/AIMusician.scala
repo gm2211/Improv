@@ -5,8 +5,8 @@ import akka.actor.{ActorLogging, ActorSystem, Props}
 import instruments.Instrument
 import messages.{MusicInfoMessage, SyncMessage}
 import representation.{MusicalElement, Phrase}
-import utils.ActorUtils
 import utils.builders.{Count, IsOnce, Once, Zero}
+import utils.{ActorUtils, CollectionUtils}
 
 import scala.collection.mutable
 
@@ -46,8 +46,8 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
   private val musicComposer: Composer = builder.composer.getOrElse(new RandomComposer)
   private val messageOnly: Boolean = builder.messageOnly.get
 
-  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
-    new mutable.HashMap[Long, mutable.Set[MusicInfoMessage]]() with mutable.MultiMap[Long, MusicInfoMessage]
+  //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
+  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = CollectionUtils.createHashMultimap
   private var currentMusicTime: Long = 0
 
   def play(time: Long): Unit = {
