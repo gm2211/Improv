@@ -32,7 +32,6 @@ class JMusicMIDIParser(val score: jmData.Score) extends MIDIParser {
   }
 
   override def getPhrases(partNum: Int): Iterator[Phrase] = {
-    Try {
       val phrases = score.getPart(partNum).getPhraseArray
       val phraseIterator: Iterator[Phrase] = new Iterator[Phrase] {
         val phrasesIterator = phrases.iterator
@@ -62,7 +61,6 @@ class JMusicMIDIParser(val score: jmData.Score) extends MIDIParser {
         }
       }
       phraseIterator
-    }.toOption
   }
 
   override def getPhrase(phraseNum: Int, partNum: Int): Phrase = {

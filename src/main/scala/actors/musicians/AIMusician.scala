@@ -59,10 +59,8 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
 
     musicInfoMessageCache.remove(time)
 
-    val responsePhrase = musicComposer.compose(phraseBuilder.build())
-    if (!responsePhrase.isEmpty) {
-      play(responsePhrase)
-    }
+    val responsePhrase = musicComposer.compose(phraseBuilder.build)
+    responsePhrase.foreach(play)
   }
 
   override def play(musicalElement: MusicalElement): Unit = {
