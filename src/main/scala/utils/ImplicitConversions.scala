@@ -8,4 +8,10 @@ object ImplicitConversions {
   }
 
   implicit def wrapInOption[A <: Any](a: A): Option[A] = Option(a)
+
+  implicit def toEnhancedTraversable[A](traversable: Traversable[A]): EnhancedTraversable[A] =
+    new EnhancedTraversable[A](traversable)
+
+  implicit def toEnhancedTraversable[A](traversable: TraversableOnce[A]): EnhancedTraversable[A] =
+    new EnhancedTraversable[A](traversable)
 }

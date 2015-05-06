@@ -6,7 +6,7 @@ import jm.music.{data => jmData}
 import jm.util.Read
 import org.slf4j.LoggerFactory
 import representation._
-import utils.CollectionUtils
+import utils.ImplicitConversions.toEnhancedTraversable
 
 import scala.collection.mutable
 
@@ -68,12 +68,8 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
 
   override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = {
     val partsArray = score.getPartArray
-    val partsIndexByInstrument = (0 until partsArray.size)
-      .foldLeft(CollectionUtils.createHashMultimap[InstrumentType, Int]){ case (mmap, index) =>
-        mmap.addBinding(InstrumentType.classify(partsArray(index).getInstrument), index)
-    }
-
-    partsIndexByInstrument
+    (0 until partsArray.size)
+      .groupByMultiMap(index => InstrumentType.classify(partsArray(index).getInstrument))
   }
 
   override def getInstrumentsCounts: Map[InstrumentType.InstrumentCategory, Int] = {
