@@ -13,7 +13,7 @@ case class PhraseBuilder(private val musicalElementsBuf: ListBuffer[MusicalEleme
     this
   }
 
-  def build() = new Phrase(this)
+  def build = new Phrase(this)
 }
 
 object Phrase {

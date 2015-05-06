@@ -7,6 +7,8 @@ import jm.util.Read
 import org.slf4j.LoggerFactory
 import representation._
 
+import scala.util.Try
+
 object JMusicMIDIParser {
   // TODO: Define exactly what length means
   val DEFAULT_PHRASE_LENGTH = 10
@@ -29,25 +31,38 @@ class JMusicMIDIParser(val score: jmData.Score) extends MIDIParser {
     if (index >= 0) Some(index) else None
   }
 
-  override def getPhrases(partNum: Int): Iterator[Option[Phrase]] = {
-    val phrases = score.getPart(partNum).getPhraseArray
-    val phraseIterator: Iterator[Option[Phrase]] = new Iterator[Option[Phrase]] {
-      val phrasesIterator = phrases.iterator
+  override def getPhrases(partNum: Int): Iterator[Phrase] = {
+    Try {
+      val phrases = score.getPart(partNum).getPhraseArray
+      val phraseIterator: Iterator[Phrase] = new Iterator[Phrase] {
+        val phrasesIterator = phrases.iterator
+        var nextPhrase: Option[Phrase] = None
 
-      override def hasNext: Boolean = phrasesIterator.hasNext
+        private def computeNext() = {
+          if (phrasesIterator.hasNext) {
+            val notes = phrasesIterator.next()
+              .getNoteArray
+              .map { note => JMUtils.convertNote(note).getOrElse(Note()) }
 
-      override def next(): Option[Phrase] = {
-        if (hasNext) {
-          val musElems = phrasesIterator.next()
-            .getNoteArray
-            .map { note => JMUtils.convertNote(note).getOrElse(Note()) }
-          return Some(Phrase.builder.withMusicalElements(musElems).build())
+            nextPhrase = Some(Phrase.builder.withMusicalElements(notes).build)
+          }
         }
-        None
-      }
-    }
 
-    phraseIterator
+        override def hasNext: Boolean = {
+          while (phrasesIterator.hasNext && nextPhrase.isEmpty) {
+            computeNext()
+          }
+          nextPhrase.isDefined
+        }
+
+        override def next(): Phrase = {
+          val nextPhrase = this.nextPhrase
+          this.nextPhrase = None
+          nextPhrase.get
+        }
+      }
+      phraseIterator
+    }.toOption
   }
 
   override def getPhrase(phraseNum: Int, partNum: Int): Phrase = {
@@ -56,7 +71,7 @@ class JMusicMIDIParser(val score: jmData.Score) extends MIDIParser {
       p => p.getNoteArray.map(note => JMUtils.convertNote(note).getOrElse(Note())).toList
     ).getOrElse(List())
 
-    Phrase.builder.withMusicalElements(notes).build()
+    Phrase.builder.withMusicalElements(notes).build
   }
 
   override def getPartIndexByInstrument: Map[InstrumentType, Array[Int]] =
