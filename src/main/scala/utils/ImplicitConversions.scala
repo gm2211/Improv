@@ -1,5 +1,7 @@
 package utils
 
+import utils.collections.EnhancedTraversable
+
 import scala.collection.convert.{WrapAsScala, WrapAsJava}
 import scala.language.implicitConversions
 

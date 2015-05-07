@@ -1,5 +1,6 @@
-package midi
+package tests.midi
 
+import midi.JFugueMIDIParser
 import org.scalatest.FlatSpec
 
 class JFugueMIDIParserTest extends FlatSpec {
