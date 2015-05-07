@@ -1,9 +1,9 @@
 package tests.utils
 
+import _root_.utils.FunctionalUtils
 import org.scalatest.FlatSpec
-import utils.FunctionalUtils
 
-class FunctionalUtils$Test extends FlatSpec {
+class FunctionalUtilsTest extends FlatSpec {
   def foo(i: Int, s: String) = s"$s$i"
   val fooCurr = (i: Int) => (s: String) => s"$s$i"
   
