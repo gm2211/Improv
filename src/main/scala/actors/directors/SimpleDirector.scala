@@ -1,6 +1,6 @@
 package actors.directors
 
-import actors.monitors.{HealthMonitor, SimpleHealthMonitor}
+import actors.monitors.{HealthMonitor, HealthMonitorFactory, SimpleHealthMonitor}
 import akka.actor.{ActorLogging, ActorSystem, Cancellable}
 import messages.{MusicInfoMessage, Start, Stop, SyncMessage}
 import utils.ActorUtils
@@ -10,15 +10,19 @@ import utils.builders.{Count, IsOnce, Once, Zero}
 case class SimpleDirectorBuilder[ActorSysCount <: Count](
     var actorSystem: Option[ActorSystem] = None,
     var syncFrequencyMS: Option[Long] = None,
-    var healthMonitor: Option[HealthMonitor] = None) extends DirectorBuilder[ActorSysCount] {
+    var healthMonitorFactory: Option[HealthMonitorFactory[Zero]] = None) extends DirectorBuilder[ActorSysCount] {
 
-  override def withActorSystem(actorSystem: ActorSystem) = copy[Once](actorSystem = Some(actorSystem))
+  override def withActorSystem(actorSystem: ActorSystem) =
+    copy[Once](actorSystem = Some(actorSystem))
 
-  def withSyncFrequencyMS(syncFrequencyMS: Long) = copy[ActorSysCount](syncFrequencyMS = Some(syncFrequencyMS))
+  def withSyncFrequencyMS(syncFrequencyMS: Long) =
+    copy[ActorSysCount](syncFrequencyMS = Some(syncFrequencyMS))
 
-  def withHealthMonitor(healthMonitor: HealthMonitor) = copy[ActorSysCount](healthMonitor = Some(healthMonitor))
+  def withHealthMonitor(healthMonitorFactory: HealthMonitorFactory[Zero]) =
+    copy[ActorSysCount](healthMonitorFactory = Some(healthMonitorFactory))
 
-  override def build[A <: ActorSysCount : IsOnce]: Director = new SimpleDirector(this.asInstanceOf[SimpleDirectorBuilder[Once]])
+  override def build[A <: ActorSysCount : IsOnce]: Director =
+    new SimpleDirector(this.asInstanceOf[SimpleDirectorBuilder[Once]])
 }
 
 object SimpleDirector {
@@ -33,7 +37,9 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
 
   private var task: Option[Cancellable] = None
   private var tickCount: Long = 0
-  private val healthMonitor: HealthMonitor = builder.healthMonitor.getOrElse(SimpleHealthMonitor.builder.build)
+  private val healthMonitor: HealthMonitor = {
+    builder.healthMonitorFactory.getOrElse(SimpleHealthMonitor.builder).withTickFrequency(syncFrequencyMS).build
+  }
 
 
   override def start(): Unit = {
