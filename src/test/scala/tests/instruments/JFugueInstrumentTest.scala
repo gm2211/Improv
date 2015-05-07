@@ -27,7 +27,7 @@ class JFugueInstrumentTest extends FlatSpec {
       .addMusicalElement(Note.fromString("B5").withDuration(1))
       .addMusicalElement(new Rest(0.1))
       .addMusicalElement(Note.fromString("C5").withDuration(1))
-      .build()
+      .build
 
     val listener = new Observer {
       override def notify(eventNotification: EventNotification): Unit = eventNotification match {
