@@ -12,12 +12,13 @@ object Note {
   def pitchToOctave(pitch: Int): Int = math.floor(pitch / 12.0).toInt
 
   val MAX_OCTAVE = 8
-  val MAX_DURATION = 1
 
   val DEFAULT_NAME = NoteName.A
   val DEFAULT_OCTAVE = 4
   val DEFAULT_DURATION = 1.0
   val DEFAULT_INTONATION = Natural
+
+  private val WELL_AUDIBLE_RANGE = 3 to 5
 
   /**
    * This method converts a string like "Ab", "A#", "Ab3"
@@ -45,8 +46,8 @@ object Note {
   }
 
   def genRandNote(): Note = {
-    val octave = Random.nextInt(MAX_OCTAVE)
-    val duration = Random.nextInt(MAX_DURATION)
+    val octave = CollectionUtils.chooseRandom(WELL_AUDIBLE_RANGE).get
+    val duration = Random.nextDouble() + 0.5
     val intonation = CollectionUtils
       .chooseRandom(List(Flat, Sharp, Natural))
       .getOrElse(Natural)
