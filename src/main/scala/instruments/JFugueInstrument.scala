@@ -1,5 +1,7 @@
 package instruments
 
+import java.util.concurrent.Executors
+
 import designPatterns.observer.{EventNotification, Observable}
 import instruments.InstrumentType.{CHROMATIC_PERCUSSION, InstrumentType, PERCUSSIVE, PIANO}
 import org.jfugue.async.Listener
@@ -13,9 +15,10 @@ import utils.ImplicitConversions.anyToRunnable
 
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
   private val log = LoggerFactory.getLogger(getClass)
+  private val threadPool = Executors.newSingleThreadExecutor()
   private var _finishedPlaying = true
-
   def finishedPlaying = _finishedPlaying
+
 
 
   override def play(musicalElement: MusicalElement): Unit = {
@@ -28,17 +31,16 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
     }
   }
 
-  private def playWithPlayer(pattern: String): Unit = {
-    new Thread(() => {
-      val player = new Player()
-      player.play(pattern)
-    }).start()
-  }
+  private def playWithPlayer(pattern: String): Unit =
+    threadPool.submit(() => new Player().play(pattern))
 
-  override def notify(eventNotification: async.EventNotification): Unit = eventNotification match {
-    case FINISHED_PLAYING =>
-      _finishedPlaying = true
-      notifyObservers(FinishedPlaying)
+  override def notify(eventNotification: async.EventNotification): Unit = {
+    log.debug("finished")
+    eventNotification match {
+      case FINISHED_PLAYING =>
+        _finishedPlaying = true
+        notifyObservers(FinishedPlaying)
+    }
   }
 }
 
