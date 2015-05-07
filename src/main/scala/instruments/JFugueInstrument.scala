@@ -32,10 +32,14 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
   }
 
   private def playWithPlayer(pattern: String): Unit =
-    threadPool.submit(() => new Player().play(pattern))
+    threadPool.submit(() => {
+      val player = new Player()
+      player.addListener(this)
+      player.play(pattern)
+    })
 
   override def notify(eventNotification: async.EventNotification): Unit = {
-    log.debug("finished")
+    log.debug(s"$instrumentType HAS FINISHED PLAYING")
     eventNotification match {
       case FINISHED_PLAYING =>
         _finishedPlaying = true
