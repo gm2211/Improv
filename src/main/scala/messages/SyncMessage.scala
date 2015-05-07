@@ -1,3 +1,4 @@
 package messages
 
-case class SyncMessage() extends Message
+case class SyncMessage(time: Long) extends Message {
+}

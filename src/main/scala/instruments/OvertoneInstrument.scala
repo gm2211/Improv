@@ -1,19 +1,30 @@
 package instruments
 
-import instruments.OvertoneInstrumentType._
+import instruments.InstrumentType.{InstrumentType, PIANO}
 import overtone.wrapper.OvertoneWrapper
-import representation.Note
+import representation.{MusicalElement, Note, Phrase, Rest}
 import utils.OvertoneUtils
 
 class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrapper(),
-                         val instrumentType: Option[OvertoneInstrumentType] = Some(PIANO)) extends Instrument {
-  OvertoneUtils.useInstrument(instrumentType.get, overtoneWrapper)
+  override val instrumentType: InstrumentType = PIANO()) extends Instrument {
+  private val overtoneInstrumentType = OvertoneInstrumentType.fromInstrumentType(instrumentType)
+  OvertoneUtils.useInstrument(overtoneInstrumentType, overtoneWrapper)
 
-  def play(note: Note): Unit =
+  override def play(musicalElement: MusicalElement): Unit = musicalElement match {
+    case note: Note =>
+      play(note)
+    case rest: Rest =>
+      Thread.sleep(rest.durationSec.toInt)
+    case phrase: Phrase =>
+      phrase.foreach(play)
+  }
+
+  def play(note: Note): Unit = {
     OvertoneUtils.play(
       note = note,
-      instrument = instrumentType.get,
+      instrument = overtoneInstrumentType,
       wrapper = overtoneWrapper)
+  }
 }
 
 

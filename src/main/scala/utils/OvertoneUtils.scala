@@ -10,7 +10,7 @@ object OvertoneUtils {
       "piano"
     case SAMPLED_PIANO =>
       "sampled-piano"
-    case KICK =>
+    case KICK | KICK2 | KICK3 | KICK4 | DRY_KICK | DUB_KICK | SNARE | CLAP =>
       "drum"
     case PING =>
       "synth"

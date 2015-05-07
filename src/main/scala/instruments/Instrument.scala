@@ -1,7 +1,10 @@
 package instruments
 
-import representation.Note
+import instruments.InstrumentType.InstrumentType
+import representation.MusicalElement
 
 trait Instrument {
-  def play(note: Note): Unit
+  def play(musicalElement: MusicalElement): Unit
+
+  val instrumentType: InstrumentType
 }
