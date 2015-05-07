@@ -11,7 +11,6 @@ trait Director extends Actor {
 
 trait DirectorBuilder[A <: Count] {
   def build[T <: A : IsOnce]: Director
-
-  def withActorSystem(actorSystem: Option[ActorSystem]): DirectorBuilder[Once]
+  def withActorSystem(actorSystem: ActorSystem): DirectorBuilder[Once]
 }
 

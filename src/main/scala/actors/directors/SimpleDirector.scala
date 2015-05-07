@@ -1,19 +1,22 @@
 package actors.directors
 
+import actors.monitors.{HealthMonitor, SimpleHealthMonitor}
 import akka.actor.{ActorLogging, ActorSystem, Cancellable}
 import messages.{MusicInfoMessage, Start, Stop, SyncMessage}
+import utils.ActorUtils
 import utils.ImplicitConversions.anyToRunnable
 import utils.builders.{Count, IsOnce, Once, Zero}
-import utils.{ActorUtils, CollectionUtils}
-
-import scala.collection.mutable
 
 case class SimpleDirectorBuilder[ActorSysCount <: Count](
-  var actorSystem: Option[ActorSystem] = None,
-  var syncFrequencyMS: Option[Long] = None) extends DirectorBuilder[ActorSysCount] {
-  override def withActorSystem(actorSystem: Option[ActorSystem]) = copy[Once](actorSystem = actorSystem)
+    var actorSystem: Option[ActorSystem] = None,
+    var syncFrequencyMS: Option[Long] = None,
+    var healthMonitor: Option[HealthMonitor] = None) extends DirectorBuilder[ActorSysCount] {
 
-  def withSyncFrequencyMS(syncFrequencyMS: Option[Long]) = copy[ActorSysCount](syncFrequencyMS = syncFrequencyMS)
+  override def withActorSystem(actorSystem: ActorSystem) = copy[Once](actorSystem = Some(actorSystem))
+
+  def withSyncFrequencyMS(syncFrequencyMS: Long) = copy[ActorSysCount](syncFrequencyMS = Some(syncFrequencyMS))
+
+  def withHealthMonitor(healthMonitor: HealthMonitor) = copy[ActorSysCount](healthMonitor = Some(healthMonitor))
 
   override def build[A <: ActorSysCount : IsOnce]: Director = new SimpleDirector(this.asInstanceOf[SimpleDirectorBuilder[Once]])
 }
@@ -22,11 +25,6 @@ object SimpleDirector {
   def builder = new SimpleDirectorBuilder[Zero]()
 
   val DEFAULT_SYNC_FREQ_MS: Long = 200
-
-  /**
-   * Amount of time in MS approximately expected before some message from the musicians should have been received
-   */
-  val TIMEOUT: Long = 5000
 }
 
 class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with ActorLogging {
@@ -35,9 +33,8 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
 
   private var task: Option[Cancellable] = None
   private var tickCount: Long = 0
+  private val healthMonitor: HealthMonitor = builder.healthMonitor.getOrElse(SimpleHealthMonitor.builder.build)
 
-  //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
-  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = CollectionUtils.createHashMultimap
 
   override def start(): Unit = {
     task = ActorUtils.schedule(
@@ -50,18 +47,8 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
     task.foreach(_.cancel())
   }
 
-  def isSystemHealthy: Boolean = {
-    val toleratedSilenceDurationTicks = (SimpleDirector.TIMEOUT / syncFrequencyMS).toInt
-    tickCount < toleratedSilenceDurationTicks ||
-      (1 to toleratedSilenceDurationTicks).exists { delta =>
-        musicInfoMessageCache.get(tickCount - delta).exists { messages =>
-          messages.exists(message => !message.musicalElement.isEmpty)
-        }
-      }
-  }
-
   def sync(): Unit = {
-    if (!isSystemHealthy) {
+    if (!healthMonitor.isSystemHealthy) {
       stop()
       actorSystem.shutdown()
     } else {
@@ -72,8 +59,7 @@ class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with
 
   override def receive: Receive = {
     case m: MusicInfoMessage =>
-      log.debug(s"Received: $m")
-      musicInfoMessageCache.addBinding(m.time, m)
+      healthMonitor.receivedHeartbeat(m.time, sender())
     case Start =>
       start()
     case Stop =>

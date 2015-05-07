@@ -7,6 +7,7 @@ import jm.util.Read
 import org.slf4j.LoggerFactory
 import representation._
 import utils.ImplicitConversions.toEnhancedTraversable
+import collection.JavaConversions._
 
 import scala.collection.mutable
 
@@ -97,12 +98,14 @@ object JMusicParserUtils {
     }
   }
 
-  def getNotesByStartTime(phrase: jmData.Phrase): mutable.MultiMap[Double, Note] = {
-//    phrase.getNoteArray.toList.zipWithIndex.groupBy()
-    phrase.getNoteArray.toList.zipWithIndex.foreach { case (note, index) =>
-//      phrase.getNoteStartTime()
-    }
-    null
+  def getNotesByStartTime(phrase: jmData.Phrase): mutable.MultiMap[Double, jmData.Note] = {
+    var index = -1
+    phrase.getNoteList.groupByMultiMap[Double](note => {index += 1; phrase.getNoteStartTime(index)})
+  }
+
+  def mergePhrases(part: jmData.Part): Phrase = {
+//    part.getPhraseList.
+    Phrase.builder.build
   }
 }
 

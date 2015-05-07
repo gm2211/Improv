@@ -6,7 +6,8 @@ import instruments.Instrument
 import messages.{MusicInfoMessage, SyncMessage}
 import representation.{MusicalElement, Phrase}
 import utils.builders.{Count, IsOnce, Once, Zero}
-import utils.{ActorUtils, CollectionUtils}
+import utils.ActorUtils
+import utils.collections.CollectionUtils
 
 import scala.collection.mutable
 

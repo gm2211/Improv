@@ -1,6 +1,6 @@
 package instruments
 
-import utils.CollectionUtils
+import utils.collections.CollectionUtils
 
 import scala.reflect.ClassTag
 

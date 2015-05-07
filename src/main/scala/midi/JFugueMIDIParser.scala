@@ -8,7 +8,7 @@ import org.jfugue.midi.MidiParser
 import org.jfugue.parser.ParserListener
 import org.jfugue.theory.{Chord, Note}
 import representation.Phrase
-import utils.CollectionUtils
+import utils.collections.CollectionUtils
 
 import scala.collection.mutable
 

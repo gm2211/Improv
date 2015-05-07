@@ -5,7 +5,7 @@ import messages.{MusicInfoMessage, SyncMessage}
 import org.jfugue.pattern.Pattern
 import org.jfugue.player.Player
 import representation.MusicalElement
-import utils.CollectionUtils
+import utils.collections.CollectionUtils
 
 import scala.collection.mutable
 
