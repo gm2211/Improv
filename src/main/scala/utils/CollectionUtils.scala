@@ -41,4 +41,10 @@ class EnhancedTraversable[A](private val traversable: TraversableOnce[A]) {
       mmap.addBinding(f(elem), elem)
     }
   }
+
+  def pairsToMultiMap[K, V](implicit evidence: A =:= (K, V)): mutable.MultiMap[K, V] = {
+    traversable.foldLeft(CollectionUtils.createHashMultimap[K, V]) { case (mmap, (key: K, value: V)) =>
+      mmap.addBinding(key, value)
+    }
+  }
 }
