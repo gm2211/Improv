@@ -17,7 +17,7 @@ class JMusicMIDIParserTest extends FlatSpec {
   "The midi parser" should "correctly assemble a phrase" in {
     println()
     val (timeElapsed, notesByStartTime) =
-      ProfilingUtils.timeIt(JMusicParserUtils.getNotesByStartTime(parser.score.getPart(0).getPhrase(0)), 1)
+      ProfilingUtils.timeIt(JMusicParserUtils.mergePhrases(parser.score.getPart(0)), 1)
     println(s"\nOn average it took $timeElapsed milliseconds to get $notesByStartTime")
   }
 }

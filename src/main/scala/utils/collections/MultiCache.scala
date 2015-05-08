@@ -3,9 +3,13 @@ package utils.collections
 
 import java.util.UUID
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
+
 import com.google.common.cache.{Cache, CacheBuilder, RemovalListener, RemovalNotification}
-import scala.collection.mutable
 import utils.ImplicitConversions.anyToRunnable
+
+import scala.collection.mutable
+import scala.math
+import collection.JavaConversions._
 
 object MultiCache {
   def buildDefault[K, V <: java.lang.Object](timeoutMS: Long, maxSize: Long): MultiCache[K, V] = {
@@ -89,4 +93,12 @@ class MultiCache[K, V <: java.lang.Object](
   override def contains(key: K): Boolean = multiMap.contains(key)
 
   override def size: Int = multiMap.size
+
+  override def keySet: collection.Set[K] = multiMap.keySet
+
+  override def values: Iterable[mutable.Set[V]] = {
+    for (uuidSet <- multiMap.values) yield {
+      uuidSet.flatMap(uuid => Option(cache.getIfPresent(uuid)))
+    }
+  }
 }

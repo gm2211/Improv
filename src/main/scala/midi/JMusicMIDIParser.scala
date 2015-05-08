@@ -7,9 +7,11 @@ import jm.util.Read
 import org.slf4j.LoggerFactory
 import representation._
 import utils.ImplicitConversions.toEnhancedTraversable
-import collection.JavaConversions._
+import utils.collections.CollectionUtils
 
 import scala.collection.mutable
+import collection.JavaConversions._
+import scala.math
 
 object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String, phraseLength: Int) = {
@@ -21,36 +23,13 @@ object JMusicMIDIParser extends MIDIParserFactory {
 
 class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends MIDIParser {
 
+  def split(phrase: Phrase): Iterator[Phrase] = {
+    //TODO Split by length
+    List(phrase).iterator
+  }
+
   override def getPhrases(partNum: Int): Iterator[Phrase] = {
-    val phrases = score.getPart(partNum).getPhraseArray
-    val phraseIterator: Iterator[Phrase] = new Iterator[Phrase] {
-      val phrasesIterator = phrases.iterator
-      var nextPhrase: Option[Phrase] = None
-
-      private def computeNext() = {
-        if (phrasesIterator.hasNext) {
-          val notes = phrasesIterator.next()
-            .getNoteArray
-            .map { note => JMusicParserUtils.convertNote(note).getOrElse(Note()) }
-
-          nextPhrase = Some(Phrase.builder.withMusicalElements(notes).build)
-        }
-      }
-
-      override def hasNext: Boolean = {
-        while (phrasesIterator.hasNext && nextPhrase.isEmpty) {
-          computeNext()
-        }
-        nextPhrase.isDefined
-      }
-
-      override def next(): Phrase = {
-        val nextPhrase = this.nextPhrase
-        this.nextPhrase = None
-        nextPhrase.get
-      }
-    }
-    phraseIterator
+    split(JMusicParserUtils.mergePhrases(score.getPart(partNum)))
   }
 
   override def getPhrase(partNum: Int, phraseNum: Int): Option[Phrase] = {
@@ -83,6 +62,32 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
 object JMusicParserUtils {
   val log = LoggerFactory.getLogger(getClass)
 
+  /**
+   * Takes an iterable and a function that converts (or extracts) its elements to a jmData.Note and returns an optional
+   * musical element
+   * @param jmNotes Iterable of stuff that either contains, is or can be converted to a jmData.Note
+   * @param getNote function that extracts or converts the elements of the iterable to a jmData.Note
+   * @tparam A Type that is, contains or can be converted to a jmData.Note (e.g. Tup2[Double, jmData.Note])
+   * @return An optional musical element
+   */
+  def convertNotes[A](jmNotes: List[A], getNote: A => jmData.Note = identity _): Option[MusicalElement] = {
+    jmNotes.flatMap(elem => convertNote(getNote(elem))) match {
+      case Nil =>
+        None
+      case musicalElement :: Nil =>
+        Some(musicalElement)
+      case musicalElements =>
+        musicalElements.collect{ case n: Note => n } match {
+          case Nil =>
+            None
+          case note :: Nil =>
+            Some(note)
+          case notes =>
+            Some(Chord(notes))
+        }
+    }
+  }
+
   def convertNote(jmNote: jmData.Note): Option[MusicalElement] = {
     if (jmNote.isRest)
       Some(Rest(jmNote.getDuration))
@@ -104,8 +109,24 @@ object JMusicParserUtils {
   }
 
   def mergePhrases(part: jmData.Part): Phrase = {
-//    part.getPhraseList.
-    Phrase.builder.build
+    def isActive(time: Double, start: Double, end: Double): Boolean = start < time && time < end
+
+    //TODO: include bars
+    val notesByStartTime = CollectionUtils.mergeMultiMaps(part.getPhraseList.toList:_*)(getNotesByStartTime)
+    val phraseBuilder = Phrase.builder
+    var activeNotes: List[(Double, Double, jmData.Note)] = List()
+    val endTimes = notesByStartTime.flatMap{ case (startTime, notes) => notes.map(_.getDuration + startTime) }
+
+    for (time <- notesByStartTime.keySet.toList.++(endTimes).sorted) {
+      convertNotes(activeNotes, (a: (_, _, jmData.Note)) => a._3)
+        .foreach(phraseBuilder.addMusicalElement)
+
+      activeNotes = activeNotes.filter{ case (start, end, _) => isActive(time, start, end)}
+      activeNotes ++= notesByStartTime.getOrElse(time, Set()).map(note => (time, time + note.getDuration, note)).toList
+    }
+
+    require(activeNotes.isEmpty)
+    phraseBuilder.build
   }
 }
 
