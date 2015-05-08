@@ -13,6 +13,9 @@ object ImplicitConversions {
 
   implicit def wrapInOption[A <: Any](a: A): Option[A] = Option(a)
 
+  implicit def fromEnhancedTraversable[A](enhancedTraversable: EnhancedTraversable[A]): TraversableOnce[A] =
+    enhancedTraversable.traversable
+
   implicit def toEnhancedTraversable[A](list: java.util.List[A]): EnhancedTraversable[A] =
     new EnhancedTraversable[A](list)
 

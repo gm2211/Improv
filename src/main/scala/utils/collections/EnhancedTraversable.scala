@@ -2,7 +2,7 @@ package utils.collections
 
 import scala.collection.mutable
 
-class EnhancedTraversable[A](private val traversable: TraversableOnce[A]) {
+class EnhancedTraversable[A](val traversable: TraversableOnce[A]) {
    def groupByMultiMap[K](f: A => K): mutable.MultiMap[K, A] = {
      traversable.foldLeft(CollectionUtils.createHashMultimap[K, A]) { case (mmap, elem) =>
        mmap.addBinding(f(elem), elem)
@@ -14,4 +14,5 @@ class EnhancedTraversable[A](private val traversable: TraversableOnce[A]) {
        mmap.addBinding(key, value)
      }
    }
+
  }

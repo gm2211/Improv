@@ -1,11 +1,19 @@
 package utils.collections
 
-import com.google.common.cache.{Cache, CacheBuilder, RemovalListener, RemovalNotification}
-
 import scala.collection.mutable
+import scala.math
 import scala.util.Random
 
 object CollectionUtils {
+  
+  def mergeMultiMaps[K, V, A](multiMaps: A*)(implicit fn: A => mutable.MultiMap[K, V]): mutable.MultiMap[K, V] = {
+    val mergedMMap = createHashMultimap[K, V]
+    for (mmap <- multiMaps; (key, values) <- mmap; value <- values) {
+      mergedMMap.addBinding(key, value)
+    }
+    mergedMMap
+  }
+
   def chooseRandom[T](collection: Iterable[T]): Option[T] = {
     def selectRandom(iter: Iterable[T]): Option[T] = {
       if (iter.size <= 0)

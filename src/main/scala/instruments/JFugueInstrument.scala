@@ -10,25 +10,26 @@ import org.jfugue.player.Player
 import org.jfugue.player.PlayerEvents.FINISHED_PLAYING
 import org.jfugue.{async, theory}
 import org.slf4j.LoggerFactory
-import representation.{MusicalElement, Note, Phrase, Rest}
+import representation._
 import utils.ImplicitConversions.anyToRunnable
 
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
   private val log = LoggerFactory.getLogger(getClass)
   private val threadPool = Executors.newSingleThreadExecutor()
   private var _finishedPlaying = true
-  def finishedPlaying = _finishedPlaying
 
+  def finishedPlaying = _finishedPlaying
 
 
   override def play(musicalElement: MusicalElement): Unit = {
     if (!_finishedPlaying) {
       log.debug("Still busy. Ignoring..")
-    } else {
-      val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
-      _finishedPlaying = false
-      playWithPlayer(musicPattern.toString)
+      return
     }
+
+    val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
+    _finishedPlaying = false
+    playWithPlayer(musicPattern.toString)
   }
 
   private def playWithPlayer(pattern: String): Unit =
@@ -39,7 +40,6 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
     })
 
   override def notify(eventNotification: async.EventNotification): Unit = {
-    log.debug(s"$instrumentType HAS FINISHED PLAYING")
     eventNotification match {
       case FINISHED_PLAYING =>
         _finishedPlaying = true
@@ -51,6 +51,7 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
 case object FinishedPlaying extends EventNotification
 
 object JFugueUtils {
+  val log = LoggerFactory.getLogger(getClass)
 
   /**
    * Takes a set of musical elements and generates a pattern that has a pattern corresponding to each on a different
@@ -78,12 +79,15 @@ object JFugueUtils {
       convertNote(note).getPattern
     case rest: Rest =>
       theory.Note.createRest(rest.durationSec).getPattern
+    case chord: Chord =>
+      new Pattern(chord.notes.map(convertNote(_).getPattern.toString).mkString("+"))
     case phrase: Phrase =>
-      new Pattern(phrase.map(element => s"${createPattern(element).getPattern.toString}").mkString(" "))
+      new Pattern(phrase.map(createPattern(_).getPattern.toString).mkString(" "))
   }
 
   def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
     val pattern: Pattern = createPattern(musicalElement)
+    log.debug(pattern.toString)
     pattern.setInstrument(instrumentNumber)
     if (PERCUSSIVE.range.contains(instrumentNumber) || CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
       pattern.setVoice(9)

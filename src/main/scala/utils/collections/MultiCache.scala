@@ -8,6 +8,7 @@ import com.google.common.cache.{Cache, CacheBuilder, RemovalListener, RemovalNot
 import utils.ImplicitConversions.anyToRunnable
 
 import scala.collection.mutable
+import scala.math
 import collection.JavaConversions._
 
 object MultiCache {
