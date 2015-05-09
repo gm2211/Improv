@@ -4,11 +4,30 @@ package representation
 import representation.NoteName.NoteName
 import utils.collections.CollectionUtils
 
+import scala.collection.mutable.ListBuffer
 import scala.util.{Random, Try}
 import scala.math
 
 
 object Note {
+  /**
+   * Returns true if two notes are equal
+   * @param note1 First note
+   * @param note2 Second note
+   * @param octave Consider octave in comparison?
+   * @param duration Consider duration in comparison?
+   * @return
+   */
+  def areEqual(
+      note1: Note,
+      note2: Note,
+      octave: Boolean = true,
+      duration: Boolean = true) = {
+    note1.name == note2.name &&
+      note1.intonation == note2.intonation &&
+      (! octave || note1.octave == note2.octave) &&
+      (! duration || note1.duration == note2.duration)
+  }
 
   def pitchToOctave(pitch: Int): Int = math.floor(pitch / 12.0).toInt
 
@@ -74,5 +93,7 @@ case class Note(name: NoteName = Note.DEFAULT_NAME,
   def withDuration(newDuration: Double) = copy(duration = newDuration)
 
   def withIntonation(newIntonation: Intonation) = copy(intonation = newIntonation)
+
+  override def getDuration: Double = duration
 }
 

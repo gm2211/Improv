@@ -29,7 +29,7 @@ class MIDIReaderComposer(builder: MIDIReaderComposerBuilder[Once, Once]) extends
   val filename: String = builder.filename.get
   val partNum: Int = builder.partNum.get
   val midiReader: MIDIParser = builder.midiParserFactory.getOrElse(JMusicMIDIParser)(filename)
-  val phraseIterator: Iterator[Phrase] = midiReader.getPhrases(partNum)
+  val phraseIterator: Iterator[Phrase] = midiReader.getPhrases(partNum).toIterator
 
   override def compose(previousPhrase: Phrase): Option[Phrase] = {
     if (phraseIterator.hasNext)

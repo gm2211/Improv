@@ -83,7 +83,7 @@ object JFugueUtils {
       case note: Note =>
         convertNote(note, instrumentNumber).getPattern
       case rest: Rest =>
-        theory.Note.createRest(rest.durationSec).getPattern
+        theory.Note.createRest(rest.duration).getPattern
       case chord: Chord =>
         new Pattern(chord.notes.map(convertNote(_, instrumentNumber).getPattern.toString).mkString("+"))
       case phrase: Phrase =>

@@ -1,7 +1,7 @@
 package midi
 
 import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
-import representation.Phrase
+import representation.{MultiVoicePhrase, Phrase}
 
 import scala.collection.mutable
 
@@ -14,9 +14,9 @@ trait MIDIParserFactory {
 
 trait MIDIParser {
 
-  def getPhrases(partNum: Int): Iterator[Phrase]
+  def getPhrases(partNum: Int): Traversable[Phrase]
 
-  def getPhrase(partNum: Int, phraseNum: Int): Option[Phrase]
+  def getMultiVoicePhrases(partNum: Int): Traversable[MultiVoicePhrase]
 
   def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int]
 
