@@ -1,7 +1,7 @@
 package actors.composers
 
 import midi.{JMusicMIDIParser, MIDIParser, MIDIParserFactory}
-import representation.Phrase
+import representation.{Phrase, MusicalElement}
 import utils.builders.{Count, IsOnce, Once, Zero}
 
 case class MIDIReaderComposerBuilder[
@@ -29,7 +29,7 @@ class MIDIReaderComposer(builder: MIDIReaderComposerBuilder[Once, Once]) extends
   val filename: String = builder.filename.get
   val partNum: Int = builder.partNum.get
   val midiReader: MIDIParser = builder.midiParserFactory.getOrElse(JMusicMIDIParser)(filename)
-  val phraseIterator: Iterator[Phrase] = midiReader.getPhrases(partNum).toIterator
+  val phraseIterator: Iterator[Phrase] = midiReader.getMultiVoicePhrases(partNum).toIterator
 
   override def compose(previousPhrase: Phrase): Option[Phrase] = {
     if (phraseIterator.hasNext)

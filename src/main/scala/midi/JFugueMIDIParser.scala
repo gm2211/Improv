@@ -7,7 +7,7 @@ import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
 import org.jfugue.midi.MidiParser
 import org.jfugue.parser.ParserListener
 import org.jfugue.theory.{Chord, Note}
-import representation.{MultiVoicePhrase, Phrase}
+import representation.Phrase
 import utils.collections.CollectionUtils
 
 import scala.collection.mutable
@@ -30,7 +30,7 @@ class JFugueMIDIParser extends MIDIParser {
 
   override def getPhrases(partNum: Int): Traversable[Phrase] = List()
 
-  override def getMultiVoicePhrases(partNum: Int): Traversable[MultiVoicePhrase] = List()
+  override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] = List()
 }
 
 class JFugueParseListener extends ParserListener {

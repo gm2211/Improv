@@ -8,6 +8,6 @@ class RandomComposer extends Composer {
     val range = 1 to 5
     val phrase = Phrase()
       .withMusicalElements(range.map(i => Note.genRandNote().withDuration(0.5)))
-    Some(phrase)
+    Some(Phrase())
   }
 }

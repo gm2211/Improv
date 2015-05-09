@@ -34,6 +34,7 @@ dependencies {
     // Scala
     compile "org.scala-lang:scala-library:$scala_version"
     compile "org.scala-lang:scala-compiler:$scala_version"
+    compile "org.scalaz:scalaz-core_2.11:$scalaz_version"
     compile "jline:jline:$jline_version"
 
     // Guava

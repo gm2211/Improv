@@ -5,6 +5,7 @@ import utils.ImplicitConversions.toEnhancedTraversable
 
 import scala.collection.mutable
 import scala.math
+import scalaz.Scalaz._
 
 object Phrase {
   def computeDuration(phrase: Phrase): Double = phrase.numericFold(0.0, _.getDuration)
@@ -21,28 +22,31 @@ object Phrase {
   }
 }
 
+/**
+ *
+ * @param musicalElements List of musical elements that belong to the phrase
+ * @param polyphony All the phrases in this phrases are to be played at the same time
+ *                  (Pre: all the musical elements in the phrase must be phrases)
+ * @param tempoBPM Tempo of the phrase
+ */
 case class Phrase(
-  musicalElements: mutable.MutableList[MusicalElement] = mutable.MutableList(),
+  musicalElements: List[MusicalElement] = List(),
+  polyphony: Boolean = false,
   tempoBPM: Double = 120)
     extends MusicalElement with mutable.Traversable[MusicalElement] {
   private val maxChordSize: MemoizedFunc[Phrase, Int] = FunctionalUtils.memoized(Phrase.computeMaxChordSize)
   private val duration: MemoizedFunc[Phrase, Double] = FunctionalUtils.memoized(Phrase.computeDuration)
 
+  require(! polyphony || canHavePolyphony)
+
+  private def canHavePolyphony: Boolean =
+    musicalElements.forall{ case p: Phrase => true; case _ => false }
+
+  def withPolyphony(polyphony: Boolean = true): Option[Phrase] =
+    (! polyphony || canHavePolyphony).option(copy(polyphony = polyphony))
+
   def withMusicalElements(musicalElements: Traversable[MusicalElement]) =
-    copy(musicalElements = musicalElements.to[mutable.MutableList])
-
-  def addMusicalElement(musicalElement: MusicalElement) = {
-    musicalElements += musicalElement
-
-    musicalElement match {
-      case chord: Chord =>
-        maxChordSize.update(this, maxChordSize(this) + chord.notes.size)
-      case _ =>
-    }
-
-    duration.update(this, duration(this) + musicalElement.getDuration)
-    this
-  }
+    copy(musicalElements = musicalElements.toList)
 
   def getMaxChordSize: Int = maxChordSize(this)
 

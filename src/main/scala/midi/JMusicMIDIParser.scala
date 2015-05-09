@@ -32,7 +32,7 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
     split(JMusicParserUtils.mergePhrases(score.getPart(partNum).getPhraseList))
   }
 
-  override def getMultiVoicePhrases(partNum: Int): Traversable[MultiVoicePhrase] =
+  override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] =
     getPhrases(partNum).map(JMusicParserUtils.splitPhrase)
 
   override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = {
@@ -106,56 +106,61 @@ object JMusicParserUtils {
     def isActive(time: Double, start: Double, end: Double): Boolean = start < time && time < end
 
     val notesByStartTime = CollectionUtils.mergeMultiMaps(phrases.toList: _*)(getNotesByStartTime)
-    val phrase = Phrase()
+    val phraseElements = mutable.MutableList[MusicalElement]()
     var activeNotes: List[(Double, Double, jmData.Note)] = List()
     val endTimes = notesByStartTime.flatMap { case (startTime, notes) => notes.map(_.getDuration + startTime) }
 
     for (time <- notesByStartTime.keySet.toList.++(endTimes).sorted) {
       convertNotes(activeNotes, (a: (_, _, jmData.Note)) => a._3)
-        .foreach(phrase.addMusicalElement)
+        .foreach(elem => phraseElements += elem)
 
       activeNotes = activeNotes.filter { case (start, end, _) => isActive(time, start, end) }
       activeNotes ++= notesByStartTime.getOrElse(time, Set()).map(note => (time, time + note.getDuration, note)).toList
     }
 
     require(activeNotes.isEmpty)
-    phrase
+    Phrase().withMusicalElements(phraseElements)
   }
 
-  def splitPhrase(phrase: Phrase): MultiVoicePhrase = {
-    def addToPhrase(element: MusicalElement, phrase: Phrase): Unit = {
+  def splitPhrase(phrase: Phrase): Phrase = {
+    def addToPhrase(element: MusicalElement, phrase: mutable.MutableList[MusicalElement]): Unit = {
       if (phrase.isEmpty) {
-        phrase.addMusicalElement(element)
+        phrase += element
       } else {
-        val previousElem = phrase.musicalElements.last
+        val previousElem = phrase.last
         (previousElem, element) match {
           case (previousNote: Note, note: Note) if Note.areEqual(note, previousNote, duration = false) =>
-            phrase.musicalElements.updateLast(previousNote.withDuration(previousNote.duration + note.duration))
+            phrase.updateLast(previousNote.withDuration(previousNote.duration + note.duration))
           case (previousRest: Rest, rest: Rest) =>
-            phrase.musicalElements.updateLast(Rest(previousRest.duration + rest.duration))
+            phrase.updateLast(Rest(previousRest.duration + rest.duration))
           case _ =>
+            phrase += element
         }
       }
     }
 
     var activeElements = List[MusicalElement]()
-    val phrases: List[(Int, Phrase)] = (0 until phrase.getMaxChordSize).map(i => (i, Phrase())).toList
+    val phrasesElements = (0 until phrase.getMaxChordSize).map(i => (i, mutable.MutableList[MusicalElement]())).toList
 
-    for (musicalElement <- phrase.musicalElements) {
+    for (musicalElement <- phrase) {
       musicalElement match {
         case chord: Chord =>
           activeElements = chord.notes
         case elem =>
           activeElements = List(elem)
       }
-      phrases.foreach { case (index, curPhrase) =>
+      phrasesElements.foreach { case (index, phraseElems) =>
         val elem = Try {
           activeElements(index)
         }.toOption.getOrElse(Rest(musicalElement.getDuration))
-        addToPhrase(elem, curPhrase)
+        addToPhrase(elem, phraseElems)
       }
     }
-    MultiVoicePhrase(phrases.map(_._2))
+    val phrases = phrasesElements.map{ case (index, phraseElems) => new Phrase(phraseElems.toList) }
+    Phrase()
+      .withMusicalElements(phrases)
+      .withPolyphony()
+      .getOrElse(phrase)
   }
 }
 
