@@ -53,6 +53,7 @@ case object FinishedPlaying extends EventNotification
 
 object JFugueUtils {
   val log = LoggerFactory.getLogger(getClass)
+  val MAX_VOICE: Int = 15
 
   /**
    * Takes a set of musical elements and generates a pattern that has a pattern corresponding to each on a different
@@ -85,9 +86,9 @@ object JFugueUtils {
       case rest: Rest =>
         theory.Note.createRest(rest.duration).getPattern
       case chord: Chord =>
-        new Pattern(chord.notes.map(convertNote(_, instrumentNumber).getPattern.toString).mkString("+"))
+        convertChord(instrumentNumber, chord)
       case phrase: Phrase =>
-        new Pattern(phrase.map(createPatternHelper(_, instrumentNumber).toString).mkString(" "))
+        convertPhrase(instrumentNumber, phrase)
     }
     if (PERCUSSIVE.range.contains(instrumentNumber) ||
       CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
@@ -96,10 +97,38 @@ object JFugueUtils {
     pattern
   }
 
+
+  def convertPhrase(instrumentNumber: Int, phrase: Phrase): Pattern = phrase match {
+    case polyphonicPhrase @ Phrase(_, true, _) =>
+      new Pattern(mergePhrases(instrumentNumber, polyphonicPhrase))
+    case normalPhrase @ Phrase(_, false, _) =>
+      new Pattern(normalPhrase.map(createPatternHelper(_, instrumentNumber).toString).mkString(" "))
+  }
+
+  def convertChord(instrumentNumber: Int, chord: Chord): Pattern =
+    new Pattern(chord.notes.map(convertNote(_, instrumentNumber).getPattern.toString).mkString("+"))
+
   def convertNote(note: Note, instrumentNumber: Int): theory.Note = {
     new theory.Note(s"${note.name.toString}${note.intonation.toString}${note.octave}")
       .setDuration(note.duration)
       .setPercussionNote(PERCUSSIVE.range.contains(instrumentNumber) ||
-                         CHROMATIC_PERCUSSION.range.contains(instrumentNumber))
+      CHROMATIC_PERCUSSION.range.contains(instrumentNumber))
+  }
+
+
+  // TODO: Very hacky => Find a better way
+  private def mergePhrases(instrumentNumber: Int, phrase: Phrase): String = {
+    var phrasePatternString = ""
+    for ((curElem, voice) <- phrase.toStream.zipWithIndex) {
+      curElem match {
+        case curPhrase: Phrase =>
+          val nonPercussionVoice = if (voice < 9) voice +1 else voice + 1
+          if (nonPercussionVoice <= MAX_VOICE) {
+            phrasePatternString += s" ${convertPhrase(instrumentNumber, curPhrase).setVoice(nonPercussionVoice).toString}"
+          }
+        case _ =>
+      }
+    }
+    phrasePatternString
   }
 }
