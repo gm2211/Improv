@@ -52,15 +52,14 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
   private var currentMusicTime: Long = 0
 
   def play(time: Long): Unit = {
-    val phraseBuilder = Phrase.builder
-    val addMusicalElement = (m: MusicInfoMessage) => phraseBuilder.addMusicalElement(m.musicalElement)
+    val musicalElements: Traversable[MusicalElement] = musicInfoMessageCache.get(time)
+      .map(messages => messages.map(_.musicalElement)).getOrElse(Set())
 
-    musicInfoMessageCache.get(time)
-      .foreach(messages => messages.foreach(addMusicalElement))
+    val phrase = Phrase().withMusicalElements(musicalElements)
 
     musicInfoMessageCache.remove(time)
 
-    val responsePhrase = musicComposer.compose(phraseBuilder.build)
+    val responsePhrase = musicComposer.compose(phrase)
     responsePhrase.foreach(play)
   }
 

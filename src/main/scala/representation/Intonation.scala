@@ -13,9 +13,9 @@ object Intonation {
 
 sealed trait Intonation
 
-case object Flat extends Intonation
+case object Flat extends Intonation { override def toString: String = "b"}
 
-case object Sharp extends Intonation
+case object Sharp extends Intonation { override def toString: String = "#"}
 
-case object Natural extends Intonation
+case object Natural extends Intonation { override def toString: String = ""}
 

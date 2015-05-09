@@ -28,6 +28,7 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
     }
 
     val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
+    log.debug(musicPattern.toString)
     _finishedPlaying = false
     playWithPlayer(musicPattern.toString)
   }
@@ -52,6 +53,7 @@ case object FinishedPlaying extends EventNotification
 
 object JFugueUtils {
   val log = LoggerFactory.getLogger(getClass)
+  val MAX_VOICE: Int = 15
 
   /**
    * Takes a set of musical elements and generates a pattern that has a pattern corresponding to each on a different
@@ -74,33 +76,59 @@ object JFugueUtils {
     pattern
   }
 
-  def createPattern(element: MusicalElement): Pattern = element match {
-    case note: Note =>
-      convertNote(note).getPattern
-    case rest: Rest =>
-      theory.Note.createRest(rest.durationSec).getPattern
-    case chord: Chord =>
-      new Pattern(chord.notes.map(convertNote(_).getPattern.toString).mkString("+"))
-    case phrase: Phrase =>
-      new Pattern(phrase.map(createPattern(_).getPattern.toString).mkString(" "))
-  }
+  def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern =
+    createPatternHelper(musicalElement, instrumentNumber).setInstrument(instrumentNumber)
 
-  def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
-    val pattern: Pattern = createPattern(musicalElement)
-    log.debug(pattern.toString)
-    pattern.setInstrument(instrumentNumber)
-    if (PERCUSSIVE.range.contains(instrumentNumber) || CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
+  def createPatternHelper(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
+    val pattern: Pattern = musicalElement match {
+      case note: Note =>
+        convertNote(note, instrumentNumber).getPattern
+      case rest: Rest =>
+        theory.Note.createRest(rest.duration).getPattern
+      case chord: Chord =>
+        convertChord(instrumentNumber, chord)
+      case phrase: Phrase =>
+        convertPhrase(instrumentNumber, phrase)
+    }
+    if (PERCUSSIVE.range.contains(instrumentNumber) ||
+      CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
       pattern.setVoice(9)
     }
     pattern
   }
 
-  def convertNote(note: Note): theory.Note =
-    new theory.Note(s"${note.name.toString}").setDuration(note.duration)
 
-  def convertNote(note: Note, instrumentNumber: Int): Pattern = {
-    val convertedNotePattern = convertNote(note).getPattern
-    convertedNotePattern.setInstrument(instrumentNumber)
-    convertedNotePattern
+  def convertPhrase(instrumentNumber: Int, phrase: Phrase): Pattern = phrase match {
+    case polyphonicPhrase @ Phrase(_, true, _) =>
+      new Pattern(mergePhrases(instrumentNumber, polyphonicPhrase))
+    case normalPhrase @ Phrase(_, false, _) =>
+      new Pattern(normalPhrase.map(createPatternHelper(_, instrumentNumber).toString).mkString(" "))
+  }
+
+  def convertChord(instrumentNumber: Int, chord: Chord): Pattern =
+    new Pattern(chord.notes.map(convertNote(_, instrumentNumber).getPattern.toString).mkString("+"))
+
+  def convertNote(note: Note, instrumentNumber: Int): theory.Note = {
+    new theory.Note(s"${note.name.toString}${note.intonation.toString}${note.octave}")
+      .setDuration(note.duration)
+      .setPercussionNote(PERCUSSIVE.range.contains(instrumentNumber) ||
+      CHROMATIC_PERCUSSION.range.contains(instrumentNumber))
+  }
+
+
+  // TODO: Very hacky => Find a better way
+  private def mergePhrases(instrumentNumber: Int, phrase: Phrase): String = {
+    var phrasePatternString = ""
+    for ((curElem, voice) <- phrase.toStream.zipWithIndex) {
+      curElem match {
+        case curPhrase: Phrase =>
+          val nonPercussionVoice = if (voice < 9) voice +1 else voice + 1
+          if (nonPercussionVoice <= MAX_VOICE) {
+            phrasePatternString += s" ${convertPhrase(instrumentNumber, curPhrase).setVoice(nonPercussionVoice).toString}"
+          }
+        case _ =>
+      }
+    }
+    phrasePatternString
   }
 }

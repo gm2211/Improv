@@ -29,7 +29,8 @@ object DemoMIDIOrchestra {
     }
 
     for ((instrument, parts) <- parser.getPartIndexByInstrument) {
-      parts.map(musicianBuilder(instrument, _).withActorSystem(orchestra.system))
+      parts.map(musicianBuilder(instrument, _)
+        .withActorSystem(orchestra.system))
         .foreach(m => orchestra.registerMusician(m.build))
     }
 

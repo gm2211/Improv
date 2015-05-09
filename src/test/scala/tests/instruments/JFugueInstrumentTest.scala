@@ -4,8 +4,10 @@ import designPatterns.observer.{EventNotification, Observer}
 import instruments.InstrumentType.PIANO
 import instruments.{FinishedPlaying, JFugueInstrument}
 import org.scalatest.FlatSpec
-import representation.{Note, Phrase, Rest}
+import representation.{MusicalElement, Note, Phrase, Rest}
 import tests.TestTags.SlowTest
+
+import scala.collection.mutable.ListBuffer
 
 class JFugueInstrumentTest extends FlatSpec {
   var instrument: JFugueInstrument = _
@@ -21,13 +23,14 @@ class JFugueInstrumentTest extends FlatSpec {
 
   def myTest() = {
     setup()
-    val phrase = Phrase.builder
-      .addMusicalElement(Note.fromString("A5").withDuration(1))
-      .addMusicalElement(new Rest(0.1))
-      .addMusicalElement(Note.fromString("B5").withDuration(1))
-      .addMusicalElement(new Rest(0.1))
-      .addMusicalElement(Note.fromString("C5").withDuration(1))
-      .build
+    val musicalElements = ListBuffer[MusicalElement]()
+      musicalElements.append(Note.fromString("A5").withDuration(1))
+      musicalElements.append(new Rest(0.1))
+      musicalElements.append(Note.fromString("B5").withDuration(1))
+      musicalElements.append(new Rest(0.1))
+      musicalElements.append(Note.fromString("C5").withDuration(1))
+
+    val phrase = new Phrase().withMusicalElements(musicalElements)
 
     val listener = new Observer {
       override def notify(eventNotification: EventNotification): Unit = eventNotification match {

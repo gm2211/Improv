@@ -1,29 +1,56 @@
 package representation
 
-import scala.collection.mutable.ListBuffer
+import utils.functional.{MemoizedFunc, FunctionalUtils}
+import utils.ImplicitConversions.toEnhancedTraversable
 
-case class PhraseBuilder(private val musicalElementsBuf: ListBuffer[MusicalElement] = ListBuffer()) {
-  def musicalElements: List[MusicalElement] = musicalElementsBuf.toList
-
-  def withMusicalElements(musicalElements: Iterable[MusicalElement]) =
-    copy(musicalElementsBuf = musicalElements.to[ListBuffer])
-
-  def addMusicalElement(musicalElement: MusicalElement) = {
-    musicalElementsBuf += musicalElement
-    this
-  }
-
-  def build = new Phrase(this)
-}
+import scala.collection.mutable
+import scala.math
+import scalaz.Scalaz._
 
 object Phrase {
-  def builder = new PhraseBuilder()
+  def computeDuration(phrase: Phrase): Double = phrase.numericFold(0.0, _.getDuration)
+
+  def apply(): Phrase = {
+    new Phrase()
+  }
+
+  def computeMaxChordSize(phrase: Phrase): Int = {
+    phrase.musicalElements.foldLeft(0){
+      case (i, c: Chord) => math.max(i, c.notes.size)
+      case (i, _) => i
+    }
+  }
 }
 
-case class Phrase(builder: PhraseBuilder) extends MusicalElement with Iterable[MusicalElement] {
-  val musicalElements: List[MusicalElement] = builder.musicalElements
+/**
+ *
+ * @param musicalElements List of musical elements that belong to the phrase
+ * @param polyphony All the phrases in this phrases are to be played at the same time
+ *                  (Pre: all the musical elements in the phrase must be phrases)
+ * @param tempoBPM Tempo of the phrase
+ */
+case class Phrase(
+  musicalElements: List[MusicalElement] = List(),
+  polyphony: Boolean = false,
+  tempoBPM: Double = 120)
+    extends MusicalElement with mutable.Traversable[MusicalElement] {
+  private val maxChordSize: MemoizedFunc[Phrase, Int] = FunctionalUtils.memoized(Phrase.computeMaxChordSize)
+  private val duration: MemoizedFunc[Phrase, Double] = FunctionalUtils.memoized(Phrase.computeDuration)
 
-  override def iterator: Iterator[MusicalElement] = musicalElements.iterator
+  require(! polyphony || canHavePolyphony)
 
+  private def canHavePolyphony: Boolean =
+    musicalElements.forall{ case p: Phrase => true; case _ => false }
+
+  def withPolyphony(polyphony: Boolean = true): Option[Phrase] =
+    (! polyphony || canHavePolyphony).option(copy(polyphony = polyphony))
+
+  def withMusicalElements(musicalElements: Traversable[MusicalElement]) =
+    copy(musicalElements = musicalElements.toList)
+
+  def getMaxChordSize: Int = maxChordSize(this)
+
+  override def getDuration: Double = duration(this)
   override def isEmpty: Boolean = musicalElements.isEmpty
+  override def foreach[U](f: (MusicalElement) => U): Unit = musicalElements.foreach(f)
 }

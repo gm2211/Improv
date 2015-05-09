@@ -28,9 +28,9 @@ class JFugueMIDIParser extends MIDIParser {
 
   override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = CollectionUtils.createHashMultimap
 
-  override def getPhrases(partNum: Int): Iterator[Phrase] = List().iterator
+  override def getPhrases(partNum: Int): Traversable[Phrase] = List()
 
-  override def getPhrase(partNum: Int, phraseNum: Int): Option[Phrase] = Some(Phrase.builder.build)
+  override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] = List()
 }
 
 class JFugueParseListener extends ParserListener {

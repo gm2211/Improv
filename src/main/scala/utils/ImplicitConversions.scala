@@ -1,8 +1,8 @@
 package utils
 
-import utils.collections.EnhancedTraversable
+import utils.collections.{EnhancedTraversable, FasterMutableListWrapper}
 
-import scala.collection.convert.{WrapAsScala, WrapAsJava}
+import scala.collection.mutable
 import scala.language.implicitConversions
 
 object ImplicitConversions {
@@ -12,6 +12,8 @@ object ImplicitConversions {
   }
 
   implicit def wrapInOption[A <: Any](a: A): Option[A] = Option(a)
+
+  implicit def toFasterMutableList[A](mutableList: mutable.MutableList[A]): FasterMutableListWrapper[A] = new FasterMutableListWrapper[A](mutableList)
 
   implicit def fromEnhancedTraversable[A](enhancedTraversable: EnhancedTraversable[A]): TraversableOnce[A] =
     enhancedTraversable.traversable

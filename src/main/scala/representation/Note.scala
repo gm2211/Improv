@@ -9,6 +9,24 @@ import scala.math
 
 
 object Note {
+  /**
+   * Returns true if two notes are equal
+   * @param note1 First note
+   * @param note2 Second note
+   * @param octave Consider octave in comparison?
+   * @param duration Consider duration in comparison?
+   * @return
+   */
+  def areEqual(
+      note1: Note,
+      note2: Note,
+      octave: Boolean = true,
+      duration: Boolean = true) = {
+    note1.name == note2.name &&
+      note1.intonation == note2.intonation &&
+      (! octave || note1.octave == note2.octave) &&
+      (! duration || note1.duration == note2.duration)
+  }
 
   def pitchToOctave(pitch: Int): Int = math.floor(pitch / 12.0).toInt
 
@@ -18,6 +36,7 @@ object Note {
   val DEFAULT_OCTAVE = 4
   val DEFAULT_DURATION = 1.0
   val DEFAULT_INTONATION = Natural
+  val DEFAULT_LOUDNESS = MF
 
   private val WELL_AUDIBLE_RANGE = 3 to 5
 
@@ -54,7 +73,11 @@ object Note {
       .getOrElse(Natural)
     val name = CollectionUtils.chooseRandom(List("A", "B", "C", "D", "E", "F", "G")).getOrElse("A")
 
-    Note(NoteName.withName(name), octave, duration, intonation)
+    Note(
+      name = NoteName.withName(name),
+      octave = octave,
+      duration = duration,
+      intonation = intonation)
   }
 }
 
@@ -66,7 +89,9 @@ object NoteName extends Enumeration {
 case class Note(name: NoteName = Note.DEFAULT_NAME,
   octave: Int = Note.DEFAULT_OCTAVE,
   duration: Double = Note.DEFAULT_DURATION,
-  intonation: Intonation = Note.DEFAULT_INTONATION) extends MusicalElement {
+  intonation: Intonation = Note.DEFAULT_INTONATION,
+  loudness: Loudness = Note.DEFAULT_LOUDNESS) extends MusicalElement {
+
   def withName(newName: NoteName) = copy(name = newName)
 
   def withOctave(newOctave: Int) = copy(octave = newOctave)
@@ -74,5 +99,9 @@ case class Note(name: NoteName = Note.DEFAULT_NAME,
   def withDuration(newDuration: Double) = copy(duration = newDuration)
 
   def withIntonation(newIntonation: Intonation) = copy(intonation = newIntonation)
+
+  def withLoudness(newLoudness: Loudness) = copy(loudness = loudness)
+
+  override def getDuration: Double = duration
 }
 

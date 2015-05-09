@@ -14,7 +14,7 @@ class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrap
     case note: Note =>
       play(note)
     case rest: Rest =>
-      Thread.sleep(rest.durationSec.toInt)
+      Thread.sleep(rest.duration.toInt)
     case phrase: Phrase =>
       phrase.foreach(play)
   }
