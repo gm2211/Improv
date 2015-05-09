@@ -4,7 +4,6 @@ package representation
 import representation.NoteName.NoteName
 import utils.collections.CollectionUtils
 
-import scala.collection.mutable.ListBuffer
 import scala.util.{Random, Try}
 import scala.math
 
@@ -37,6 +36,7 @@ object Note {
   val DEFAULT_OCTAVE = 4
   val DEFAULT_DURATION = 1.0
   val DEFAULT_INTONATION = Natural
+  val DEFAULT_LOUDNESS = MF
 
   private val WELL_AUDIBLE_RANGE = 3 to 5
 
@@ -73,7 +73,11 @@ object Note {
       .getOrElse(Natural)
     val name = CollectionUtils.chooseRandom(List("A", "B", "C", "D", "E", "F", "G")).getOrElse("A")
 
-    Note(NoteName.withName(name), octave, duration, intonation)
+    Note(
+      name = NoteName.withName(name),
+      octave = octave,
+      duration = duration,
+      intonation = intonation)
   }
 }
 
@@ -85,7 +89,9 @@ object NoteName extends Enumeration {
 case class Note(name: NoteName = Note.DEFAULT_NAME,
   octave: Int = Note.DEFAULT_OCTAVE,
   duration: Double = Note.DEFAULT_DURATION,
-  intonation: Intonation = Note.DEFAULT_INTONATION) extends MusicalElement {
+  intonation: Intonation = Note.DEFAULT_INTONATION,
+  loudness: Loudness = Note.DEFAULT_LOUDNESS) extends MusicalElement {
+
   def withName(newName: NoteName) = copy(name = newName)
 
   def withOctave(newOctave: Int) = copy(octave = newOctave)
@@ -93,6 +99,8 @@ case class Note(name: NoteName = Note.DEFAULT_NAME,
   def withDuration(newDuration: Double) = copy(duration = newDuration)
 
   def withIntonation(newIntonation: Intonation) = copy(intonation = newIntonation)
+
+  def withLoudness(newLoudness: Loudness) = copy(loudness = loudness)
 
   override def getDuration: Double = duration
 }

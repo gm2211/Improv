@@ -33,7 +33,7 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
   }
 
   override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] =
-    getPhrases(partNum).map(JMusicParserUtils.splitPhrase)
+    split(JMusicParserUtils.convertPart(score.getPart(partNum)))
 
   override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = {
     val partsArray = score.getPartArray
@@ -87,11 +87,14 @@ object JMusicParserUtils {
       val intonation = if (jmNote.isFlat) Flat else if (jmNote.isSharp) Sharp else Natural
       val (noteName, _, _) = Note.parseString(jmNote.getNote)
       val duration = jmNote.getDuration / durationRatio
+      val loudness = Loudness(jmNote.getDynamic)
+      //val startTime = jmNote.getNoteStartTime //NB: the start time is based on the note's rhythm value, not on its duration
 
       noteName.flatMap(name => Some(Note(name = name,
         octave = Note.pitchToOctave(notePitch),
         duration = duration,
-        intonation = intonation)))
+        intonation = intonation,
+        loudness = loudness)))
     }
   }
 
@@ -102,6 +105,20 @@ object JMusicParserUtils {
     })
   }
 
+  def convertPart(part: jmData.Part): Phrase = {
+    val phrases = part.getPhraseList.map(convertPhrase)
+    new Phrase(
+      musicalElements = phrases.toList,
+      polyphony = true,
+      tempoBPM = part.getTempo)
+  }
+
+  def convertPhrase(phrase: jmData.Phrase): Phrase = {
+    val elements = phrase.getNoteList.flatMap(convertNote)
+    new Phrase(elements.toList, tempoBPM = phrase.getTempo)
+  }
+
+  // TODO: make this work with representation.Phrase too
   def mergePhrases(phrases: Traversable[jmData.Phrase]): Phrase = {
     def isActive(time: Double, start: Double, end: Double): Boolean = start < time && time < end
 
