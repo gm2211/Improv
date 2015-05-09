@@ -11,7 +11,6 @@ import utils.collections.CollectionUtils
 
 import scala.collection.mutable
 import collection.JavaConversions._
-import scala.math
 
 object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String, phraseLength: Int) = {
@@ -95,10 +94,11 @@ object JMusicParserUtils {
       val notePitch = if (!jmNote.getPitchType) jmNote.getPitch else jmData.Note.freqToMidiPitch(jmNote.getFrequency)
       val intonation = if (jmNote.isFlat) Flat else if (jmNote.isSharp) Sharp else Natural
       val (noteName, _, _) = Note.parseString(jmNote.getNote)
+      val duration = jmNote.getDuration / 4
 
       noteName.flatMap(name => Some(Note(name = name,
         octave = Note.pitchToOctave(notePitch),
-        duration = jmNote.getDuration,
+        duration = duration,
         intonation = intonation)))
     }
   }

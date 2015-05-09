@@ -28,6 +28,7 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
     }
 
     val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
+    log.debug(musicPattern.toString)
     _finishedPlaying = false
     playWithPlayer(musicPattern.toString)
   }
@@ -74,33 +75,31 @@ object JFugueUtils {
     pattern
   }
 
-  def createPattern(element: MusicalElement): Pattern = element match {
-    case note: Note =>
-      convertNote(note).getPattern
-    case rest: Rest =>
-      theory.Note.createRest(rest.durationSec).getPattern
-    case chord: Chord =>
-      new Pattern(chord.notes.map(convertNote(_).getPattern.toString).mkString("+"))
-    case phrase: Phrase =>
-      new Pattern(phrase.map(createPattern(_).getPattern.toString).mkString(" "))
-  }
+  def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern =
+    createPatternHelper(musicalElement, instrumentNumber).setInstrument(instrumentNumber)
 
-  def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
-    val pattern: Pattern = createPattern(musicalElement)
-    log.debug(pattern.toString)
-    pattern.setInstrument(instrumentNumber)
-    if (PERCUSSIVE.range.contains(instrumentNumber) || CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
+  def createPatternHelper(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
+    val pattern: Pattern = musicalElement match {
+      case note: Note =>
+        convertNote(note, instrumentNumber).getPattern
+      case rest: Rest =>
+        theory.Note.createRest(rest.durationSec).getPattern
+      case chord: Chord =>
+        new Pattern(chord.notes.map(convertNote(_, instrumentNumber).getPattern.toString).mkString("+"))
+      case phrase: Phrase =>
+        new Pattern(phrase.map(createPatternHelper(_, instrumentNumber).toString).mkString(" "))
+    }
+    if (PERCUSSIVE.range.contains(instrumentNumber) ||
+      CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
       pattern.setVoice(9)
     }
     pattern
   }
 
-  def convertNote(note: Note): theory.Note =
-    new theory.Note(s"${note.name.toString}").setDuration(note.duration)
-
-  def convertNote(note: Note, instrumentNumber: Int): Pattern = {
-    val convertedNotePattern = convertNote(note).getPattern
-    convertedNotePattern.setInstrument(instrumentNumber)
-    convertedNotePattern
+  def convertNote(note: Note, instrumentNumber: Int): theory.Note = {
+    new theory.Note(s"${note.name.toString}${note.intonation.toString}${note.octave}")
+      .setDuration(note.duration)
+      .setPercussionNote(PERCUSSIVE.range.contains(instrumentNumber) ||
+                         CHROMATIC_PERCUSSION.range.contains(instrumentNumber))
   }
 }
