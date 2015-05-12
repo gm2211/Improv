@@ -100,12 +100,11 @@ object JMusicParserUtils {
     }
   }
 
-  def getNotesByStartTime(phrase: jmData.Phrase): mutable.MultiMap[Double, jmData.Note] = {
-    var index = -1
-    phrase.getNoteList.groupByMultiMap[Double](note => {
-      index += 1; phrase.getNoteStartTime(index)
-    })
-  }
+  def getNotesByStartTime(phrase: Phrase): mutable.MultiMap[Double, MusicalElement] =
+    phrase.musicalElements.groupByMultiMap[Double](_.getStartTime)
+
+  def getNotesByStartTime(phrase: jmData.Phrase): mutable.MultiMap[Double, jmData.Note] =
+    phrase.getNoteList.groupByMultiMap[Double](note => note.getNoteStartTime.orElse(0.0))
 
   def convertPart(part: jmData.Part): Phrase = {
     val phrases = part.getPhraseList.map(convertPhrase)
@@ -120,18 +119,16 @@ object JMusicParserUtils {
     new Phrase(elements.toList, tempoBPM = phrase.getTempo, startTime = phrase.getStartTime)
   }
 
-  // TODO: make this work with representation.Phrase too
-  def mergePhrases(phrases: Traversable[jmData.Phrase]): Phrase = {
+  def mergePhrases(phrases: Traversable[Phrase]): Phrase = {
     def isActive(time: Double, start: Double, end: Double): Boolean = start < time && time < end
 
     val notesByStartTime = CollectionUtils.mergeMultiMaps(phrases.toList: _*)(getNotesByStartTime)
     val phraseElements = mutable.MutableList[MusicalElement]()
-    var activeNotes: List[(Double, Double, jmData.Note)] = List()
+    var activeNotes: List[(Double, Double, MusicalElement)] = List()
     val endTimes = notesByStartTime.flatMap { case (startTime, notes) => notes.map(_.getDuration + startTime) }
 
     for (time <- notesByStartTime.keySet.toList.++(endTimes).sorted) {
-      convertNotes(activeNotes, (a: (_, _, jmData.Note)) => a._3)
-        .foreach(elem => phraseElements += elem)
+      activeNotes.foreach(elem => phraseElements += elem._3)
 
       activeNotes = activeNotes.filter { case (start, end, _) => isActive(time, start, end) }
       activeNotes ++= notesByStartTime.getOrElse(time, Set()).map(note => (time, time + note.getDuration, note)).toList
