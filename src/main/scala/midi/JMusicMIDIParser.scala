@@ -80,20 +80,26 @@ object JMusicParserUtils {
   }
 
   def convertNote(jmNote: jmData.Note): Option[MusicalElement] = {
-    val durationRatio = 4
+    val durationRatio = 1.0 / 4.0 // In JMusic the duration of 1.0 represents a quarter note (CROTCHET)
 
     if (jmNote.isRest)
-      Some(Rest(jmNote.getDuration / durationRatio))
+      Some(Rest(jmNote.getDuration * durationRatio))
     else {
-      val notePitch = if (!jmNote.getPitchType) jmNote.getPitch else jmData.Note.freqToMidiPitch(jmNote.getFrequency)
+      val notePitch = jmNote.getPitchType match {
+        case jmData.Note.MIDI_PITCH =>
+          jmNote.getPitch
+        case _ =>
+          jmData.Note.freqToMidiPitch(jmNote.getFrequency)
+      }
       val intonation = if (jmNote.isFlat) Flat else if (jmNote.isSharp) Sharp else Natural
       val (noteName, _, _) = Note.parseString(jmNote.getNote)
       val duration = jmNote.getDuration / durationRatio
       val loudness = Loudness(jmNote.getDynamic)
-      val startTime = jmNote.getNoteStartTime.orElse(0.0) / durationRatio
+      val startTime = jmNote.getNoteStartTime.orElse(0.0) * durationRatio
 
       noteName.flatMap(name => Some(Note(name = name,
         octave = Note.pitchToOctave(notePitch),
+        pitch = notePitch,
         duration = duration,
         intonation = intonation,
         loudness = loudness,
@@ -109,10 +115,12 @@ object JMusicParserUtils {
 
   def convertPart(part: jmData.Part): Phrase = {
     val phrases = part.getPhraseList.map(convertPhrase)
+    val startTime: Double = phrases.collectFirst { case phrase => phrase.startTime }.getOrElse(Phrase.DEFAULT_START_TIME)
     new Phrase(
       musicalElements = phrases.toList,
       polyphony = true,
-      tempoBPM = part.getTempo)
+      tempoBPM = part.getTempo,
+      startTime = startTime)
   }
 
   def convertPhrase(phrase: jmData.Phrase): Phrase = {

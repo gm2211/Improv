@@ -110,6 +110,7 @@ object JFugueUtils {
     new theory.Note(s"${note.name.toString}${note.intonation.toString}${note.octave}")
       .setDuration(note.duration)
       .setOnVelocity(note.loudness.loudness.toByte)
+      .setOffVelocity(0)
       .setPercussionNote(PERCUSSIVE.range.contains(instrumentNumber) ||
                          CHROMATIC_PERCUSSION.range.contains(instrumentNumber))
   }
