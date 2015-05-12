@@ -37,6 +37,7 @@ object Note {
   val DEFAULT_DURATION = 1.0
   val DEFAULT_INTONATION = Natural
   val DEFAULT_LOUDNESS = MF
+  val DEFAULT_START_TIME: Double = 0.0
 
   private val WELL_AUDIBLE_RANGE = 3 to 5
 
@@ -90,7 +91,8 @@ case class Note(name: NoteName = Note.DEFAULT_NAME,
   octave: Int = Note.DEFAULT_OCTAVE,
   duration: Double = Note.DEFAULT_DURATION,
   intonation: Intonation = Note.DEFAULT_INTONATION,
-  loudness: Loudness = Note.DEFAULT_LOUDNESS) extends MusicalElement {
+  loudness: Loudness = Note.DEFAULT_LOUDNESS,
+  startTime: Double = Note.DEFAULT_START_TIME) extends MusicalElement {
 
   def withName(newName: NoteName) = copy(name = newName)
 
@@ -103,5 +105,7 @@ case class Note(name: NoteName = Note.DEFAULT_NAME,
   def withLoudness(newLoudness: Loudness) = copy(loudness = loudness)
 
   override def getDuration: Double = duration
+
+  override def getStartTime: Double = startTime
 }
 

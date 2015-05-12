@@ -7,6 +7,9 @@ import scala.math
 import scalaz.Scalaz._
 
 object Phrase {
+  val DEFAULT_TEMPO_BPM = 120
+  val DEFAULT_START_TIME = 0.0
+
   def computeDuration(phrase: Phrase): Double = phrase.numericFold(0.0, _.getDuration)
 
   def apply(): Phrase = {
@@ -31,7 +34,8 @@ object Phrase {
 case class Phrase(
   musicalElements: List[MusicalElement] = List(),
   polyphony: Boolean = false,
-  tempoBPM: Double = 120)
+  tempoBPM: Double = Phrase.DEFAULT_TEMPO_BPM,
+  startTime: Double = Phrase.DEFAULT_START_TIME)
     extends MusicalElement with Traversable[MusicalElement] {
   private val maxChordSize: MemoizedFunc[Phrase, Int] = FunctionalUtils.memoized(Phrase.computeMaxChordSize)
   private val duration: MemoizedFunc[Phrase, Double] = FunctionalUtils.memoized(Phrase.computeDuration)
@@ -52,4 +56,5 @@ case class Phrase(
   override def getDuration: Double = duration(this)
   override def isEmpty: Boolean = musicalElements.isEmpty
   override def foreach[U](f: (MusicalElement) => U): Unit = musicalElements.foreach(f)
+  override def getStartTime: Double = startTime
 }

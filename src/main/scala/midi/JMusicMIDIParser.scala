@@ -89,13 +89,14 @@ object JMusicParserUtils {
       val (noteName, _, _) = Note.parseString(jmNote.getNote)
       val duration = jmNote.getDuration / durationRatio
       val loudness = Loudness(jmNote.getDynamic)
-      //val startTime = jmNote.getNoteStartTime //NB: the start time is based on the note's rhythm value, not on its duration
+      val startTime = jmNote.getNoteStartTime.orElse(0.0) / durationRatio
 
       noteName.flatMap(name => Some(Note(name = name,
         octave = Note.pitchToOctave(notePitch),
         duration = duration,
         intonation = intonation,
-        loudness = loudness)))
+        loudness = loudness,
+        startTime = startTime)))
     }
   }
 
@@ -116,7 +117,7 @@ object JMusicParserUtils {
 
   def convertPhrase(phrase: jmData.Phrase): Phrase = {
     val elements = phrase.getNoteList.flatMap(convertNote)
-    new Phrase(elements.toList, tempoBPM = phrase.getTempo)
+    new Phrase(elements.toList, tempoBPM = phrase.getTempo, startTime = phrase.getStartTime)
   }
 
   // TODO: make this work with representation.Phrase too
