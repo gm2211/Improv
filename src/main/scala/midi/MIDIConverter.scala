@@ -1,15 +1,11 @@
 package midi
 
-import java.util
 import javax.sound.midi.Sequence
 
 import jm.midi.MidiUtil
 import jm.music.data.{Part, Score}
 import jm.music.{data => jmData}
 import representation.{MusicalElement, Note, Phrase, Rest}
-
-import scala.collection.JavaConversions._
-
 
 object MIDIConverter {
   def toSequence(phrase: Phrase): Sequence = {

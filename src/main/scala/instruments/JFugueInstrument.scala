@@ -1,15 +1,18 @@
 package instruments
 
 import java.util.concurrent.Executors
+import javax.sound.midi.Sequence
 
 import designPatterns.observer.{EventNotification, Observable}
 import instruments.InstrumentType.{CHROMATIC_PERCUSSION, InstrumentType, PERCUSSIVE, PIANO}
 import org.jfugue.async.Listener
+import org.jfugue.midi.MidiParserListener
 import org.jfugue.pattern.Pattern
 import org.jfugue.player.Player
 import org.jfugue.player.PlayerEvents.FINISHED_PLAYING
 import org.jfugue.{async, theory}
 import org.slf4j.LoggerFactory
+import org.staccato.StaccatoParser
 import representation._
 import utils.ImplicitConversions.{anyToRunnable, toEnhancedTraversable}
 
@@ -124,5 +127,13 @@ object JFugueUtils {
       }
     }
     phrasePatternString
+  }
+
+  def toSequence(pattern: Pattern): Sequence = {
+    val parser = new StaccatoParser()
+    val midiListener = new MidiParserListener()
+    parser.addParserListener(midiListener)
+    parser.parse(pattern)
+    midiListener.getSequence
   }
 }
