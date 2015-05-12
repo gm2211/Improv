@@ -48,9 +48,13 @@ dependencies {
     // Groovy
     runtime "org.codehaus.groovy:groovy-all:$groovy_version"
 
+    // Serialisation
+    compile "com.twitter:chill-all_2.11:$chill_version"
+
     // MIDI
     compile name: "jfugue-5.0.1"
     compile name: "jMusic1.6.4"
+    compile name: "javaml-$javaml_version"
 
     // Dependency Injection
     //compile "net.codingwell:scala-guice_2.10:$scala_guice_version"
