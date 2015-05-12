@@ -1,36 +1,36 @@
 package actors.musicians
 
+import java.util.concurrent.{ThreadPoolExecutor, Executors}
+
 import instruments.JFugueUtils
 import messages.{MusicInfoMessage, SyncMessage}
-import org.jfugue.pattern.Pattern
 import org.jfugue.player.Player
 import representation.MusicalElement
-import utils.collections.CollectionUtils
+import utils.collections.MultiCache
 
 import scala.collection.mutable
+import utils.ImplicitConversions.anyToRunnable
 
 /**
  * This musician listens to all the music messages sent by other musicians and plays them all at the same time on the
  * next sync message (this kind of acts like a sync barrier)
  */
 class JFugueSynchronizedPlayer extends Musician {
-  //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
-  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = CollectionUtils.createHashMultimap
+  private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = MultiCache.buildDefault(5000, 50)
 
-  def merge(messages: mutable.Set[MusicInfoMessage]): Pattern = {
-    val instrElemSet = messages
-      .map(message => (message.instrument, message.musicalElement))
-      .toSet
-    JFugueUtils.createMultiVoicePattern(instrElemSet)
+  private def prepare(messages: mutable.Set[MusicInfoMessage]): String = {
+    JFugueUtils.mergePatterns(messages.map(message => JFugueUtils.createPattern(message.musicalElement, message.instrument.instrumentNumber)))
   }
 
   override def receive: Receive = {
     case musicMessage: MusicInfoMessage =>
       musicInfoMessageCache.addBinding(musicMessage.time, musicMessage)
     case syncMessage: SyncMessage =>
-      musicInfoMessageCache.get(syncMessage.time - 1)
-        .map(merge)
-        .exists { pattern => println(pattern); new Player().play(pattern); true }
+      val pattern = musicInfoMessageCache.get(syncMessage.time - 1)
+        .map(prepare).getOrElse("")
+
+      new Player().play(pattern)
+
       musicInfoMessageCache.remove(syncMessage.time - 1)
   }
 

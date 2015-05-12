@@ -11,7 +11,10 @@ import org.jfugue.player.PlayerEvents.FINISHED_PLAYING
 import org.jfugue.{async, theory}
 import org.slf4j.LoggerFactory
 import representation._
-import utils.ImplicitConversions.anyToRunnable
+import utils.ImplicitConversions.{anyToRunnable, toEnhancedTraversable}
+
+import scala.math
+import scalaz.Scalaz._
 
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
   private val log = LoggerFactory.getLogger(getClass)
@@ -54,30 +57,13 @@ case object FinishedPlaying extends EventNotification
 object JFugueUtils {
   val log = LoggerFactory.getLogger(getClass)
   val MAX_VOICE: Int = 15
+  val DEFAULT_TEMPO: Int = 120
 
-  /**
-   * Takes a set of musical elements and generates a pattern that has a pattern corresponding to each on a different
-   * pattern voice
-   * e.g.: a set of {Phrase(...), Phrase(...), Note}
-   * will result in
-   * Pattern.voice(1) => <phrase_pattern>
-   * Pattern.voice(2) => <phrase_pattern>
-   * Pattern.voice(3) => <note_pattern>
-   * @param musicalElements A set of musical elements
-   * @return a Pattern
-   */
-  def createMultiVoicePattern(musicalElements: Set[(InstrumentType, MusicalElement)]) = {
-    val pattern = new Pattern
-    musicalElements.zipWithIndex.foreach { case ((instr, elem), idx) =>
-      val voicePattern = createPattern(elem, instr.instrumentNumber)
-      if (idx != 9) voicePattern.setVoice(idx)
-      pattern.add(voicePattern)
-    }
-    pattern
+  def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
+    createPatternHelper(musicalElement, instrumentNumber)
+      .setInstrument(instrumentNumber)
+      .setTempo(DEFAULT_TEMPO)
   }
-
-  def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern =
-    createPatternHelper(musicalElement, instrumentNumber).setInstrument(instrumentNumber)
 
   def createPatternHelper(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
     val pattern: Pattern = musicalElement match {
@@ -86,9 +72,9 @@ object JFugueUtils {
       case rest: Rest =>
         theory.Note.createRest(rest.duration).getPattern
       case chord: Chord =>
-        convertChord(instrumentNumber, chord)
+        createChordPattern(instrumentNumber, chord)
       case phrase: Phrase =>
-        convertPhrase(instrumentNumber, phrase)
+        createPhrasePattern(phrase, instrumentNumber)
     }
     if (PERCUSSIVE.range.contains(instrumentNumber) ||
       CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
@@ -97,36 +83,46 @@ object JFugueUtils {
     pattern
   }
 
+  def convertPolyphonicPhrase(phrase: Phrase, instrumentNumber: Int): String = {
+    phrase.polyphony.option {
+      var curTime = 0.0
+      phrase.musicalElements.asInstanceOf[List[Phrase]].zipped.map { case musicalElements =>
+        val musStr = musicalElements.map {
+          case Some(elem) =>
+            s"@$curTime ${createPatternHelper(elem, instrumentNumber)}"
+          case _ =>
+            ""
+        }.mkString(" ")
+        curTime += musicalElements.foldLeft(0.0)((d, optElem) => math.max(d, optElem.map(_.getDuration).getOrElse(0.0)))
+        musStr
+      }.mkString(" ")
+    }.getOrElse("")
+  }
 
-  def convertPhrase(instrumentNumber: Int, phrase: Phrase): Pattern = phrase match {
-    case polyphonicPhrase @ Phrase(_, true, _) =>
-      new Pattern(mergePhrases(instrumentNumber, polyphonicPhrase))
-    case normalPhrase @ Phrase(_, false, _) =>
+  def createPhrasePattern(phrase: Phrase, instrumentNumber: Int): Pattern = phrase match {
+    case polyphonicPhrase@Phrase(_, true, _) =>
+      new Pattern(convertPolyphonicPhrase(polyphonicPhrase, instrumentNumber))
+    case normalPhrase@Phrase(_, false, _) =>
       new Pattern(normalPhrase.map(createPatternHelper(_, instrumentNumber).toString).mkString(" "))
   }
 
-  def convertChord(instrumentNumber: Int, chord: Chord): Pattern =
+  def createChordPattern(instrumentNumber: Int, chord: Chord): Pattern =
     new Pattern(chord.notes.map(convertNote(_, instrumentNumber).getPattern.toString).mkString("+"))
 
   def convertNote(note: Note, instrumentNumber: Int): theory.Note = {
     new theory.Note(s"${note.name.toString}${note.intonation.toString}${note.octave}")
       .setDuration(note.duration)
+      .setOnVelocity(note.loudness.loudness.toByte)
       .setPercussionNote(PERCUSSIVE.range.contains(instrumentNumber) ||
-      CHROMATIC_PERCUSSION.range.contains(instrumentNumber))
+                         CHROMATIC_PERCUSSION.range.contains(instrumentNumber))
   }
 
-
-  // TODO: Very hacky => Find a better way
-  private def mergePhrases(instrumentNumber: Int, phrase: Phrase): String = {
+  def mergePatterns(patterns: Traversable[Pattern]): String = {
     var phrasePatternString = ""
-    for ((curElem, voice) <- phrase.toStream.zipWithIndex) {
-      curElem match {
-        case curPhrase: Phrase =>
-          val nonPercussionVoice = if (voice < 9) voice +1 else voice + 1
-          if (nonPercussionVoice <= MAX_VOICE) {
-            phrasePatternString += s" ${convertPhrase(instrumentNumber, curPhrase).setVoice(nonPercussionVoice).toString}"
-          }
-        case _ =>
+    for ((curPattern, voice) <- patterns.toStream.zipWithIndex) {
+      val nonPercussionVoice = if (voice < 9) voice + 1 else voice + 1
+      if (nonPercussionVoice <= MAX_VOICE) {
+        phrasePatternString += s" ${curPattern.setVoice(nonPercussionVoice).toString}"
       }
     }
     phrasePatternString

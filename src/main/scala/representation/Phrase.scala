@@ -1,9 +1,8 @@
 package representation
 
-import utils.functional.{MemoizedFunc, FunctionalUtils}
 import utils.ImplicitConversions.toEnhancedTraversable
+import utils.functional.{FunctionalUtils, MemoizedFunc}
 
-import scala.collection.mutable
 import scala.math
 import scalaz.Scalaz._
 
@@ -33,7 +32,7 @@ case class Phrase(
   musicalElements: List[MusicalElement] = List(),
   polyphony: Boolean = false,
   tempoBPM: Double = 120)
-    extends MusicalElement with mutable.Traversable[MusicalElement] {
+    extends MusicalElement with Traversable[MusicalElement] {
   private val maxChordSize: MemoizedFunc[Phrase, Int] = FunctionalUtils.memoized(Phrase.computeMaxChordSize)
   private val duration: MemoizedFunc[Phrase, Double] = FunctionalUtils.memoized(Phrase.computeDuration)
 

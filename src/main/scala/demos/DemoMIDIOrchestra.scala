@@ -3,7 +3,7 @@ package demos
 import actors.Orchestra
 import actors.composers.MIDIReaderComposer
 import actors.directors.SimpleDirector
-import actors.musicians.AIMusician
+import actors.musicians.{JFugueSynchronizedPlayer, AIMusician}
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 import midi.JMusicMIDIParser
@@ -26,13 +26,16 @@ object DemoMIDIOrchestra {
       AIMusician.builder
         .withInstrument(instrument)
         .withComposer(composer)
+//        .isMessageOnly
     }
 
-    for ((instrument, parts) <- parser.getPartIndexByInstrument) {
+    for (((instrument, parts), index) <- parser.getPartIndexByInstrument.toStream.zipWithIndex; if index < 3) {
       parts.map(musicianBuilder(instrument, _)
         .withActorSystem(orchestra.system))
         .foreach(m => orchestra.registerMusician(m.build))
     }
+
+//    orchestra.registerMusician(new JFugueSynchronizedPlayer)
 
     orchestra.start()
   }

@@ -17,11 +17,7 @@ class JFugueInstrumentTest extends FlatSpec {
     instrument = new JFugueInstrument(PIANO())
   }
 
-  "An instrument" should "play a phrase note by note" taggedAs SlowTest in {
-    myTest()
-  }
-
-  def myTest() = {
+  "An instrument" should "notify correctly when it is done playing" taggedAs SlowTest in {
     setup()
     val musicalElements = ListBuffer[MusicalElement]()
       musicalElements.append(Note.fromString("A5").withDuration(1))
