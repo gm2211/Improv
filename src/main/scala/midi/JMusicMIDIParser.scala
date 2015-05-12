@@ -9,9 +9,10 @@ import representation._
 import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}
 import utils.collections.CollectionUtils
 
-import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.util.Try
+import scalaz.Scalaz._
+import collection.JavaConversions._
 
 object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String, phraseLength: Int) = {
@@ -29,12 +30,12 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
   }
 
   override def getPhrases(partNum: Int): Traversable[Phrase] = {
-    split(JMusicParserUtils.mergePhrases(score.getPart(partNum).getPhraseList))
+    val multiVoicePhrase = JMusicParserUtils.convertPart(score.getPart(partNum))
+    split(JMusicParserUtils.mergePhrases(multiVoicePhrase).getOrElse(Phrase()))
   }
 
   override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] =
     split(JMusicParserUtils.convertPart(score.getPart(partNum)))
-//    getPhrases(partNum).map(JMusicParserUtils.splitPhrase)
 
   override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = {
     val partsArray = score.getPartArray
@@ -118,6 +119,9 @@ object JMusicParserUtils {
     val elements = phrase.getNoteList.flatMap(convertNote)
     new Phrase(elements.toList, tempoBPM = phrase.getTempo, startTime = phrase.getStartTime)
   }
+
+  def mergePhrases(phrase: Phrase): Option[Phrase] =
+    phrase.polyphony.option(mergePhrases(phrase.musicalElements.asInstanceOf[List[Phrase]]))
 
   def mergePhrases(phrases: Traversable[Phrase]): Phrase = {
     def isActive(time: Double, start: Double, end: Double): Boolean = start < time && time < end

@@ -3,6 +3,7 @@ package tests
 import _root_.instruments.InstrumentType.PIANO
 import _root_.midi.{JMusicParserUtils, JMusicMIDIParser}
 import org.scalatest.FlatSpec
+import representation.Phrase
 import tests.testutils.ProfilingUtils
 import collection.JavaConversions._
 
@@ -17,8 +18,11 @@ class JMusicMIDIParserTest extends FlatSpec {
 
   "The midi parser" should "correctly assemble a phrase" in {
     println()
-    val (timeElapsed, notesByStartTime) =
-      ProfilingUtils.timeIt(JMusicParserUtils.splitPhrase(JMusicParserUtils.mergePhrases(parser.score.getPart(0).getPhraseList)), 1)
+    val multiVoicePhrase = JMusicParserUtils.convertPart(parser.score.getPart(0))
+    val mergeTask = () => JMusicParserUtils.mergePhrases(multiVoicePhrase).getOrElse(Phrase())
+    val splitTask = () => JMusicParserUtils.splitPhrase(mergeTask())
+
+    val (timeElapsed, notesByStartTime) = ProfilingUtils.timeIt(splitTask(), 1)
     println(s"\nOn average it took $timeElapsed milliseconds to get $notesByStartTime")
   }
 }

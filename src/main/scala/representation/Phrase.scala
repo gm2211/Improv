@@ -17,7 +17,7 @@ object Phrase {
   }
 
   def computeMaxChordSize(phrase: Phrase): Int = {
-    phrase.musicalElements.foldLeft(0){
+    phrase.musicalElements.foldLeft(1){
       case (i, c: Chord) => math.max(i, c.notes.size)
       case (i, _) => i
     }
