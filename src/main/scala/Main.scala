@@ -1,6 +1,4 @@
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional
-import com.google.common.io.Files
-import utils.{SerialisationUtils, IOUtils}
+import utils.IOUtils
 
 object Main extends App {
 //  val filename = IOUtils.getResourcePath("musicScores/midi_export.mid")
@@ -11,5 +9,6 @@ object Main extends App {
   //    demos.DemoRandomOrchestra.run()
 //      demos.DemoJMusicMIDIPlayer.run(filename)
 //  demos.DemoJFugueMIDIPlayer.run(filename)
-//  demos.DemoPopulateDB.run(filename)
+  demos.DemoPopulateDB.run(filename)
 }
+

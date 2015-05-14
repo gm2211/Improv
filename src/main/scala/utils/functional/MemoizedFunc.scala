@@ -2,7 +2,7 @@ package utils.functional
 
 import scala.collection.mutable
 
-class MemoizedFunc[From, To](private val function: From => To) {
+class MemoizedFunc[From, To](private val function: From => To) extends Serializable {
   private val results: mutable.Map[From, To] = new mutable.HashMap()
 
   /**

@@ -1,42 +1,21 @@
 package storage
 
-import cbr.{CaseSolutionStore, CaseDescription, CaseIndex}
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional
+import cbr.{CaseDescription, CaseIndex, CaseSolutionStore}
 import net.sf.javaml.core.kdtree.KDTree
-import utils.builders.Once
+import utils.SerialisationUtils
 
 import scala.language.reflectiveCalls
 
-//case class KDTreeIndexBuilder[
-//  CD <: CaseDescription,
-//  CaseSolution,
-//  CaseSolStoreCount <: Count,
-//  DescriptionSizeCount <: Count](
-//    solutionStore: Option[CaseSolutionStore[CaseSolution]] = None,
-//    descriptionSize: Option[Int] = None) {
-//
-//  def withSolutionStore(solutionStore: CaseSolutionStore[CaseSolution]) =
-//    copy[CD, CaseSolution, Once, DescriptionSizeCount](solutionStore = Option(solutionStore))
-//
-//  def withDescriptionSize(descriptionSize: Int) =
-//    copy[CD, CaseSolution, CaseSolStoreCount, Once](descriptionSize = Some(descriptionSize))
-//
-//  def build[
-//    A <: CaseSolStoreCount : IsOnce,
-//    B <: DescriptionSizeCount : IsOnce]: KDTreeIndex[CD, CaseSolution] =
-//      new KDTreeIndex[CD, CaseSolution](this.asInstanceOf[KDTreeIndexBuilder[CD, CaseSolution, Once, Once]])
-//}
-
 object KDTreeIndex {
-//  def loadFromFile[CD, CS](filename: String): KDTreeIndex[CD, CS] = {
-//
-//  }
+  def loadFromFile[CD <: CaseDescription, CS](filename: String): Option[KDTreeIndex[CD, CS]] =
+    SerialisationUtils.deserialise(filename).toOption
 }
 
 class KDTreeIndex[CD <: CaseDescription, CaseSolution](
       caseStore: CaseSolutionStore[CaseSolution],
-      descriptionSize: Int
-    ) extends CaseIndex[CD, CaseSolution] {
+      descriptionSize: Int,
+      private var path: String
+    ) extends CaseIndex[CD, CaseSolution] with FileSerialisable {
   private val kdTree = new KDTree[String](descriptionSize)
   private val store = caseStore
 
@@ -49,5 +28,11 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution](
     kdTree.nearest(caseDescription.getSignature, k).flatMap { solutionID =>
       store.getSolution(solutionID)
     }
+  }
+
+  override def save(path: Option[String] = None): Boolean = {
+    val filePath = path.getOrElse(this.path)
+    this.path = filePath
+    SerialisationUtils.serialise(this, filePath).isSuccess
   }
 }
