@@ -50,6 +50,13 @@ dependencies {
 
     // Serialisation
     compile "com.twitter:chill-all_2.11:$chill_version"
+    compile "com.twitter:chill-bijection_2.11:$chill_version"
+
+    // In-memory store
+    compile "com.hazelcast:hazelcast:$hazelcast_version"
+
+    // DB server
+    compile "org.mapdb:mapdb:$mapdb_version"
 
     // MIDI
     compile name: "jfugue-5.0.1"
