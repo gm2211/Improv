@@ -1,23 +1,26 @@
 package storage
 
 import cbr.{CaseDescription, CaseIndex, CaseSolutionStore}
+import com.fasterxml.jackson.annotation.{JsonCreator, JsonProperty}
 import net.sf.javaml.core.kdtree.KDTree
 import utils.SerialisationUtils
 
 import scala.language.reflectiveCalls
 
 object KDTreeIndex {
-  def loadFromFile[CD <: CaseDescription, CS](filename: String): Option[KDTreeIndex[CD, CS]] =
-    SerialisationUtils.deserialise(filename).toOption
+  def loadFromFile[CD <: CaseDescription : Manifest, CS : Manifest](filename: String): Option[KDTreeIndex[CD, CS]] =
+    SerialisationUtils.deserialise[KDTreeIndex[CD, CS]](filename).toOption
 }
 
-class KDTreeIndex[CD <: CaseDescription, CaseSolution](
-      caseStore: CaseSolutionStore[CaseSolution],
-      descriptionSize: Int,
-      private var path: String
-    ) extends CaseIndex[CD, CaseSolution] with FileSerialisable {
+
+@JsonCreator
+class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
+      @JsonProperty("store") private val store: CaseSolutionStore[CaseSolution],
+      @JsonProperty("ignored") descriptionSize: Int,
+      @JsonProperty("path") private var path: String
+    )  extends CaseIndex[CD, CaseSolution] with FileSerialisable {
+  @JsonProperty("kdTree")
   private val kdTree = new KDTree[String](descriptionSize)
-  private val store = caseStore
 
   def addCase(caseDescription: CD, caseSolution: CaseSolution): Unit = {
     val storedSolutionID = store.addSolution(caseSolution)
@@ -36,3 +39,4 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution](
     SerialisationUtils.serialise(this, filePath).isSuccess
   }
 }
+

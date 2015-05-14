@@ -1,10 +1,11 @@
 package demos
 
-import cbr.{Feature, CaseDescription}
+import cbr.{CaseDescription, Feature}
 import representation.Phrase
 import storage.{KDTreeIndex, MapDBSolutionStore}
-import training.TrainingUtils
-import utils.IOUtils
+import utils.{IOUtils, SerialisationUtils}
+
+import scala.util.Try
 
 object DemoPopulateDB {
   def run(filename: String): Unit = {
@@ -16,7 +17,10 @@ object DemoPopulateDB {
 
   override val weightedFeatures: List[(Double, Feature)] = List((10.0, new Feature {}))
 }
-    index.addCase(dummyD, Phrase())
+//    index.addCase(dummyD, Phrase())
+    println(index.findKNearestNeighbours(dummyD, 1))
+//    val indexx = SerialisationUtils.deserialise(IOUtils.getResourcePath("knowledgeBase/caseIndex"), classOf[KDTreeIndex[CaseDescription, Phrase]])
+//    indexx.failed.foreach(println)
     println(index.save())
   }
 }

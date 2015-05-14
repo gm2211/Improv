@@ -49,8 +49,10 @@ dependencies {
     runtime "org.codehaus.groovy:groovy-all:$groovy_version"
 
     // Serialisation
-    compile "com.twitter:chill-all_2.11:$chill_version"
-    compile "com.twitter:chill-bijection_2.11:$chill_version"
+    compile "com.fasterxml.jackson.module:jackson-module-scala_2.11:$jackson_version"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+    compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
+    compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
 
     // In-memory store
     compile "com.hazelcast:hazelcast:$hazelcast_version"

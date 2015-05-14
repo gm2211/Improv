@@ -2,10 +2,14 @@ package cbr
 
 import java.util.UUID
 
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import representation.Phrase
+import storage.MapDBSolutionStore
 
+@JsonDeserialize(as = classOf[MapDBSolutionStore[Phrase]])
 trait CaseSolutionStore[CaseSolution] {
-  @Optional("Do not serialise the map")
+  @JsonIgnore
   private var map: Option[MapStore[String, CaseSolution]] = None
 
   private def getMap = {
