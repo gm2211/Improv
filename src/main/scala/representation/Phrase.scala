@@ -51,6 +51,9 @@ case class Phrase(
   def withMusicalElements(musicalElements: Traversable[MusicalElement]) =
     copy(musicalElements = musicalElements.toList)
 
+  def withMusicalElements(musicalElements: MusicalElement*) =
+    copy(musicalElements = musicalElements.toList)
+
   def getMaxChordSize: Int = maxChordSize(this)
 
   override def getDuration: Double = duration(this)

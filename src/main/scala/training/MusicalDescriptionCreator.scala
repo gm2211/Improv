@@ -1,6 +1,6 @@
 package training
 
-import cbr.{Feature, CaseDescription}
+import cbr.{CaseDescription, Feature}
 import representation.Phrase
 
 class MusicalDescriptionCreator extends DescriptionCreator[Phrase] {

@@ -16,7 +16,6 @@ import org.staccato.StaccatoParser
 import representation._
 import utils.ImplicitConversions.{anyToRunnable, toEnhancedTraversable}
 
-import scala.math
 import scalaz.Scalaz._
 
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {

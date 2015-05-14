@@ -9,7 +9,6 @@ import utils.ImplicitConversions.anyToRunnable
 
 import scala.collection.mutable
 import scala.math
-import collection.JavaConversions._
 
 object MultiCache {
   def buildDefault[K, V <: java.lang.Object](timeoutMS: Long, maxSize: Long): MultiCache[K, V] = {

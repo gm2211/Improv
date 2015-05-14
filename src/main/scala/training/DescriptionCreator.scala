@@ -1,6 +1,5 @@
 package training
 import cbr.CaseDescription
-import representation.Phrase
 
 trait DescriptionCreator[A] {
 

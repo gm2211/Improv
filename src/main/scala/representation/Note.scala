@@ -4,8 +4,8 @@ package representation
 import representation.NoteName.NoteName
 import utils.collections.CollectionUtils
 
-import scala.util.{Random, Try}
 import scala.math
+import scala.util.{Random, Try}
 
 
 object Note {

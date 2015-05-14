@@ -5,7 +5,8 @@ import java.io.File
 import cbr.MapStore
 import com.google.common.io.Files
 import org.mapdb.{DB, DBMaker, HTreeMap}
-import collection.JavaConversions._
+
+import scala.collection.JavaConversions._
 
 object MapDBMapStore {
   def loadFromFile[K, V](filename: String) = {

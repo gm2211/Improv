@@ -9,10 +9,10 @@ import representation._
 import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}
 import utils.collections.CollectionUtils
 
+import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.util.Try
 import scalaz.Scalaz._
-import collection.JavaConversions._
 
 object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String, phraseLength: Int) = {

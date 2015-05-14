@@ -3,13 +3,20 @@ package storage
 import cbr.{CaseDescription, CaseIndex, CaseSolutionStore}
 import com.fasterxml.jackson.annotation.{JsonCreator, JsonProperty}
 import net.sf.javaml.core.kdtree.KDTree
-import utils.SerialisationUtils
+import utils.{IOUtils, SerialisationUtils}
 
 import scala.language.reflectiveCalls
+import scala.util.Try
 
 object KDTreeIndex {
-  def loadFromFile[CD <: CaseDescription : Manifest, CS : Manifest](filename: String): Option[KDTreeIndex[CD, CS]] =
-    SerialisationUtils.deserialise[KDTreeIndex[CD, CS]](filename).toOption
+  def loadOrCreate[CD <: CaseDescription : Manifest, CS : Manifest](
+      filename: String,
+      descriptionSize: Int = 10): KDTreeIndex[CD, CS] = {
+    SerialisationUtils.deserialise[KDTreeIndex[CD, CS]](filename).toOption.getOrElse{
+      val store = new MapDBSolutionStore[CS](IOUtils.getResourcePath("knowledgeBase/solutionStore"))
+      new KDTreeIndex[CD, CS](store, descriptionSize, IOUtils.getResourcePath("knowledgeBase/caseIndex"))
+    }
+  }
 }
 
 
@@ -28,9 +35,9 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
   }
 
   override def findKNearestNeighbours(caseDescription: CD, k: Int): Traversable[CaseSolution] = {
-    kdTree.nearest(caseDescription.getSignature, k).flatMap { solutionID =>
-      store.getSolution(solutionID)
-    }
+    Try(kdTree.nearest(caseDescription.getSignature, k).toList)
+      .toOption
+      .map(_.flatMap(store.getSolution)).getOrElse(List())
   }
 
   override def save(path: Option[String] = None): Boolean = {
@@ -38,5 +45,16 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
     this.path = filePath
     SerialisationUtils.serialise(this, filePath).isSuccess
   }
+
+  override def removeCase(caseDescription: CD): Boolean = {
+    val key: Array[Double] = caseDescription.getSignature
+
+    Try(kdTree.search(key)).map{ solutionID =>
+      store.removeSolution(solutionID)
+      kdTree.delete(key)
+    }.isSuccess
+  }
+
+  //TODO: Make this iterable? Will require changes to javaml's KDTree (low priority)
 }
 

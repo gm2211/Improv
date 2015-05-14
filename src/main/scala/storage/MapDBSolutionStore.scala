@@ -1,6 +1,6 @@
 package storage
 
-import cbr.{MapStore, CaseSolutionStore}
+import cbr.{CaseSolutionStore, MapStore}
 
 class MapDBSolutionStore[CaseSolution](private val filename: String) extends CaseSolutionStore[CaseSolution] {
   /**
