@@ -10,7 +10,7 @@ import scala.util.Try
 import collection.JavaConversions._
 
 object KDTreeIndex {
-  val DEFAUL_KDTREE_REBALANCING_THRESHOLD = 5
+  val DEFAULT_KDTREE_REBALANCING_THRESHOLD = 1000
 
   def loadOrCreate[CD <: CaseDescription : Manifest, CS : Manifest](
       filename: String,
@@ -30,7 +30,7 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
       @JsonProperty("path") private var path: String
     )  extends CaseIndex[CD, CaseSolution] with FileSerialisable {
   @JsonProperty("kdTree")
-  private val kdTree = new KDTree[String](descriptionSize, KDTreeIndex.DEFAUL_KDTREE_REBALANCING_THRESHOLD)
+  private val kdTree = new KDTree[String](descriptionSize, KDTreeIndex.DEFAULT_KDTREE_REBALANCING_THRESHOLD)
 
   def addCase(caseDescription: CD, caseSolution: CaseSolution): Unit = {
     removeCase(caseDescription) // The implementation of KDTree I'm using does not support multiple keys
