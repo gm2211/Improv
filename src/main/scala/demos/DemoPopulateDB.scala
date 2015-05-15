@@ -15,8 +15,12 @@ object DemoPopulateDB {
       override val weightedFeatures: List[(Double, Feature)] = List((10.0, new Feature {}))
     }
 //    println(index.removeCase(dummyD))
-//    println(index.addCase(dummyD, Phrase().withMusicalElements(Note())))
-    println(index.findKNearestNeighbours(dummyD, 3))
+//    (1 to 10).foreach(i=>index.addCase(dummyD, Phrase().withMusicalElements(Note())))
+    for (key <- index.take(6)) {
+      index.removeCase(key)
+    }
+//    println(index.findKNearestNeighbours(dummyD, 3))
+//    index.clear()
     println(index.save())
   }
 }

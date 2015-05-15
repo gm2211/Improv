@@ -9,6 +9,7 @@ import storage.MapDBSolutionStore
 
 @JsonDeserialize(as = classOf[MapDBSolutionStore[Phrase]])
 trait CaseSolutionStore[CaseSolution] {
+
   @JsonIgnore
   private var map: Option[MapStore[String, CaseSolution]] = None
 
@@ -48,4 +49,9 @@ trait CaseSolutionStore[CaseSolution] {
    * @param solutionID ID of the solution to be removed
    */
   def removeSolution(solutionID: String): Unit = getMap.remove(solutionID)
+
+  /**
+   * Removes all entries in the solution store
+   */
+  def clear(): Unit = getMap.removeAll()
 }

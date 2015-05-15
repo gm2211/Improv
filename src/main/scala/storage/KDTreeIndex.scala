@@ -1,14 +1,17 @@
 package storage
 
-import cbr.{CaseDescription, CaseIndex, CaseSolutionStore}
+import cbr.{Feature, CaseDescription, CaseIndex, CaseSolutionStore}
 import com.fasterxml.jackson.annotation.{JsonCreator, JsonProperty}
 import net.sf.javaml.core.kdtree.KDTree
 import utils.{IOUtils, SerialisationUtils}
 
 import scala.language.reflectiveCalls
 import scala.util.Try
+import collection.JavaConversions._
 
 object KDTreeIndex {
+  val DEFAUL_KDTREE_REBALANCING_THRESHOLD = 5
+
   def loadOrCreate[CD <: CaseDescription : Manifest, CS : Manifest](
       filename: String,
       descriptionSize: Int = 10): KDTreeIndex[CD, CS] = {
@@ -27,9 +30,10 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
       @JsonProperty("path") private var path: String
     )  extends CaseIndex[CD, CaseSolution] with FileSerialisable {
   @JsonProperty("kdTree")
-  private val kdTree = new KDTree[String](descriptionSize)
+  private val kdTree = new KDTree[String](descriptionSize, KDTreeIndex.DEFAUL_KDTREE_REBALANCING_THRESHOLD)
 
   def addCase(caseDescription: CD, caseSolution: CaseSolution): Unit = {
+    removeCase(caseDescription) // The implementation of KDTree I'm using does not support multiple keys
     val storedSolutionID = store.addSolution(caseSolution)
     kdTree.insert(caseDescription.getSignature, storedSolutionID)
   }
@@ -49,12 +53,26 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
   override def removeCase(caseDescription: CD): Boolean = {
     val key: Array[Double] = caseDescription.getSignature
 
-    Try(kdTree.search(key)).map{ solutionID =>
+    removeEntry(key)
+  }
+
+  override def foreach[U](f: (CaseDescription) => U): Unit = {
+    kdTree.withFilter(!_.isDeleted).foreach( node => f(new CaseDescription {
+      override def getSignature: Array[Double] = node.getKey.getCoord
+      override val weightedFeatures: List[(Double, Feature)] = List()
+    }))
+  }
+
+  override def clear(): Unit = {
+    this.foreach(node => removeEntry(node.getSignature))
+    store.clear()
+  }
+
+  private def removeEntry(key: Array[Double]): Boolean = {
+    Try(kdTree.search(key)).map { solutionID =>
       store.removeSolution(solutionID)
       kdTree.delete(key)
     }.isSuccess
   }
-
-  //TODO: Make this iterable? Will require changes to javaml's KDTree (low priority)
 }
 

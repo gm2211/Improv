@@ -30,6 +30,8 @@ class MapDBMapStore[K, V](private val db: DB, mapName: String) extends MapStore[
     db.commit()
   }
 
+  override def removeAll(): Unit = db_map.keySet().foreach(db_map.remove)
+
   def keySet(): Set[K] = db_map.keySet().toSet
 
   def close(): Unit = db.close()

@@ -26,6 +26,8 @@ class HazelcastStore[CaseSolution](filename: String) extends CaseSolutionStore[C
       override def put(key: String, value: CaseSolution): Unit = hazelcastMap.put(key, value)
 
       override def remove(key: String): Unit = hazelcastMap.remove(key)
+
+      override def removeAll(): Unit = hazelcastMap.foreach(hazelcastMap.remove)
     }
   }
 }
