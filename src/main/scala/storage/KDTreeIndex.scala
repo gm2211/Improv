@@ -63,9 +63,20 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
     }))
   }
 
-  override def clear(): Unit = {
+  /**
+   * Compacts the index potentially removing entries marked for removal
+   *
+   * Note: My modified version of KDTree will already re-balance itself every time
+   * a certain threshold of nodes marked as deleted
+   */
+  def compact(): Unit = {
+    kdTree.rebalance()
+  }
+
+  override def clear(): KDTreeIndex.this.type = {
     this.foreach(node => removeEntry(node.getSignature))
     store.clear()
+    this
   }
 
   private def removeEntry(key: Array[Double]): Boolean = {
