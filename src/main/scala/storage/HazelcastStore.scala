@@ -8,7 +8,7 @@ import com.hazelcast.core.{Hazelcast, MapStore}
 
 import scala.collection.JavaConversions._
 
-class HazelcastStore[CaseSolution](filename: String) extends CaseSolutionStore[CaseSolution] {
+class HazelcastStore[CaseSolution : Manifest](filename: String) extends CaseSolutionStore[CaseSolution] {
   private val mapdbStore = new MapDBMapStoreWrapper[String, CaseSolution](filename)
 
   /**
@@ -21,13 +21,15 @@ class HazelcastStore[CaseSolution](filename: String) extends CaseSolutionStore[C
     new cbr.MapStore[String, CaseSolution] {
       private val hazelcastMap = hazelcast.getMap[String, CaseSolution](filename)
 
-      override def get(key: String): CaseSolution = hazelcastMap.get(key)
+      override def get(key: String): Option[CaseSolution] = Option(hazelcastMap.get(key))
 
       override def put(key: String, value: CaseSolution): Unit = hazelcastMap.put(key, value)
 
       override def remove(key: String): Unit = hazelcastMap.remove(key)
 
       override def removeAll(): Unit = hazelcastMap.foreach(hazelcastMap.remove)
+
+      override def commit(): Unit = ()
     }
   }
 }
@@ -46,7 +48,7 @@ object HazelcastUtils {
   }
 }
 
-class MapDBMapStoreWrapper[K, V](filename: String) extends MapStore[K, V] {
+class MapDBMapStoreWrapper[K, V : Manifest](filename: String) extends MapStore[K, V] {
   private val mapdb = MapDBMapStore.loadFromFile[K, V](filename)
 
   override def delete(key: K): Unit = {
@@ -62,5 +64,5 @@ class MapDBMapStoreWrapper[K, V](filename: String) extends MapStore[K, V] {
 
   override def loadAllKeys(): java.lang.Iterable[K] = mapdb.keySet()
 
-  override def load(key: K): V = mapdb.get(key)
+  override def load(key: K): V = mapdb.get(key).getOrElse(manifest[V].getClass.newInstance().asInstanceOf)
 }

@@ -42,7 +42,7 @@ trait CaseSolutionStore[CaseSolution] {
    * @param solutionID ID of the solution to be retrived
    * @return An Option of a solution
    */
-  def getSolution(solutionID: String): Option[CaseSolution] = Option(getMap.get(solutionID))
+  def getSolution(solutionID: String): Option[CaseSolution] = getMap.get(solutionID)
 
   /**
    * Removes a solution from the store
@@ -54,4 +54,9 @@ trait CaseSolutionStore[CaseSolution] {
    * Removes all entries in the solution store
    */
   def clear(): Unit = getMap.removeAll()
+
+  /**
+   * Commits all the changes to the map store
+   */
+  def commit(): Unit = getMap.commit()
 }

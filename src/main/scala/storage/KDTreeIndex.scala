@@ -1,13 +1,14 @@
 package storage
 
-import cbr.{Feature, CaseDescription, CaseIndex, CaseSolutionStore}
+import cbr.{CaseDescription, CaseIndex, CaseSolutionStore}
 import com.fasterxml.jackson.annotation.{JsonCreator, JsonProperty}
 import net.sf.javaml.core.kdtree.KDTree
 import utils.{IOUtils, SerialisationUtils}
 
+import scala.collection.JavaConversions._
 import scala.language.reflectiveCalls
+import scala.math
 import scala.util.Try
-import collection.JavaConversions._
 
 object KDTreeIndex {
   val DEFAULT_KDTREE_REBALANCING_THRESHOLD = 1000
@@ -39,12 +40,14 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
   }
 
   override def findKNearestNeighbours(caseDescription: CD, k: Int): Traversable[CaseSolution] = {
-    Try(kdTree.nearest(caseDescription.getSignature, k).toList)
+    val maxNumOfNeighbours = math.min(k, kdTree.getNodeCount)
+    Try(kdTree.nearest(caseDescription.getSignature, maxNumOfNeighbours).toList)
       .toOption
       .map(_.flatMap(store.getSolution)).getOrElse(List())
   }
 
   override def save(path: Option[String] = None): Boolean = {
+    store.commit()
     val filePath = path.getOrElse(this.path)
     this.path = filePath
     SerialisationUtils.serialise(this, filePath).isSuccess
@@ -57,10 +60,7 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
   }
 
   override def foreach[U](f: (CaseDescription) => U): Unit = {
-    kdTree.withFilter(!_.isDeleted).foreach( node => f(new CaseDescription {
-      override def getSignature: Array[Double] = node.getKey.getCoord
-      override val weightedFeatures: List[(Double, Feature)] = List()
-    }))
+    kdTree.withFilter(!_.isDeleted).foreach( node => f(node.getKey.getCoord))
   }
 
   /**

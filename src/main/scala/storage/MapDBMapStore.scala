@@ -18,21 +18,20 @@ object MapDBMapStore {
 class MapDBMapStore[K, V](private val db: DB, mapName: String) extends MapStore[K, V] {
   private val db_map: HTreeMap[K, V] = db.hashMap(mapName)
 
-  override def get(key: K): V = db_map.get(key)
+  override def get(key: K): Option[V] = Option(db_map.get(key))
 
-  override def remove(key: K): Unit = {
-    db_map.remove(key)
-    db.commit()
-  }
+  override def remove(key: K): Unit = db_map.remove(key)
 
-  override def put(key: K, value: V): Unit = {
-    db_map.put(key, value)
-    db.commit()
-  }
+  override def put(key: K, value: V): Unit = db_map.put(key, value)
 
   override def removeAll(): Unit = db_map.keySet().foreach(db_map.remove)
 
   def keySet(): Set[K] = db_map.keySet().toSet
 
   def close(): Unit = db.close()
+
+  /**
+   * Commits the changes to the map
+   */
+  override def commit(): Unit = db.commit()
 }

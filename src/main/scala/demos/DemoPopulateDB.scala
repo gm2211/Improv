@@ -8,7 +8,8 @@ import utils.IOUtils
 object DemoPopulateDB {
   def run(filename: String): Unit = {
     val index = KDTreeIndex.loadOrCreate[CaseDescription, Phrase](IOUtils.getResourcePath("knowledgeBase/caseIndex"))
-    index.findKNearestNeighbours(Array.fill[Double](10)(1.0), 10)
-    index.clear().save()
+    println(index.addCase(Array.fill[Double](10)(4.0), Phrase()))
+    println(index.findKNearestNeighbours(Array.fill[Double](10)(1.0), 10))
+    index.save()
   }
 }
