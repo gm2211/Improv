@@ -2,7 +2,7 @@ package actors.monitors
 
 import akka.actor._
 import messages.MusicInfoMessage
-import utils.builders.{Zero, IsOnce, Once, Count}
+import utils.builders.{Count, IsOnce, Once, Zero}
 import utils.collections.MultiCache
 
 case class SimpleHealthMonitorBuilder[TickFrequencyCount <: Count]

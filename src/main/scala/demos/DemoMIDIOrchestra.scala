@@ -3,7 +3,7 @@ package demos
 import actors.Orchestra
 import actors.composers.MIDIReaderComposer
 import actors.directors.SimpleDirector
-import actors.musicians.{JFugueSynchronizedPlayer, AIMusician}
+import actors.musicians.AIMusician
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 import midi.JMusicMIDIParser

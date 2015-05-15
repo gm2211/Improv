@@ -1,6 +1,6 @@
 package actors.monitors
 
-import akka.actor.{ActorSystem, ActorRef}
+import akka.actor.{ActorRef, ActorSystem}
 import utils.builders._
 
 // Type-safe Builders are not feasible through inheritance: As soon as I have more than one implementation

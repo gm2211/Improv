@@ -2,9 +2,9 @@ package tests
 
 import _root_.instruments.InstrumentType.PIANO
 import _root_.midi.{JMusicParserUtils, JMusicMIDIParser}
+import _root_.utils.ProfilingUtils
 import org.scalatest.FlatSpec
 import representation.Phrase
-import tests.testutils.ProfilingUtils
 import collection.JavaConversions._
 
 class JMusicMIDIParserTest extends FlatSpec {

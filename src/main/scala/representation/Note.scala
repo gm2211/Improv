@@ -4,8 +4,8 @@ package representation
 import representation.NoteName.NoteName
 import utils.collections.CollectionUtils
 
-import scala.util.{Random, Try}
 import scala.math
+import scala.util.{Random, Try}
 
 
 object Note {
@@ -34,6 +34,7 @@ object Note {
 
   val DEFAULT_NAME = NoteName.A
   val DEFAULT_OCTAVE = 4
+  val DEFAULT_PITCH: Int = 60
   val DEFAULT_DURATION = 1.0
   val DEFAULT_INTONATION = Natural
   val DEFAULT_LOUDNESS = MF
@@ -89,6 +90,7 @@ object NoteName extends Enumeration {
 
 case class Note(name: NoteName = Note.DEFAULT_NAME,
   octave: Int = Note.DEFAULT_OCTAVE,
+  pitch: Int = Note.DEFAULT_PITCH,
   duration: Double = Note.DEFAULT_DURATION,
   intonation: Intonation = Note.DEFAULT_INTONATION,
   loudness: Loudness = Note.DEFAULT_LOUDNESS,

@@ -48,9 +48,22 @@ dependencies {
     // Groovy
     runtime "org.codehaus.groovy:groovy-all:$groovy_version"
 
+    // Serialisation
+    compile "com.fasterxml.jackson.module:jackson-module-scala_2.11:$jackson_version"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
+    compile "com.fasterxml.jackson.core:jackson-core:$jackson_version"
+    compile "com.fasterxml.jackson.core:jackson-annotations:$jackson_version"
+
+    // In-memory store
+    compile "com.hazelcast:hazelcast:$hazelcast_version"
+
+    // DB server
+    compile "org.mapdb:mapdb:$mapdb_version"
+
     // MIDI
     compile name: "jfugue-5.0.1"
     compile name: "jMusic1.6.4"
+    compile name: "javaml-$javaml_version"
 
     // Dependency Injection
     //compile "net.codingwell:scala-guice_2.10:$scala_guice_version"

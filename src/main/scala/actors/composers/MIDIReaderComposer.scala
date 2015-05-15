@@ -1,7 +1,7 @@
 package actors.composers
 
 import midi.{JMusicMIDIParser, MIDIParser, MIDIParserFactory}
-import representation.{Phrase, MusicalElement}
+import representation.Phrase
 import utils.builders.{Count, IsOnce, Once, Zero}
 
 case class MIDIReaderComposerBuilder[

@@ -5,7 +5,7 @@ import actors.musicians.Musician
 import akka.actor.{ActorRef, ActorSystem, Props}
 import messages.{Message, Start, Stop}
 import utils.ActorUtils
-import utils.ImplicitConversions.{anyToRunnable, wrapInOption}
+import utils.ImplicitConversions.anyToRunnable
 
 import scala.language.implicitConversions
 

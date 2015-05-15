@@ -1,0 +1,5 @@
+package cbr
+
+trait Feature {
+
+}
