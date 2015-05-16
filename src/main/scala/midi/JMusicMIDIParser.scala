@@ -95,8 +95,8 @@ object JMusicParserUtils {
     if (jmNote.isRest) {
       Some(
         Rest(
-          duration = jmNote.getDuration * durationRatio,
-          startTime = jmNote.getNoteStartTime.orElse(0.0) * durationRatio))
+          duration = round(jmNote.getDuration * durationRatio, TIME_PRECISION),
+          startTime = round(jmNote.getNoteStartTime.orElse(0.0) * durationRatio, TIME_PRECISION)))
     } else {
       val notePitch = jmNote.getPitchType match {
         case jmData.Note.MIDI_PITCH =>
@@ -106,9 +106,9 @@ object JMusicParserUtils {
       }
       val intonation = if (jmNote.isFlat) Flat else if (jmNote.isSharp) Sharp else Natural
       val (noteName, _, _) = Note.parseString(jmNote.getNote)
-      val duration = jmNote.getDuration * durationRatio
+      val duration = round(jmNote.getDuration * durationRatio, TIME_PRECISION)
       val loudness = Loudness(jmNote.getDynamic)
-      val startTime = jmNote.getNoteStartTime.orElse(0.0) * durationRatio
+      val startTime = round(jmNote.getNoteStartTime.orElse(0.0) * durationRatio, TIME_PRECISION)
 
       noteName.flatMap(name => Some(Note(name = name,
         octave = Note.pitchToOctave(notePitch),
@@ -133,7 +133,7 @@ object JMusicParserUtils {
       musicalElements = phrases.toList,
       polyphony = true,
       tempoBPM = part.getTempo,
-      startTime = startTime)
+      startTime = round(startTime, TIME_PRECISION))
   })
 
   val convertPhrase = FunctionalUtils.memoized((phrase: jmData.Phrase) => {
@@ -141,7 +141,7 @@ object JMusicParserUtils {
     val jmNotes = phrase.getNoteList.toList.sortBy(_.getNoteStartTime.get)
     jmNotes.foreach(convertNote(_).foreach(addToPhrase(_, elements)))
 
-    new Phrase(elements.toList, tempoBPM = phrase.getTempo, startTime = phrase.getStartTime)
+    new Phrase(elements.toList, tempoBPM = phrase.getTempo, startTime = round(phrase.getStartTime, TIME_PRECISION))
   })
 
   def mergePhrases(phrase: Phrase): Option[Phrase] =
@@ -164,7 +164,7 @@ object JMusicParserUtils {
     val endTimes = notesByStartTime.flatMap { case (startTime, notes) =>
       notes.map(startTime + _.getDuration)
     }
-    val times = notesByStartTime.keySet.toList.++(endTimes).map(round(_, TIME_PRECISION)).distinct.sorted
+    val times = notesByStartTime.keySet.toList.++(endTimes).distinct.sorted
 
     for (time <- times) {
       mergeNotes(activeNotes).foreach(addToPhrase(_, phraseElements))
