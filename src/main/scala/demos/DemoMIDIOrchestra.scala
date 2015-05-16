@@ -26,18 +26,16 @@ object DemoMIDIOrchestra {
       AIMusician.builder
         .withInstrument(instrument)
         .withComposer(composer)
-        .isMessageOnly
+//        .isMessageOnly
     }
 
-    for ( (instrument, parts) <- parser.getPartIndexByInstrument.toStream
-          if ! PERCUSSIVE.range.contains(instrument.instrumentNumber) &&
-             ! CHROMATIC_PERCUSSION.range.contains(instrument.instrumentNumber)) {
+    for ( (instrument, parts) <- parser.getPartIndexByInstrument.toStream) {
       parts.map(musicianBuilder(instrument, _)
         .withActorSystem(orchestra.system))
         .foreach(m => orchestra.registerMusician(m.build))
     }
 
-    orchestra.registerMusician(new JFugueSynchronizedPlayer)
+//    orchestra.registerMusician(new JFugueSynchronizedPlayer)
 
     orchestra.start()
   }

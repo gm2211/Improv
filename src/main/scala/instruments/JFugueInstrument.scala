@@ -14,8 +14,9 @@ import org.jfugue.{async, theory}
 import org.slf4j.LoggerFactory
 import org.staccato.StaccatoParser
 import representation._
-import utils.ImplicitConversions.{anyToRunnable, toEnhancedTraversable}
+import utils.ImplicitConversions.{toDouble, anyToRunnable, toEnhancedTraversable}
 
+import scala.util.Try
 import scalaz.Scalaz._
 
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
@@ -64,7 +65,7 @@ object JFugueUtils {
   def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
     createPatternHelper(musicalElement, instrumentNumber)
       .setInstrument(instrumentNumber)
-      .setTempo(DEFAULT_TEMPO)
+      .setTempo(Try(musicalElement.asInstanceOf[Phrase].tempoBPM.toInt).getOrElse(DEFAULT_TEMPO))
   }
 
   def createPatternHelper(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {

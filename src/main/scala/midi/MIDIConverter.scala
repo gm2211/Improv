@@ -6,6 +6,7 @@ import jm.midi.MidiUtil
 import jm.music.data.{Part, Score}
 import jm.music.{data => jmData}
 import representation.{MusicalElement, Note, Phrase, Rest}
+import utils.ImplicitConversions.toDouble
 
 object MIDIConverter {
   def toSequence(phrase: Phrase): Sequence = {
@@ -22,7 +23,7 @@ object JMusicConverterUtils {
 
   def convertNote(note: Note): jmData.Note = {
     val jmNote = new jmData.Note()
-    val duration: Double = note.duration / 8
+    val duration: BigDecimal = note.duration / 8
     jmNote.setDuration(duration)
     jmNote.setRhythmValue(duration / jmData.Note.DEFAULT_DURATION_MULTIPLIER)
     jmNote.setPitchType(jmData.Note.MIDI_PITCH)

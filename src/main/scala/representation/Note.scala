@@ -93,26 +93,26 @@ object NoteName extends Enumeration {
 case class Note(name: NoteName = Note.DEFAULT_NAME,
   octave: Int = Note.DEFAULT_OCTAVE,
   pitch: Int = Note.DEFAULT_PITCH,
-  duration: Double = Note.DEFAULT_DURATION,
+  duration: BigDecimal = Note.DEFAULT_DURATION,
   intonation: Intonation = Note.DEFAULT_INTONATION,
   loudness: Loudness = Note.DEFAULT_LOUDNESS,
-  startTime: Double = Note.DEFAULT_START_TIME) extends MusicalElement {
+  startTime: BigDecimal = Note.DEFAULT_START_TIME) extends MusicalElement {
 
   def withName(newName: NoteName) = copy(name = newName)
 
   def withOctave(newOctave: Int) = copy(octave = newOctave)
 
-  def withDuration(newDuration: Double) = copy(duration = newDuration)
+  def withDuration(newDuration: BigDecimal) = copy(duration = newDuration)
 
   def withIntonation(newIntonation: Intonation) = copy(intonation = newIntonation)
 
   def withLoudness(newLoudness: Loudness) = copy(loudness = loudness)
 
-  override def withStartTime(startTime: Double): Note = copy(startTime = startTime)
+  override def withStartTime(startTime: BigDecimal): Note = copy(startTime = startTime)
 
-  override def getDuration: Double = duration
+  override def getDuration: BigDecimal = duration
 
-  override def getStartTime: Double = startTime
+  override def getStartTime: BigDecimal = startTime
 
 }
 

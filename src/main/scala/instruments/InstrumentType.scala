@@ -2,10 +2,13 @@ package instruments
 
 import utils.collections.CollectionUtils
 
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 object InstrumentType {
   type InstrumentType = InstrumentCategory
+
+  implicit def toInstrumentNumber(instrumentType: InstrumentType): Int = instrumentType.instrumentNumber
 
   sealed abstract class InstrumentTypeObject[T <: InstrumentCategory](implicit m: ClassTag[T]) {
     val range: Range

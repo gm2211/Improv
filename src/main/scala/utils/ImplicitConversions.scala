@@ -28,4 +28,5 @@ object ImplicitConversions {
   implicit def toEnhancedTraversable[A](traversable: TraversableOnce[A]): EnhancedTraversable[A] =
     new EnhancedTraversable[A](traversable)
 
+  implicit def toDouble(bigDecimal: BigDecimal): Double = bigDecimal.toDouble
 }

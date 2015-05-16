@@ -1,8 +1,8 @@
 package representation
 
 trait MusicalElement {
-  def withStartTime(startTime: Double): MusicalElement
-  def withDuration(duration: Double): MusicalElement
-  def getDuration: Double
-  def getStartTime: Double
+  def withStartTime(startTime: BigDecimal): MusicalElement
+  def withDuration(duration: BigDecimal): MusicalElement
+  def getDuration: BigDecimal
+  def getStartTime: BigDecimal
 }
