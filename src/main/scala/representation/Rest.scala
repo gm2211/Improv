@@ -10,4 +10,8 @@ case class Rest(
     startTime: Double = 0.0) extends MusicalElement {
   override def getDuration: Double = duration
   override def getStartTime: Double = startTime
+
+  override def withDuration(duration: Double): MusicalElement = copy(duration = duration)
+
+  override def withStartTime(startTime: Double): MusicalElement = copy(startTime = startTime)
 }

@@ -1,6 +1,8 @@
 package representation
 
 
+import java.util.UUID
+
 import representation.NoteName.NoteName
 import utils.collections.CollectionUtils
 
@@ -106,8 +108,11 @@ case class Note(name: NoteName = Note.DEFAULT_NAME,
 
   def withLoudness(newLoudness: Loudness) = copy(loudness = loudness)
 
+  override def withStartTime(startTime: Double): Note = copy(startTime = startTime)
+
   override def getDuration: Double = duration
 
   override def getStartTime: Double = startTime
+
 }
 

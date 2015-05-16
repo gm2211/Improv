@@ -16,7 +16,9 @@ class JFugueSynchronizedPlayer extends Musician {
   private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = MultiCache.buildDefault(5000, 50)
 
   private def prepare(messages: mutable.Set[MusicInfoMessage]): String = {
-    JFugueUtils.mergePatterns(messages.map(message => JFugueUtils.createPattern(message.musicalElement, message.instrument.instrumentNumber)))
+    val pattern = JFugueUtils.mergePatterns(messages.map(message => JFugueUtils.createPattern(message.musicalElement, message.instrument.instrumentNumber)))
+    println(pattern) //TODO: Remove print statement
+    pattern
   }
 
   override def receive: Receive = {

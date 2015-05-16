@@ -10,7 +10,7 @@ object Phrase {
   val DEFAULT_TEMPO_BPM = 120
   val DEFAULT_START_TIME = 0.0
 
-  def computeDuration(phrase: Phrase): Double = phrase.numericFold(0.0, _.getDuration)
+  def computeDuration(phrase: Phrase): Double = phrase.sumBy(0.0, _.getDuration)
 
   def apply(): Phrase = {
     new Phrase()
@@ -54,7 +54,19 @@ case class Phrase(
   def withMusicalElements(musicalElements: MusicalElement*) =
     copy(musicalElements = musicalElements.toList)
 
+  override def withDuration(newDuration: Double): MusicalElement = scaled(newDuration / getDuration)
+
+  override def withStartTime(startTime: Double): MusicalElement = {
+    val shiftedMusicalElements = musicalElements.map(_.withStartTime(startTime))
+    copy(startTime = startTime, musicalElements = shiftedMusicalElements)
+  }
+
   def getMaxChordSize: Int = maxChordSize(this)
+
+  def scaled(durationRatio: Double): Phrase = {
+    val scaledElems = musicalElements.map(elem => elem.withDuration(elem.getDuration * durationRatio))
+    copy(musicalElements = scaledElems)
+  }
 
   override def getDuration: Double = duration(this)
   override def isEmpty: Boolean = musicalElements.isEmpty

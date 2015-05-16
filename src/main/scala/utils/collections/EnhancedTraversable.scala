@@ -16,7 +16,7 @@ class EnhancedTraversable[A](val traversable: TraversableOnce[A]) {
     }
   }
 
-  def numericFold[K](defaultValue: K, fn: A => K)(implicit num: Numeric[K]): K =
+  def sumBy[K](defaultValue: K, fn: A => K)(implicit num: Numeric[K]): K =
     traversable.foldLeft[K](defaultValue) { case (acc, elem) => num.plus(acc, fn(elem)) }
 
   def zipped[K](implicit evidence: A => TraversableOnce[K]): Stream[TraversableOnce[Option[K]]] = {
