@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import representation._
 import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}
 import utils.collections.CollectionUtils
+import utils.functional.FunctionalUtils
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -29,21 +30,29 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
     List(phrase)
   }
 
-  override def getPhrases(partNum: Int): Traversable[Phrase] = {
+  private val getPhrasesM = FunctionalUtils.memoized((partNum: Int) => {
     val multiVoicePhrase = JMusicParserUtils.convertPart(score.getPart(partNum))
     split(JMusicParserUtils.mergePhrases(multiVoicePhrase).getOrElse(Phrase()))
-  }
+  })
 
-  override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] =
-    split(JMusicParserUtils.convertPart(score.getPart(partNum)))
+  override def getPhrases(partNum: Int): Traversable[Phrase] = getPhrasesM(partNum)
 
-  override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = {
+  private val getMultiVoicePhrasesM = FunctionalUtils.memoized((partNum: Int) => {
+    val multiVoicePhrase = JMusicParserUtils.convertPart(score.getPart(partNum))
+    split(multiVoicePhrase)
+  })
+
+  override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] = getMultiVoicePhrasesM(partNum)
+
+  private val partIndexByInstrumentM = FunctionalUtils.memoized[mutable.MultiMap[InstrumentType, Int]]({
     val partsArray = score.getPartArray
     (0 until partsArray.size)
       .groupByMultiMap(index => InstrumentType.classify(partsArray(index).getInstrument))
-  }
+  })
 
-  override def getInstrumentsCounts: Map[InstrumentType.InstrumentCategory, Int] = {
+  override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = partIndexByInstrumentM
+
+  def getInstrumentsCounts: Map[InstrumentType.InstrumentCategory, Int] = {
     val parts = score.getPartArray
     val instruments = parts.map(i => InstrumentType.classify(i.getInstrument))
     instruments.groupBy(identity).mapValues(_.length)
@@ -107,13 +116,13 @@ object JMusicParserUtils {
     }
   }
 
-  def getNotesByStartTime(phrase: Phrase): mutable.MultiMap[Double, MusicalElement] =
-    phrase.musicalElements.groupByMultiMap[Double](_.getStartTime)
+  val getNotesByStartTime = FunctionalUtils.memoized((phrase: Phrase) =>
+    phrase.musicalElements.groupByMultiMap[Double](_.getStartTime))
 
   def getNotesByStartTime(phrase: jmData.Phrase): mutable.MultiMap[Double, jmData.Note] =
     phrase.getNoteList.groupByMultiMap[Double](note => note.getNoteStartTime.orElse(0.0))
 
-  def convertPart(part: jmData.Part): Phrase = {
+  val convertPart = FunctionalUtils.memoized((part: jmData.Part) => {
     val phrases = part.getPhraseList.map(convertPhrase)
     val startTime: Double = phrases.collectFirst { case phrase => phrase.startTime }.getOrElse(Phrase.DEFAULT_START_TIME)
     new Phrase(
@@ -121,12 +130,12 @@ object JMusicParserUtils {
       polyphony = true,
       tempoBPM = part.getTempo,
       startTime = startTime)
-  }
+  })
 
-  def convertPhrase(phrase: jmData.Phrase): Phrase = {
+  val convertPhrase = FunctionalUtils.memoized((phrase: jmData.Phrase) => {
     val elements = phrase.getNoteList.flatMap(convertNote)
     new Phrase(elements.toList, tempoBPM = phrase.getTempo, startTime = phrase.getStartTime)
-  }
+  })
 
   def mergePhrases(phrase: Phrase): Option[Phrase] =
     phrase.polyphony.option(mergePhrases(phrase.musicalElements.asInstanceOf[List[Phrase]]))
@@ -170,7 +179,7 @@ object JMusicParserUtils {
     var activeElements = List[MusicalElement]()
     val phrasesElements = (0 until phrase.getMaxChordSize).map(i => (i, mutable.MutableList[MusicalElement]())).toList
 
-    for (musicalElement <- phrase) {
+    for (musicalElement <- phrase.musicalElements.sortWith(_.getStartTime > _.getStartTime)) {
       musicalElement match {
         case chord: Chord =>
           activeElements = chord.notes
@@ -184,7 +193,7 @@ object JMusicParserUtils {
         addToPhrase(elem, phraseElems)
       }
     }
-    val phrases = phrasesElements.map{ case (index, phraseElems) => new Phrase(phraseElems.toList) }
+    val phrases = phrasesElements.map { case (index, phraseElems) => new Phrase(phraseElems.toList) }
     Phrase()
       .withMusicalElements(phrases)
       .withPolyphony()
