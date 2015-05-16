@@ -85,7 +85,7 @@ object InstrumentType {
   }
 
   sealed abstract class InstrumentCategory(val instrumentNumber: Int, val instrTypeObj: InstrumentTypeObject[_]) {
-    require(instrTypeObj.range contains instrumentNumber)
+    require(instrTypeObj.range contains instrumentNumber, "Instrument number not in range")
   }
 
   case class PIANO(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, PIANO)

@@ -1,5 +1,8 @@
 package cbr
 
+import utils.functional.{MemoizedValue, FunctionalUtils}
+
+import scala.collection.mutable.ArrayBuffer
 import scala.language.implicitConversions
 
 object CaseDescription {
@@ -10,6 +13,18 @@ object CaseDescription {
 }
 
 trait CaseDescription {
-  def getSignature: Array[Double]
   val weightedFeatures: List[(Double, Feature)]
+  val size: MemoizedValue[Int] = FunctionalUtils.memoized(weightedFeatures.foldLeft(0)(_ + _._2.size))
+
+  /**
+   * Returns an array of doubles that represents a multi-dimensional point which corresponds to the case Description
+   * @return
+   */
+  def getSignature: Array[Double] = {
+    weightedFeatures.foldLeft(new ArrayBuffer[Double]()) { case (buf, (weight, feature)) =>
+        buf.appendAll(feature.getSignature.map(weight * _))
+        buf
+    }.toArray
+  }
+
 }

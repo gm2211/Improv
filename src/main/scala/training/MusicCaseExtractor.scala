@@ -4,8 +4,35 @@ import cbr._
 import instruments.InstrumentType.InstrumentType
 import midi.MIDIParser
 import representation.Phrase
+import utils.builders.{Zero, IsOnce, Once, Count}
 
-class MusicCaseExtractor(val parser: MIDIParser, val descriptionCreator: MusicalDescriptionCreator) {
+
+case class MusicCaseExtractorBuilder[
+  ParserCount <: Count,
+  DescriptionCreatorCount <: Count] (
+    midiParser: Option[MIDIParser] = None,
+    descriptionCreator: Option[DescriptionCreator[Phrase]] = None) {
+
+  def withMIDIParser(midiParser: MIDIParser) =
+    copy[Once, DescriptionCreatorCount](midiParser = Some(midiParser))
+
+  def withDescriptionCreator(descriptionCreator: DescriptionCreator[Phrase]) =
+    copy[ParserCount, Once](descriptionCreator = Some(descriptionCreator))
+
+  def build[A <: ParserCount : IsOnce,
+            B <: DescriptionCreatorCount : IsOnce] =
+    new MusicCaseExtractor(this.asInstanceOf[MusicCaseExtractorBuilder[Once, Once]])
+
+}
+
+object MusicCaseExtractor {
+  def builder = new MusicCaseExtractorBuilder[Zero, Zero]()
+}
+
+class MusicCaseExtractor private[training] (builder: MusicCaseExtractorBuilder[Once, Once]) {
+  val parser: MIDIParser = builder.midiParser.get
+  val descriptionCreator: DescriptionCreator[Phrase] = builder.descriptionCreator.get
+
   def getCases: List[(CaseDescription, Phrase)] = {
     parser.getPartIndexByInstrument.flatMap { case (instrumentType, partIndices) =>
       partIndices.map(getCasesFromParts(partIndices.toSet, instrumentType))

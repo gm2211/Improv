@@ -1,6 +1,7 @@
 package utils
 
 import utils.collections.{EnhancedTraversable, FasterMutableListWrapper}
+import utils.functional.MemoizedValue
 
 import scala.collection.mutable
 import scala.language.implicitConversions
@@ -26,4 +27,5 @@ object ImplicitConversions {
 
   implicit def toEnhancedTraversable[A](traversable: TraversableOnce[A]): EnhancedTraversable[A] =
     new EnhancedTraversable[A](traversable)
+
 }
