@@ -105,7 +105,7 @@ object JMusicParserUtils {
       }
       val intonation = if (jmNote.isFlat) Flat else if (jmNote.isSharp) Sharp else Natural
       val (noteName, _, _) = Note.parseString(jmNote.getNote)
-      val duration = jmNote.getDuration / durationRatio
+      val duration = jmNote.getDuration * durationRatio
       val loudness = Loudness(jmNote.getDynamic)
       val startTime = jmNote.getNoteStartTime.orElse(0.0) * durationRatio
 
