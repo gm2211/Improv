@@ -62,29 +62,30 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
 
 object JMusicParserUtils {
   private val log = LoggerFactory.getLogger(getClass)
-  private val TIME_PRECISION: Int = 5
+  private val TIME_PRECISION: Int = 8
 
   /**
    * Takes an iterable and a function that converts (or extracts) its elements to a jmData.Note and returns an optional
    * musical element
    * @param musicalElements Iterable of stuff that either contains, is or can be converted to a jmData.Note
+   * @param endTime Time at which all notes terminate
    * @return An optional musical element
    */
-  def mergeNotes(musicalElements: List[MusicalElement]): Option[MusicalElement] = {
+  def mergeNotes(musicalElements: List[MusicalElement], endTime: BigDecimal): Option[MusicalElement] = {
+    def computeDuration(em: MusicalElement) = endTime - em.getStartTime
     musicalElements match {
       case Nil =>
         None
       case element :: Nil =>
-        Some(element)
+        Some(element.withDuration(computeDuration(element)))
       case elements =>
-        val minDuration = elements.minBy(_.getDuration).getDuration
         elements.collect { case n: Note => n } match {
           case Nil =>
-            Some(elements.head.withDuration(minDuration))
+            Some(elements.head.withDuration(computeDuration(elements.head)))
           case note :: Nil =>
-            Some(note.withDuration(minDuration))
+            Some(note.withDuration(computeDuration(note)))
           case notes =>
-            Some(Chord(notes.map(_.withDuration(minDuration))))
+            Some(Chord(notes.map(note => note.withDuration(computeDuration(note)))))
         }
     }
   }
@@ -167,13 +168,13 @@ object JMusicParserUtils {
     val times = notesByStartTime.keySet.toList.++(endTimes).distinct.sorted
 
     for (time <- times) {
-      mergeNotes(activeNotes).foreach(addToPhrase(_, phraseElements))
+      mergeNotes(activeNotes, time).foreach(addToPhrase(_, phraseElements))
 
       activeNotes = activeNotes.flatMap(resizeIfActive(time, _))
       activeNotes ++= notesByStartTime.getOrElse(time, Set()).toList
     }
 
-    require(activeNotes.isEmpty)
+    require(activeNotes.isEmpty, "All active notes must be consumed")
     Phrase().withMusicalElements(phraseElements)
   }
 
