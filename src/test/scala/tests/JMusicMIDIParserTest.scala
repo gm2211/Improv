@@ -11,7 +11,7 @@ import org.scalatest.FlatSpec
 import representation.Phrase
 
 class JMusicMIDIParserTest extends FlatSpec {
-  val resourcePath = IOUtils.getResourcePath("musicScores/midPiano.mid")
+  val resourcePath = IOUtils.getResourcePath("musicScores/shortPiano.mid")
   val parser = JMusicMIDIParser(resourcePath)
 
   "The midi parser" should "return a list of parts and their indexes grouped by instrument" in {

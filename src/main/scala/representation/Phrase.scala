@@ -7,7 +7,7 @@ import scala.math
 import scalaz.Scalaz._
 
 object Phrase {
-  val DEFAULT_TEMPO_BPM = 120
+  val DEFAULT_TEMPO_BPM = 120.0
   val DEFAULT_START_TIME = 0.0
 
   def computeDuration(phrase: Phrase): BigDecimal = phrase.sumBy(0.0, _.getDuration)

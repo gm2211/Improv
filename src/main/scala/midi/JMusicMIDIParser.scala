@@ -64,6 +64,19 @@ object JMusicParserUtils {
   private val log = LoggerFactory.getLogger(getClass)
   private val TIME_PRECISION: Int = 8
 
+  def getTempo(part: jmData.Part): Double = {
+    Try(part.getTempo)
+      .filter(_ >= 0)
+      .orElse(Try(part.getMyScore.getTempo))
+      .getOrElse(Phrase.DEFAULT_TEMPO_BPM)
+  }
+
+  def getTempo(phrase: jmData.Phrase): Double = {
+    Try(phrase.getTempo)
+      .filter(_ >= 0)
+      .getOrElse(getTempo(phrase.getMyPart))
+  }
+
   /**
    * Takes an iterable and a function that converts (or extracts) its elements to a jmData.Note and returns an optional
    * musical element
@@ -133,16 +146,18 @@ object JMusicParserUtils {
     new Phrase(
       musicalElements = phrases.toList,
       polyphony = true,
-      tempoBPM = part.getTempo,
+      tempoBPM = getTempo(part),
       startTime = round(startTime, TIME_PRECISION))
   })
 
   val convertPhrase = FunctionalUtils.memoized((phrase: jmData.Phrase) => {
     val elements = mutable.MutableList[MusicalElement]()
     val jmNotes = phrase.getNoteList.toList.sortBy(_.getNoteStartTime.get)
+    val startTime: BigDecimal = round(phrase.getStartTime, TIME_PRECISION)
+
     jmNotes.foreach(convertNote(_).foreach(addToPhrase(_, elements)))
 
-    new Phrase(elements.toList, tempoBPM = phrase.getTempo, startTime = round(phrase.getStartTime, TIME_PRECISION))
+    new Phrase(elements.toList, tempoBPM = getTempo(phrase), startTime = startTime)
   })
 
   def mergePhrases(phrase: Phrase): Option[Phrase] =
@@ -163,7 +178,7 @@ object JMusicParserUtils {
     val phraseElements = mutable.MutableList[MusicalElement]()
     var activeNotes: List[MusicalElement] = List()
     val endTimes = notesByStartTime.flatMap { case (startTime, notes) =>
-      notes.map(startTime + _.getDuration)
+      notes.map(note => round(startTime + note.getDuration, TIME_PRECISION))
     }
     val times = notesByStartTime.keySet.toList.++(endTimes).distinct.sorted
 
@@ -197,8 +212,9 @@ object JMusicParserUtils {
   def splitPhrase(phrase: Phrase): Phrase = {
     var activeElements = List[MusicalElement]()
     val phrasesElements = (0 until phrase.getMaxChordSize).map(i => (i, mutable.MutableList[MusicalElement]())).toList
+    val musicalElements: List[MusicalElement] = phrase.musicalElements.sortBy(_.getStartTime)
 
-    for (musicalElement <- phrase.musicalElements.sortBy(_.getStartTime)) {
+    for (musicalElement <- musicalElements) {
       musicalElement match {
         case chord: Chord =>
           activeElements = chord.notes
@@ -219,5 +235,6 @@ object JMusicParserUtils {
       .withPolyphony()
       .getOrElse(phrase)
   }
+
 }
 

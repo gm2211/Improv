@@ -91,7 +91,7 @@ object JFugueUtils {
       phrase.musicalElements.asInstanceOf[List[Phrase]].zipped.map { case musicalElements =>
         musicalElements.map {
           case Some(elem) =>
-            s"@${elem.getStartTime} ${createPatternHelper(elem, instrumentNumber)}"
+            s"@${elem.getStartTime.toDouble} ${createPatternHelper(elem, instrumentNumber)}"
           case _ =>
             ""
         }.mkString(" ")
