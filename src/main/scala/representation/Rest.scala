@@ -20,5 +20,5 @@ case class Rest(
     copy(durationNS = timeUnit.toNanos(duration.toLong))
 
   override def withStartTime(startTime: BigInt, timeUnit: TimeUnit): Rest =
-    copy(startTimeMS = timeUnit.toNanos(startTimeMS.toLong))
+    copy(startTimeMS = timeUnit.toNanos(startTime.toLong))
 }
