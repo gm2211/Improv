@@ -38,7 +38,7 @@ trait MusicalElement {
 
   def getDuration(timeUnit: TimeUnit): BigInt
 
-  def getStartTimeBPM(tempoBPM: BigDecimal): BigDecimal = MusicalElement.toBPM(getDurationNS, tempoBPM = tempoBPM)
+  def getStartTimeBPM(tempoBPM: BigDecimal): BigDecimal = MusicalElement.toBPM(getStartTimeNS, tempoBPM = tempoBPM)
 
   def getStartTimeNS: BigInt = getStartTime(NANOSECONDS)
 
