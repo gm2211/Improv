@@ -23,7 +23,7 @@ object JMusicConverterUtils {
 
   def convertNote(note: Note): jmData.Note = {
     val jmNote = new jmData.Note()
-    val duration: BigDecimal = note.duration / 8
+    val duration: BigDecimal = BigDecimal(note.durationNS) / 8
     jmNote.setDuration(duration)
     jmNote.setRhythmValue(duration / jmData.Note.DEFAULT_DURATION_MULTIPLIER)
     jmNote.setPitchType(jmData.Note.MIDI_PITCH)
@@ -33,7 +33,7 @@ object JMusicConverterUtils {
   }
 
   def convertRest(rest: Rest): jmData.Note =
-    new jmData.Rest(rest.getDuration / 8)
+    new jmData.Rest(rest.getDurationNS.toDouble / 8)
 
   def toNote(musicalElement: MusicalElement): Option[jmData.Note] = musicalElement match {
     case note: Note =>
@@ -55,9 +55,9 @@ object JMusicConverterUtils {
   def toPhrase(phrase: Phrase): jmData.Phrase = {
     require(! phrase.polyphony)
     val jmPhrase = new jmData.Phrase()
-    val startTimeOrdering = Ordering.by((elem: MusicalElement) => elem.getStartTime)
-    jmPhrase.setDuration(phrase.getDuration)
-    jmPhrase.setStartTime(phrase.getStartTime)
+    val startTimeOrdering = Ordering.by((elem: MusicalElement) => elem.getStartTimeNS)
+    jmPhrase.setDuration(phrase.getDurationBPM(phrase.tempoBPM))
+    jmPhrase.setStartTime(phrase.getStartTimeBPM(phrase.tempoBPM))
     jmPhrase.setTempo(phrase.tempoBPM)
 
     phrase.musicalElements

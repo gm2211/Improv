@@ -63,19 +63,20 @@ object JFugueUtils {
   val DEFAULT_TEMPO: Int = 120
 
   def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
-    createPatternHelper(musicalElement, instrumentNumber)
+    val tempo = Try(musicalElement.asInstanceOf[Phrase].tempoBPM.toInt).getOrElse(DEFAULT_TEMPO)
+    createPatternHelper(musicalElement, instrumentNumber, tempo)
       .setInstrument(instrumentNumber)
-      .setTempo(Try(musicalElement.asInstanceOf[Phrase].tempoBPM.toInt).getOrElse(DEFAULT_TEMPO))
+      .setTempo(tempo)
   }
 
-  def createPatternHelper(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
+  def createPatternHelper(musicalElement: MusicalElement, instrumentNumber: Int, tempoBPM: Double): Pattern = {
     val pattern: Pattern = musicalElement match {
       case note: Note =>
-        convertNote(note, instrumentNumber).getPattern
+        convertNote(note, instrumentNumber, tempoBPM).getPattern
       case rest: Rest =>
-        theory.Note.createRest(rest.duration).getPattern
+        theory.Note.createRest(rest.getDurationBPM(tempoBPM)).getPattern
       case chord: Chord =>
-        createChordPattern(instrumentNumber, chord)
+        createChordPattern(chord, instrumentNumber, tempoBPM)
       case phrase: Phrase =>
         createPhrasePattern(phrase, instrumentNumber)
     }
@@ -91,7 +92,7 @@ object JFugueUtils {
       phrase.musicalElements.asInstanceOf[List[Phrase]].zipped.map { case musicalElements =>
         musicalElements.map {
           case Some(elem) =>
-            s"@${elem.getStartTime.toDouble} ${createPatternHelper(elem, instrumentNumber)}"
+            s"@${elem.getStartTimeNS.toDouble} ${createPatternHelper(elem, instrumentNumber, phrase.tempoBPM)}"
           case _ =>
             ""
         }.mkString(" ")
@@ -100,18 +101,18 @@ object JFugueUtils {
   }
 
   def createPhrasePattern(phrase: Phrase, instrumentNumber: Int): Pattern = phrase match {
-    case polyphonicPhrase@Phrase(_, true, _, _) =>
+    case polyphonicPhrase@Phrase(_, true, _) =>
       new Pattern(convertPolyphonicPhrase(polyphonicPhrase, instrumentNumber))
-    case normalPhrase@Phrase(_, false, _, _) =>
-      new Pattern(normalPhrase.map(createPatternHelper(_, instrumentNumber).toString).mkString(" "))
+    case normalPhrase@Phrase(_, false, _) =>
+      new Pattern(normalPhrase.map(createPatternHelper(_, instrumentNumber, phrase.tempoBPM).toString).mkString(" "))
   }
 
-  def createChordPattern(instrumentNumber: Int, chord: Chord): Pattern =
-    new Pattern(chord.notes.map(convertNote(_, instrumentNumber).getPattern.toString).mkString("+"))
+  def createChordPattern(chord: Chord, instrumentNumber: Int, tempoBPM: Double): Pattern =
+    new Pattern(chord.notes.map(convertNote(_, instrumentNumber, tempoBPM).getPattern.toString).mkString("+"))
 
-  def convertNote(note: Note, instrumentNumber: Int): theory.Note = {
+  def convertNote(note: Note, instrumentNumber: Int, tempoBPM: Double): theory.Note = {
     new theory.Note(s"${note.name.toString}${note.intonation.toString}${note.octave}")
-      .setDuration(note.duration)
+      .setDuration(note.getDurationBPM(tempoBPM))
       .setOnVelocity(note.loudness.loudness.toByte)
       .setOffVelocity(0)
       .setPercussionNote(PERCUSSIVE.range.contains(instrumentNumber) ||
@@ -128,6 +129,8 @@ object JFugueUtils {
     }
     phrasePatternString
   }
+
+  def toSequence(musicalElement: MusicalElement): Sequence = toSequence(createPattern(musicalElement, PIANO(1)))
 
   def toSequence(pattern: Pattern): Sequence = {
     val parser = new StaccatoParser()

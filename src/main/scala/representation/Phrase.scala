@@ -3,14 +3,18 @@ package representation
 import utils.ImplicitConversions.toEnhancedTraversable
 import utils.functional.{FunctionalUtils, MemoizedFunc}
 
+import scala.concurrent.duration.TimeUnit
 import scala.math
 import scalaz.Scalaz._
 
 object Phrase {
-  val DEFAULT_TEMPO_BPM = 120.0
   val DEFAULT_START_TIME = 0.0
 
-  def computeDuration(phrase: Phrase): BigDecimal = phrase.sumBy(0.0, _.getDuration)
+  def computeDuration(phrase: Phrase, timeUnit: TimeUnit): BigInt =
+    phrase.sumBy(0, _.getDuration(timeUnit))
+
+  def computeStartTime(phrase: Phrase, timeUnit: TimeUnit): BigInt =
+    phrase.minBy(_.getDuration(timeUnit)).getDuration(timeUnit)
 
   def apply(): Phrase = {
     new Phrase()
@@ -34,11 +38,16 @@ object Phrase {
 case class Phrase(
   musicalElements: List[MusicalElement] = List(),
   polyphony: Boolean = false,
-  tempoBPM: Double = Phrase.DEFAULT_TEMPO_BPM,
-  startTime: BigDecimal = Phrase.DEFAULT_START_TIME)
+  tempoBPM: Double = MusicalElement.DEFAULT_TEMPO_BPM)
     extends MusicalElement with Traversable[MusicalElement] {
-  private val maxChordSize: MemoizedFunc[Phrase, Int] = FunctionalUtils.memoized(Phrase.computeMaxChordSize)
-  private val duration: MemoizedFunc[Phrase, BigDecimal] = FunctionalUtils.memoized(Phrase.computeDuration)
+  private val maxChordSize: MemoizedFunc[Phrase, Int] =
+    FunctionalUtils.memoized(Phrase.computeMaxChordSize)
+
+  private val durationMS: MemoizedFunc[(Phrase, TimeUnit), BigInt] =
+    FunctionalUtils.memoized((Phrase.computeDuration _).tupled)
+
+  private val startTimeMS: MemoizedFunc[(Phrase, TimeUnit), BigInt] =
+    FunctionalUtils.memoized((Phrase.computeStartTime _).tupled)
 
   require(! polyphony || canHavePolyphony)
 
@@ -54,22 +63,25 @@ case class Phrase(
   def withMusicalElements(musicalElements: MusicalElement*) =
     copy(musicalElements = musicalElements.toList)
 
-  override def withDuration(newDuration: BigDecimal): MusicalElement = scaled(newDuration / getDuration)
+  override def withDuration(newDuration: BigInt, timeUnit: TimeUnit): Phrase =
+    scaled(BigDecimal(newDuration / getDuration(timeUnit)), timeUnit)
 
-  override def withStartTime(startTime: BigDecimal): MusicalElement = {
-    val shiftedMusicalElements = musicalElements.map(_.withStartTime(startTime))
-    copy(startTime = startTime, musicalElements = shiftedMusicalElements)
+  override def withStartTime(startTime: BigInt, timeUnit: TimeUnit): Phrase = {
+    val shiftedMusicalElements = musicalElements.map(_.withStartTime(startTime, timeUnit))
+    copy(musicalElements = shiftedMusicalElements)
   }
 
   def getMaxChordSize: Int = maxChordSize(this)
 
-  def scaled(durationRatio: BigDecimal): Phrase = {
-    val scaledElems = musicalElements.map(elem => elem.withDuration(elem.getDuration * durationRatio))
+  def scaled(durationRatio: BigDecimal, timeUnit: TimeUnit): Phrase = {
+    val scaledElems = musicalElements.map { elem =>
+      elem.withDuration((BigDecimal(elem.getDuration(timeUnit)) * durationRatio).toBigInt(), timeUnit)
+    }
+
     copy(musicalElements = scaledElems)
   }
 
-  override def getDuration: BigDecimal = duration(this)
-  override def isEmpty: Boolean = musicalElements.isEmpty
+  override def getDuration(timeUnit: TimeUnit): BigInt = durationMS((this, timeUnit))
   override def foreach[U](f: (MusicalElement) => U): Unit = musicalElements.foreach(f)
-  override def getStartTime: BigDecimal = startTime
+  override def getStartTime(timeUnit: TimeUnit): BigInt = startTimeMS((this, timeUnit))
 }

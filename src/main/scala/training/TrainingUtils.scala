@@ -12,7 +12,7 @@ object TrainingUtils {
   def getCasesFromMIDI(filename: String): List[(CaseDescription, Phrase)] = {
     val extractor = MusicCaseExtractor.builder
       .withMIDIParser(JMusicMIDIParser(filename))
-      .withDescriptionCreator(new PhraseFeatureExtractor with DescriptionCreator[Phrase])
+      .withDescriptionCreator(PhraseFeatureExtractor.getDefaultExtractor)
       .build
 
     extractor.getCasesFromPart(0, PIANO(1))

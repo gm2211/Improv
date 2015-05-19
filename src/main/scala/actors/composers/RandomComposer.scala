@@ -6,7 +6,7 @@ class RandomComposer extends Composer {
   override def compose(previousPhrase: Phrase): Option[Phrase] = {
     val range = 1 to 5
     val phrase = Phrase()
-      .withMusicalElements(range.map(i => Note.genRandNote().withDuration(0.5)))
+      .withMusicalElements(range.map(i => Note.genRandNote().withDurationBPM(0.5, 120.0)))
     Some(Phrase())
   }
 }

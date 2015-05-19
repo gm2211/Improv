@@ -21,9 +21,9 @@ class JFugueInstrumentTest extends FlatSpec {
     setup()
     val musicalElements = ListBuffer[MusicalElement]()
       musicalElements.append(Note.fromString("A5").withDuration(1))
-      musicalElements.append(new Rest(0.1))
+      musicalElements.append(new Rest(MusicalElement.fromBPM(0.1)))
       musicalElements.append(Note.fromString("B5").withDuration(1))
-      musicalElements.append(new Rest(0.1))
+      musicalElements.append(new Rest(MusicalElement.fromBPM(0.1)))
       musicalElements.append(Note.fromString("C5").withDuration(1))
 
     val phrase = new Phrase().withMusicalElements(musicalElements)

@@ -1,17 +1,24 @@
 package representation
 
+import scala.concurrent.duration.{TimeUnit, NANOSECONDS}
+
 object Rest {
-  val DEFAULT_DURATION = 0.0
-  val DEFAULT_START_TIME = 0.0
+  val DEFAULT_DURATION = 0
+  val DEFAULT_START_TIME = 0
 }
 
 case class Rest(
-    duration: BigDecimal = 0.0,
-    startTime: BigDecimal = 0.0) extends MusicalElement {
-  override def getDuration: BigDecimal = duration
-  override def getStartTime: BigDecimal = startTime
+    durationNS: BigInt = Rest.DEFAULT_DURATION,
+    startTimeMS: BigInt = Rest.DEFAULT_START_TIME) extends MusicalElement {
+  override def getDuration(timeUnit: TimeUnit): BigInt =
+    timeUnit.convert(durationNS.toLong, NANOSECONDS)
 
-  override def withDuration(duration: BigDecimal): MusicalElement = copy(duration = duration)
+  override def getStartTime(timeUnit: TimeUnit): BigInt =
+    timeUnit.convert(startTimeMS.toLong, NANOSECONDS)
 
-  override def withStartTime(startTime: BigDecimal): MusicalElement = copy(startTime = startTime)
+  override def withDuration(duration: BigInt, timeUnit: TimeUnit): Rest =
+    copy(durationNS = timeUnit.toNanos(duration.toLong))
+
+  override def withStartTime(startTime: BigInt, timeUnit: TimeUnit): Rest =
+    copy(startTimeMS = timeUnit.toNanos(startTimeMS.toLong))
 }

@@ -1,13 +1,12 @@
 package representation
 
 
-import java.util.UUID
-
 import representation.NoteName.NoteName
 import utils.collections.CollectionUtils
 
+import scala.concurrent.duration.{NANOSECONDS, MILLISECONDS, TimeUnit}
 import scala.math
-import scala.util.{Random, Try}
+import scala.util.Try
 
 
 object Note {
@@ -27,7 +26,7 @@ object Note {
     note1.name == note2.name &&
       note1.intonation == note2.intonation &&
       (! octave || note1.octave == note2.octave) &&
-      (! duration || note1.duration == note2.duration)
+      (! duration || note1.durationNS == note2.durationNS)
   }
 
   def pitchToOctave(pitch: Int): Int = math.floor(pitch / 12.0).toInt
@@ -36,11 +35,11 @@ object Note {
 
   val DEFAULT_NAME = NoteName.A
   val DEFAULT_OCTAVE = 4
-  val DEFAULT_PITCH: Int = 60
-  val DEFAULT_DURATION = 1.0
+  val DEFAULT_PITCH = 60
+  val DEFAULT_DURATION = 2000
   val DEFAULT_INTONATION = Natural
   val DEFAULT_LOUDNESS = MF
-  val DEFAULT_START_TIME: Double = 0.0
+  val DEFAULT_START_TIME = 0
 
   private val WELL_AUDIBLE_RANGE = 3 to 5
 
@@ -71,7 +70,7 @@ object Note {
 
   def genRandNote(): Note = {
     val octave = CollectionUtils.chooseRandom(WELL_AUDIBLE_RANGE).get
-    val duration = Random.nextDouble() + 0.5
+    val duration = MILLISECONDS.toNanos(150)
     val intonation = CollectionUtils
       .chooseRandom(List(Flat, Sharp, Natural))
       .getOrElse(Natural)
@@ -80,7 +79,7 @@ object Note {
     Note(
       name = NoteName.withName(name),
       octave = octave,
-      duration = duration,
+      durationNS = duration,
       intonation = intonation)
   }
 }
@@ -93,26 +92,29 @@ object NoteName extends Enumeration {
 case class Note(name: NoteName = Note.DEFAULT_NAME,
   octave: Int = Note.DEFAULT_OCTAVE,
   pitch: Int = Note.DEFAULT_PITCH,
-  duration: BigDecimal = Note.DEFAULT_DURATION,
+  durationNS: BigInt = Note.DEFAULT_DURATION,
   intonation: Intonation = Note.DEFAULT_INTONATION,
   loudness: Loudness = Note.DEFAULT_LOUDNESS,
-  startTime: BigDecimal = Note.DEFAULT_START_TIME) extends MusicalElement {
+  startTimeNS: BigInt = Note.DEFAULT_START_TIME) extends MusicalElement {
+
 
   def withName(newName: NoteName) = copy(name = newName)
 
   def withOctave(newOctave: Int) = copy(octave = newOctave)
 
-  def withDuration(newDuration: BigDecimal) = copy(duration = newDuration)
-
   def withIntonation(newIntonation: Intonation) = copy(intonation = newIntonation)
 
   def withLoudness(newLoudness: Loudness) = copy(loudness = loudness)
 
-  override def withStartTime(startTime: BigDecimal): Note = copy(startTime = startTime)
+  override def withStartTime(startTime: BigInt, timeUnit: TimeUnit): Note =
+    copy(startTimeNS = timeUnit.toNanos(startTime.toLong))
 
-  override def getDuration: BigDecimal = duration
+  override def withDuration(duration: BigInt, timeUnit: TimeUnit): Note =
+    copy(durationNS = timeUnit.toNanos(duration.toLong))
 
-  override def getStartTime: BigDecimal = startTime
+  override def getDuration(timeUnit: TimeUnit): BigInt = timeUnit.convert(durationNS.toLong, NANOSECONDS)
+
+  override def getStartTime(timeUnit: TimeUnit): BigInt = timeUnit.convert(startTimeNS.toLong, NANOSECONDS)
 
 }
 

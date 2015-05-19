@@ -13,6 +13,7 @@ import utils.NumericUtils.round
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
+import scala.concurrent.duration.{TimeUnit, NANOSECONDS}
 import scala.util.Try
 import scalaz.Scalaz._
 
@@ -62,13 +63,12 @@ class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends M
 
 object JMusicParserUtils {
   private val log = LoggerFactory.getLogger(getClass)
-  private val TIME_PRECISION: Int = 8
 
   def getTempo(part: jmData.Part): Double = {
     Try(part.getTempo)
       .filter(_ >= 0)
       .orElse(Try(part.getMyScore.getTempo))
-      .getOrElse(Phrase.DEFAULT_TEMPO_BPM)
+      .getOrElse(MusicalElement.DEFAULT_TEMPO_BPM)
   }
 
   def getTempo(phrase: jmData.Phrase): Double = {
@@ -84,8 +84,11 @@ object JMusicParserUtils {
    * @param endTime Time at which all notes terminate
    * @return An optional musical element
    */
-  def mergeNotes(musicalElements: List[MusicalElement], endTime: BigDecimal): Option[MusicalElement] = {
-    def computeDuration(em: MusicalElement) = endTime - em.getStartTime
+  def mergeNotes(
+      musicalElements: List[MusicalElement],
+      endTime: BigInt,
+      timeUnit: TimeUnit = NANOSECONDS): Option[MusicalElement] = {
+    def computeDuration(em: MusicalElement) = timeUnit.toNanos(endTime.toLong) - em.getStartTimeNS
     musicalElements match {
       case Nil =>
         None
@@ -105,12 +108,17 @@ object JMusicParserUtils {
 
   def convertNote(jmNote: jmData.Note): Option[MusicalElement] = {
     val durationRatio = 1.0 / 4.0 // In JMusic the duration of 1.0 represents a quarter note (CROTCHET)
+    val tempoBPM = jmNote.getMyPhrase.getTempo
+    val fromBPM = (value: Double) => MusicalElement.fromBPM(value * durationRatio, tempoBPM)
+    val duration = fromBPM(jmNote.getDuration)
+    val startTime = fromBPM(jmNote.getNoteStartTime.orElse(0.0))
 
     if (jmNote.isRest) {
       Some(
-        Rest(
-          duration = round(jmNote.getDuration * durationRatio, TIME_PRECISION),
-          startTime = round(jmNote.getNoteStartTime.orElse(0.0) * durationRatio, TIME_PRECISION)))
+        Rest()
+          .withDuration(duration)
+          .withStartTime(startTime)
+      )
     } else {
       val notePitch = jmNote.getPitchType match {
         case jmData.Note.MIDI_PITCH =>
@@ -120,65 +128,57 @@ object JMusicParserUtils {
       }
       val intonation = if (jmNote.isFlat) Flat else if (jmNote.isSharp) Sharp else Natural
       val (noteName, _, _) = Note.parseString(jmNote.getNote)
-      val duration = round(jmNote.getDuration * durationRatio, TIME_PRECISION)
       val loudness = Loudness(jmNote.getDynamic)
-      val startTime = round(jmNote.getNoteStartTime.orElse(0.0) * durationRatio, TIME_PRECISION)
 
       noteName.flatMap(name => Some(Note(name = name,
         octave = Note.pitchToOctave(notePitch),
         pitch = notePitch,
-        duration = duration,
+        durationNS = duration,
         intonation = intonation,
         loudness = loudness,
-        startTime = startTime)))
+        startTimeNS = startTime)))
     }
   }
 
-  val getNotesByStartTime = FunctionalUtils.memoized((phrase: Phrase) =>
-    phrase.musicalElements.groupByMultiMap[BigDecimal](_.getStartTime))
-
-  def getNotesByStartTime(phrase: jmData.Phrase): mutable.MultiMap[Double, jmData.Note] =
-    phrase.getNoteList.groupByMultiMap[Double](note => note.getNoteStartTime.orElse(0.0))
+  val getNotesByStartTimeNS = FunctionalUtils.memoized { (phrase: Phrase) =>
+    phrase.musicalElements.groupByMultiMap[BigInt](_.getStartTime(NANOSECONDS))
+  }
 
   val convertPart = FunctionalUtils.memoized((part: jmData.Part) => {
     val phrases = part.getPhraseList.map(convertPhrase)
-    val startTime: BigDecimal = Try(phrases.minBy(_.getStartTime).getStartTime).getOrElse(Phrase.DEFAULT_START_TIME)
     new Phrase(
       musicalElements = phrases.toList,
       polyphony = true,
-      tempoBPM = getTempo(part),
-      startTime = round(startTime, TIME_PRECISION))
+      tempoBPM = getTempo(part))
   })
 
   val convertPhrase = FunctionalUtils.memoized((phrase: jmData.Phrase) => {
     val elements = mutable.MutableList[MusicalElement]()
     val jmNotes = phrase.getNoteList.toList.sortBy(_.getNoteStartTime.get)
-    val startTime: BigDecimal = round(phrase.getStartTime, TIME_PRECISION)
 
     jmNotes.foreach(convertNote(_).foreach(addToPhrase(_, elements)))
 
-    new Phrase(elements.toList, tempoBPM = getTempo(phrase), startTime = startTime)
+    new Phrase(elements.toList, tempoBPM = getTempo(phrase))
   })
 
   def mergePhrases(phrase: Phrase): Option[Phrase] =
     phrase.polyphony.option(mergePhrases(phrase.musicalElements.asInstanceOf[List[Phrase]]))
 
   def mergePhrases(phrases: Traversable[Phrase]): Phrase = {
-    def isActive(time: BigDecimal, elem: MusicalElement): Boolean =
-      elem.getStartTime <= time && time < elem.getStartTime + elem.getDuration
+    def isActive(timeNS: BigInt, elem: MusicalElement): Boolean =
+      elem.getStartTimeNS <= timeNS && timeNS < elem.getStartTimeNS + elem.getDurationNS
 
-    def resizeIfActive(time: BigDecimal, elem: MusicalElement): Option[MusicalElement] = isActive(time, elem).option {
+    def resizeIfActive(time: BigInt, elem: MusicalElement): Option[MusicalElement] = isActive(time, elem).option {
       elem
         .withStartTime(time)
-        .withDuration(elem.getStartTime + elem.getDuration - time)
+        .withDuration(elem.getStartTimeNS + elem.getDurationNS - time)
     }
 
-
-    val notesByStartTime = CollectionUtils.mergeMultiMaps(phrases.toList: _*)(getNotesByStartTime)
+    val notesByStartTime = CollectionUtils.mergeMultiMaps(phrases.toList: _*)(getNotesByStartTimeNS)
     val phraseElements = mutable.MutableList[MusicalElement]()
     var activeNotes: List[MusicalElement] = List()
     val endTimes = notesByStartTime.flatMap { case (startTime, notes) =>
-      notes.map(note => round(startTime + note.getDuration, TIME_PRECISION))
+      notes.map(note => startTime + note.getDurationNS)
     }
     val times = notesByStartTime.keySet.toList.++(endTimes).distinct.sorted
 
@@ -200,9 +200,9 @@ object JMusicParserUtils {
       val previousElem = phrase.last
       (previousElem, element) match {
         case (previousNote: Note, note: Note) if Note.areEqual(note, previousNote, duration = false) =>
-          phrase.updateLast(previousNote.withDuration(previousNote.duration + note.duration))
+          phrase.updateLast(previousNote.withDuration(previousNote.durationNS + note.durationNS))
         case (previousRest: Rest, rest: Rest) =>
-          phrase.updateLast(previousRest.withDuration(previousRest.duration + rest.duration))
+          phrase.updateLast(previousRest.withDuration(previousRest.durationNS + rest.durationNS))
         case _ =>
           phrase += element
       }
@@ -212,7 +212,7 @@ object JMusicParserUtils {
   def splitPhrase(phrase: Phrase): Phrase = {
     var activeElements = List[MusicalElement]()
     val phrasesElements = (0 until phrase.getMaxChordSize).map(i => (i, mutable.MutableList[MusicalElement]())).toList
-    val musicalElements: List[MusicalElement] = phrase.musicalElements.sortBy(_.getStartTime)
+    val musicalElements: List[MusicalElement] = phrase.musicalElements.sortBy(_.getStartTimeNS)
 
     for (musicalElement <- musicalElements) {
       musicalElement match {
@@ -224,7 +224,7 @@ object JMusicParserUtils {
       phrasesElements.foreach { case (index, phraseElems) =>
         val elem = Try {
           activeElements(index)
-        }.toOption.getOrElse(Rest(duration = musicalElement.getDuration, startTime = musicalElement.getStartTime))
+        }.toOption.getOrElse(Rest(durationNS = musicalElement.getDurationNS, startTimeMS = musicalElement.getStartTimeNS))
         addToPhrase(elem, phraseElems)
       }
     }
