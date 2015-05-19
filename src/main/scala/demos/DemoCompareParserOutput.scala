@@ -9,13 +9,12 @@ import org.jfugue.player.Player
 
 object DemoCompareParserOutput {
   def run(filename: String) = {
-    val player = new Player()
     val pattern = MidiFileManager.loadPatternFromMidi(new File(filename)).toString.split("V[0-9]").tail
     val myPhrase = JMusicMIDIParser.apply(filename).getMultiVoicePhrases(0).toList.head
     val myPattern = JFugueUtils.createPattern(myPhrase, 0)
     println(pattern(0))
     println(myPattern)
 
-    Thread.sleep(1000)
+    new Player().play(myPattern)
   }
 }

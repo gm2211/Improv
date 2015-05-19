@@ -60,13 +60,12 @@ case object FinishedPlaying extends EventNotification
 object JFugueUtils {
   val log = LoggerFactory.getLogger(getClass)
   val MAX_VOICE: Int = 15
-  val DEFAULT_TEMPO: Int = 120
 
   def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
-    val tempo = Try(musicalElement.asInstanceOf[Phrase].tempoBPM.toInt).getOrElse(DEFAULT_TEMPO)
+    val tempo = Try(musicalElement.asInstanceOf[Phrase].tempoBPM).getOrElse(MusicalElement.DEFAULT_TEMPO_BPM)
     createPatternHelper(musicalElement, instrumentNumber, tempo)
       .setInstrument(instrumentNumber)
-      .setTempo(tempo)
+      .setTempo(tempo.toInt)
   }
 
   def createPatternHelper(musicalElement: MusicalElement, instrumentNumber: Int, tempoBPM: Double): Pattern = {
@@ -92,7 +91,7 @@ object JFugueUtils {
       phrase.musicalElements.asInstanceOf[List[Phrase]].zipped.map { case musicalElements =>
         musicalElements.map {
           case Some(elem) =>
-            s"@${elem.getStartTimeNS.toDouble} ${createPatternHelper(elem, instrumentNumber, phrase.tempoBPM)}"
+            s"@${elem.getStartTimeBPM(phrase.tempoBPM).toDouble} ${createPatternHelper(elem, instrumentNumber, phrase.tempoBPM)}"
           case _ =>
             ""
         }.mkString(" ")

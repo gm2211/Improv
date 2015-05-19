@@ -9,11 +9,10 @@ import representation._
 import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}
 import utils.collections.CollectionUtils
 import utils.functional.FunctionalUtils
-import utils.NumericUtils.round
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable
-import scala.concurrent.duration.{TimeUnit, NANOSECONDS}
+import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
 import scala.util.Try
 import scalaz.Scalaz._
 
@@ -108,10 +107,10 @@ object JMusicParserUtils {
 
   def convertNote(jmNote: jmData.Note): Option[MusicalElement] = {
     val durationRatio = 1.0 / 4.0 // In JMusic the duration of 1.0 represents a quarter note (CROTCHET)
-    val tempoBPM = jmNote.getMyPhrase.getTempo
+    val tempoBPM = getTempo(jmNote.getMyPhrase)
     val fromBPM = (value: Double) => MusicalElement.fromBPM(value * durationRatio, tempoBPM)
     val duration = fromBPM(jmNote.getDuration)
-    val startTime = fromBPM(jmNote.getNoteStartTime.orElse(0.0))
+    val startTime = fromBPM(jmNote.getNoteStartTime.get)
 
     if (jmNote.isRest) {
       Some(
