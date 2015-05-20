@@ -9,16 +9,16 @@ object Rest {
 
 case class Rest(
     durationNS: BigInt = Rest.DEFAULT_DURATION,
-    startTimeMS: BigInt = Rest.DEFAULT_START_TIME) extends MusicalElement {
+    startTimeNS: BigInt = Rest.DEFAULT_START_TIME) extends MusicalElement {
   override def getDuration(timeUnit: TimeUnit): BigInt =
     timeUnit.convert(durationNS.toLong, NANOSECONDS)
 
   override def getStartTime(timeUnit: TimeUnit): BigInt =
-    timeUnit.convert(startTimeMS.toLong, NANOSECONDS)
+    timeUnit.convert(startTimeNS.toLong, NANOSECONDS)
 
   override def withDuration(duration: BigInt, timeUnit: TimeUnit): Rest =
     copy(durationNS = timeUnit.toNanos(duration.toLong))
 
   override def withStartTime(startTime: BigInt, timeUnit: TimeUnit): Rest =
-    copy(startTimeMS = timeUnit.toNanos(startTime.toLong))
+    copy(startTimeNS = timeUnit.toNanos(startTime.toLong))
 }

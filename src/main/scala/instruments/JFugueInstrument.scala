@@ -89,12 +89,14 @@ object JFugueUtils {
   def convertPolyphonicPhrase(phrase: Phrase, instrumentNumber: Int): String = {
     phrase.polyphony.option {
       phrase.musicalElements.asInstanceOf[List[Phrase]].zipped.map { case musicalElements =>
-        musicalElements.map {
+        val phrasePattern = musicalElements.map {
           case Some(elem) =>
             s"@${elem.getStartTimeBPM(phrase.tempoBPM).toDouble} ${createPatternHelper(elem, instrumentNumber, phrase.tempoBPM)}"
           case _ =>
             ""
         }.mkString(" ")
+        
+        phrasePattern
       }.mkString(" ")
     }.getOrElse("")
   }

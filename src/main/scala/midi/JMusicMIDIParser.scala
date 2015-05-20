@@ -21,7 +21,7 @@ object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String, phraseLength: Int) = {
     val score: jmData.Score = new jmData.Score()
     Read.midi(score, filename)
-    new JMusicMIDIParser(score, SimpleSegmenter.getDefault)
+    new JMusicMIDIParser(score, SimpleSegmenter.getDefault())
   }
 }
 
@@ -64,6 +64,7 @@ class JMusicMIDIParser(
 
 object JMusicParserUtils {
   private val log = LoggerFactory.getLogger(getClass)
+  private val TIME_PRECISION_NS = 100
 
   def getTempo(part: jmData.Part): Double = {
     Try(part.getTempo)
@@ -183,7 +184,12 @@ object JMusicParserUtils {
   }
 
   private def addToPhrase(element: MusicalElement, phrase: mutable.MutableList[MusicalElement]): Unit = {
+
     if (phrase.isEmpty) {
+      if (element.getStartTimeNS > 0) {
+        phrase += new Rest(durationNS = element.getStartTimeNS)
+      }
+
       phrase += element
     } else {
       val previousElem = phrase.last
@@ -193,6 +199,10 @@ object JMusicParserUtils {
         case (previousRest: Rest, rest: Rest) =>
           phrase.updateLast(previousRest.withDuration(previousRest.durationNS + rest.durationNS))
         case _ =>
+          if (element.getStartTimeNS > phrase.last.getEndTimeNS + TIME_PRECISION_NS) {
+            phrase += new Rest(startTimeNS = phrase.last.getEndTimeNS,
+                               durationNS = element.getStartTimeNS)
+          }
           phrase += element
       }
     }
@@ -213,7 +223,7 @@ object JMusicParserUtils {
       phrasesElements.foreach { case (index, phraseElems) =>
         val elem = Try {
           activeElements(index)
-        }.toOption.getOrElse(Rest(durationNS = musicalElement.getDurationNS, startTimeMS = musicalElement.getStartTimeNS))
+        }.toOption.getOrElse(Rest(durationNS = musicalElement.getDurationNS, startTimeNS = musicalElement.getStartTimeNS))
         addToPhrase(elem, phraseElems)
       }
     }
