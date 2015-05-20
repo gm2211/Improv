@@ -4,6 +4,7 @@ import instruments.InstrumentType
 import instruments.InstrumentType.InstrumentType
 import jm.music.{data => jmData}
 import jm.util.Read
+import midi.segmentation.{SimpleSegmenter, PhraseSegmenter}
 import org.slf4j.LoggerFactory
 import representation._
 import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}
@@ -20,27 +21,28 @@ object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String, phraseLength: Int) = {
     val score: jmData.Score = new jmData.Score()
     Read.midi(score, filename)
-    new JMusicMIDIParser(score, phraseLength)
+    new JMusicMIDIParser(score, SimpleSegmenter.getDefault)
   }
 }
 
-class JMusicMIDIParser(val score: jmData.Score, val phraseLength: Int) extends MIDIParser {
+class JMusicMIDIParser(
+  val score: jmData.Score,
+  val phraseSplitter: PhraseSegmenter) extends MIDIParser {
 
   def split(phrase: Phrase): Traversable[Phrase] = {
-    //TODO Split by length
-    List(phrase)
+    phraseSplitter.split(phrase)
   }
 
-  private val getPhrasesM = FunctionalUtils.memoized((partNum: Int) => {
+  private val getPhrasesM = FunctionalUtils.memoized[Int, Traversable[Phrase]]((partNum: Int) => {
     val multiVoicePhrase = JMusicParserUtils.convertPart(score.getPart(partNum))
-    split(JMusicParserUtils.mergePhrases(multiVoicePhrase).getOrElse(Phrase()))
+    multiVoicePhrase.flatMap(phrase => JMusicParserUtils.mergePhrases(phrase).map(split)).getOrElse(List())
   })
 
   override def getPhrases(partNum: Int): Traversable[Phrase] = getPhrasesM(partNum)
 
   private val getMultiVoicePhrasesM = FunctionalUtils.memoized((partNum: Int) => {
     val multiVoicePhrase = JMusicParserUtils.convertPart(score.getPart(partNum))
-    split(multiVoicePhrase)
+    multiVoicePhrase.map(split).getOrElse(List())
   })
 
   override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] = getMultiVoicePhrasesM(partNum)
@@ -145,10 +147,7 @@ object JMusicParserUtils {
 
   val convertPart = FunctionalUtils.memoized((part: jmData.Part) => {
     val phrases = part.getPhraseList.map(convertPhrase)
-    new Phrase(
-      musicalElements = phrases.toList,
-      polyphony = true,
-      tempoBPM = getTempo(part))
+    Phrase(phrases.toList, getTempo(part))
   })
 
   val convertPhrase = FunctionalUtils.memoized((phrase: jmData.Phrase) => {
@@ -164,15 +163,6 @@ object JMusicParserUtils {
     phrase.polyphony.option(mergePhrases(phrase.musicalElements.asInstanceOf[List[Phrase]]))
 
   def mergePhrases(phrases: Traversable[Phrase]): Phrase = {
-    def isActive(timeNS: BigInt, elem: MusicalElement): Boolean =
-      elem.getStartTimeNS <= timeNS && timeNS < elem.getStartTimeNS + elem.getDurationNS
-
-    def resizeIfActive(time: BigInt, elem: MusicalElement): Option[MusicalElement] = isActive(time, elem).option {
-      elem
-        .withStartTime(time)
-        .withDuration(elem.getStartTimeNS + elem.getDurationNS - time)
-    }
-
     val notesByStartTime = CollectionUtils.mergeMultiMaps(phrases.toList: _*)(getNotesByStartTimeNS)
     val phraseElements = mutable.MutableList[MusicalElement]()
     var activeNotes: List[MusicalElement] = List()
@@ -184,7 +174,7 @@ object JMusicParserUtils {
     for (time <- times) {
       mergeNotes(activeNotes, time).foreach(addToPhrase(_, phraseElements))
 
-      activeNotes = activeNotes.flatMap(resizeIfActive(time, _))
+      activeNotes = activeNotes.flatMap(MusicalElement.resizeIfActive(time, _))
       activeNotes ++= notesByStartTime.getOrElse(time, Set()).toList
     }
 

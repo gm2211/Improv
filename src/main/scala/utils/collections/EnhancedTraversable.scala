@@ -16,6 +16,18 @@ class EnhancedTraversable[A](val traversable: TraversableOnce[A]) {
     }
   }
 
+  /**
+   * Executes a fold left with the starting value being the first value in the list
+   * @param defaultValue Value to be returned if the list is empty
+   * @param fn
+   * @tparam K
+   * @return
+   */
+  def foldLeftWithFstAsDefault[K](defaultValue: K, defValFN: A => K, fn: (K, A) => K): K = {
+    val defValue: K = traversable.toStream.headOption.map(defValFN).getOrElse(defaultValue)
+    traversable.foldLeft[K](defValue)(fn)
+  }
+
   def sumBy[K](defaultValue: K, fn: A => K)(implicit num: Numeric[K]): K =
     traversable.foldLeft[K](defaultValue) { case (acc, elem) => num.plus(acc, fn(elem)) }
 

@@ -21,7 +21,7 @@ class JMusicMIDIParserTest extends FlatSpec {
 
   "The midi parser" should "correctly assemble a phrase" in {
     println()
-    val multiVoicePhrase = JMusicParserUtils.convertPart(parser.score.getPart(0))
+    val multiVoicePhrase = JMusicParserUtils.convertPart(parser.score.getPart(0)).getOrElse(Phrase())
     val mergedPhrase = JMusicParserUtils.mergePhrases(multiVoicePhrase).getOrElse(Phrase())
     val splitTask = () => JMusicParserUtils.splitPhrase(mergedPhrase)
 

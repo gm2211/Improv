@@ -1,6 +1,10 @@
 package representation
 
+import utils.NumericUtils
+
 import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
+import scalaz.Scalaz._
+import scala.math
 
 object MusicalElement {
   val DEFAULT_TEMPO_BPM = 120.0
@@ -19,6 +23,34 @@ object MusicalElement {
       timeUnit: TimeUnit = NANOSECONDS): BigDecimal = {
     timeUnit.toNanos(time.toLong) * tempoInBeatsPerNanoSec(tempoBPM)
   }
+
+  def isActive(timeNS: BigInt, elem: MusicalElement): Boolean =
+    elem.getStartTimeNS <= timeNS && timeNS < elem.getStartTimeNS + elem.getDurationNS
+
+  def resizeIfActive(newStartTimeNS: BigInt, elem: MusicalElement): Option[MusicalElement] = {
+    MusicalElement.isActive(newStartTimeNS, elem).fold(
+      fromNewStartTimeToPreviousEndTime(newStartTimeNS, elem),
+      None
+    )
+  }
+
+  def fromNewStartTimeToPreviousEndTime(newStartTimeNS: BigInt, elem: MusicalElement): Option[MusicalElement] = {
+    val newDuration: BigInt = elem.getStartTimeNS + elem.getDurationNS - newStartTimeNS
+    (newDuration > 0).option {
+      elem
+        .withStartTime(newStartTimeNS)
+        .withDuration(newDuration)
+    }
+  }
+
+  
+  def fromPreviousStartTimeToNewEndTime(newEndTimeNS: BigInt, elem: MusicalElement): Option[MusicalElement] = {
+    val newDuration = newEndTimeNS - elem.getStartTimeNS
+    (newDuration > 0).option(elem.withDuration(newDuration))
+  }
+
+  def split(elem: MusicalElement, timeNS: BigInt): (Option[MusicalElement], Option[MusicalElement]) =
+    (fromPreviousStartTimeToNewEndTime(timeNS, elem), fromNewStartTimeToPreviousEndTime(timeNS, elem))
 }
 
 trait MusicalElement {

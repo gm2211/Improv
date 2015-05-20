@@ -1,7 +1,7 @@
 package utils
 
 import utils.collections.{EnhancedTraversable, FasterMutableListWrapper}
-import utils.functional.MemoizedValue
+import scala.math
 
 import scala.collection.mutable
 import scala.language.implicitConversions
@@ -29,4 +29,6 @@ object ImplicitConversions {
     new EnhancedTraversable[A](traversable)
 
   implicit def toDouble(bigDecimal: BigDecimal): Double = bigDecimal.toDouble
+
+  implicit def toLong(bigInt: BigInt): Long = bigInt.toLong
 }
