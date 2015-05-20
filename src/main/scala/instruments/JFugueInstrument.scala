@@ -21,7 +21,7 @@ import scalaz.Scalaz._
 
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
   private val log = LoggerFactory.getLogger(getClass)
-  private val threadPool = Executors.newSingleThreadExecutor()
+  private val threadPool = Executors.newCachedThreadPool()
   private var _finishedPlaying = true
 
   def finishedPlaying = _finishedPlaying

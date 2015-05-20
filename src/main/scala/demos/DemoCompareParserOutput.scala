@@ -17,7 +17,7 @@ object DemoCompareParserOutput {
     myPhrases.foreach(p => println(p.getDuration(MILLISECONDS)))
     myPatterns.foreach(println)
 
-    myPatterns.foreach{ p => new Player().play(p); println("done");Thread.sleep(5000)}
+    myPatterns.foreach{ p => new Player().play(p); println("done")}
 //    new Player().play(pattern(0))
   }
 }

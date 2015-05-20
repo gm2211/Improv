@@ -3,7 +3,7 @@ package demos
 import actors.Orchestra
 import actors.composers.MIDIReaderComposer
 import actors.directors.SimpleDirector
-import actors.musicians.AIMusician
+import actors.musicians.{JFugueSynchronizedPlayer, AIMusician}
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 import midi.JMusicMIDIParser
@@ -11,7 +11,7 @@ import utils.ImplicitConversions.wrapInOption
 
 object DemoMIDIOrchestra {
   def run(filename: String) = {
-    val director = Option(SimpleDirector.builder.withSyncFrequencyMS(10000))
+    val director = Option(SimpleDirector.builder.withSyncFrequencyMS(20000))
     val orchestra = Orchestra.builder.withDirector(director).build
     val parser = JMusicMIDIParser(filename)
 
