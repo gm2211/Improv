@@ -1,7 +1,6 @@
 package utils
 
 import utils.collections.{EnhancedTraversable, FasterMutableListWrapper}
-import scala.math
 
 import scala.collection.mutable
 import scala.language.implicitConversions

@@ -4,7 +4,7 @@ package representation
 import representation.NoteName.NoteName
 import utils.collections.CollectionUtils
 
-import scala.concurrent.duration.{NANOSECONDS, MILLISECONDS, TimeUnit}
+import scala.concurrent.duration.{MILLISECONDS, NANOSECONDS, TimeUnit}
 import scala.math
 import scala.util.Try
 

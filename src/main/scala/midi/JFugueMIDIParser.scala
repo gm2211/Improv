@@ -3,7 +3,7 @@ package midi
 import java.io.File
 import javax.sound.midi.MidiSystem
 
-import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
+import instruments.InstrumentType.InstrumentType
 import org.jfugue.midi.MidiParser
 import org.jfugue.parser.ParserListener
 import org.jfugue.theory.{Chord, Note}

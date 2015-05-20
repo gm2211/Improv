@@ -3,10 +3,8 @@ package training
 import cbr.Feature
 import instruments.JFugueUtils
 import jsymbolic.features.{AverageNoteDurationFeature, MIDIFeatureExtractor}
-import jsymbolic.processing.{MIDIFeatureProcessor, MIDIIntermediateRepresentations}
+import jsymbolic.processing.MIDIFeatureProcessor
 import representation.Phrase
-
-import scala.collection.mutable.ArrayBuffer
 
 object PhraseFeatureExtractor {
   def getDefaultExtractor = {

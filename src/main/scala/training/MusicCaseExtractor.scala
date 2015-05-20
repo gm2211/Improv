@@ -4,7 +4,7 @@ import cbr._
 import instruments.InstrumentType.InstrumentType
 import midi.MIDIParser
 import representation.Phrase
-import utils.builders.{Zero, IsOnce, Once, Count}
+import utils.builders.{Count, IsOnce, Once, Zero}
 
 
 case class MusicCaseExtractorBuilder[

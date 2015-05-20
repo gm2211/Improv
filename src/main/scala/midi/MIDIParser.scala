@@ -1,6 +1,6 @@
 package midi
 
-import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
+import instruments.InstrumentType.InstrumentType
 import representation.Phrase
 
 import scala.collection.mutable

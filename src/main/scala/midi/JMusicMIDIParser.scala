@@ -4,7 +4,7 @@ import instruments.InstrumentType
 import instruments.InstrumentType.InstrumentType
 import jm.music.{data => jmData}
 import jm.util.Read
-import midi.segmentation.{SimpleSegmenter, PhraseSegmenter}
+import midi.segmentation.{PhraseSegmenter, SimpleSegmenter}
 import org.slf4j.LoggerFactory
 import representation._
 import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}

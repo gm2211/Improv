@@ -1,6 +1,6 @@
 package representation
 
-import scala.concurrent.duration.{TimeUnit, NANOSECONDS}
+import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
 
 object Rest {
   val DEFAULT_DURATION = 0

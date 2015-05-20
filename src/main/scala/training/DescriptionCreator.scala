@@ -1,5 +1,5 @@
 package training
-import cbr.{Feature, CaseDescription}
+import cbr.{CaseDescription, Feature}
 
 trait DescriptionCreator[A] {
   this: FeatureExtractor[A] =>

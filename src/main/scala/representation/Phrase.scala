@@ -1,9 +1,8 @@
 package representation
 
-import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}
+import utils.ImplicitConversions.toEnhancedTraversable
 import utils.functional.{FunctionalUtils, MemoizedFunc}
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
 import scala.math

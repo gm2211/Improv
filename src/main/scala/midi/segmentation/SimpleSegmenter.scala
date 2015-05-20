@@ -1,12 +1,11 @@
 package midi.segmentation
 
 import representation.{MusicalElement, Phrase}
-import utils.ImplicitConversions.{toEnhancedTraversable, toLong}
+import utils.ImplicitConversions.toEnhancedTraversable
 import utils.NumericUtils
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-import scala.util.Try
 
 object SimpleSegmenter {
   val DEFAULT_SUB_PHRASE_LENGTH_BPM: BigDecimal = 10

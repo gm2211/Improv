@@ -1,6 +1,6 @@
 package cbr
 
-import utils.functional.{MemoizedValue, FunctionalUtils}
+import utils.functional.{FunctionalUtils, MemoizedValue}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.language.implicitConversions
