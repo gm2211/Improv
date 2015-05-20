@@ -1,6 +1,6 @@
 package representation
 
-import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
+import scala.concurrent.duration.{NANOSECONDS, MILLISECONDS, TimeUnit}
 import scalaz.Scalaz._
 
 object MusicalElement {
@@ -26,12 +26,12 @@ object MusicalElement {
 
   def resizeIfActive(newStartTimeNS: BigInt, elem: MusicalElement): Option[MusicalElement] = {
     MusicalElement.isActive(newStartTimeNS, elem).fold(
-      fromNewStartTimeToPreviousEndTime(newStartTimeNS, elem),
+      fromNewStartTimeToPreviousEndTime(elem, newStartTimeNS),
       None
     )
   }
 
-  def fromNewStartTimeToPreviousEndTime(newStartTimeNS: BigInt, elem: MusicalElement): Option[MusicalElement] = {
+  def fromNewStartTimeToPreviousEndTime(elem: MusicalElement, newStartTimeNS: BigInt): Option[MusicalElement] = {
     require(newStartTimeNS > 0)
     val newDuration: BigInt = elem.getEndTimeNS - newStartTimeNS
     (newDuration > 0).option {
@@ -41,7 +41,7 @@ object MusicalElement {
     }
   }
 
-  def fromPreviousStartTimeToNewEndTime(newEndTimeNS: BigInt, elem: MusicalElement): Option[MusicalElement] = {
+  def fromPreviousStartTimeToNewEndTime(elem: MusicalElement, newEndTimeNS: BigInt): Option[MusicalElement] = {
     require(newEndTimeNS > 0)
     val newDuration = newEndTimeNS - elem.getStartTimeNS
     (newDuration > 0).option(elem.withDuration(newDuration))
@@ -52,8 +52,8 @@ object MusicalElement {
     var right: Option[MusicalElement] = None
 
     if (elem.getStartTimeNS <= splitTimeNS && splitTimeNS <= elem.getEndTimeNS) {
-      left = fromPreviousStartTimeToNewEndTime(splitTimeNS, elem)
-      right = fromNewStartTimeToPreviousEndTime(splitTimeNS, elem)
+      left = fromPreviousStartTimeToNewEndTime(elem, splitTimeNS)
+      right = fromNewStartTimeToPreviousEndTime(elem, splitTimeNS)
     } else if (splitTimeNS > elem.getEndTimeNS) {
       left = Some(elem)
     } else if (splitTimeNS < elem.getStartTimeNS) {
@@ -68,6 +68,15 @@ trait MusicalElement {
 
   def withStartTimeBPM(startTimeBPM: BigDecimal, tempoBPM: Double): MusicalElement =
     withStartTime(MusicalElement.fromBPM(startTimeBPM, tempoBPM))
+
+  def withEndTime(endTime: BigInt, timeUnit: TimeUnit = NANOSECONDS): MusicalElement = {
+    val duration = endTime - getStartTime(timeUnit)
+    require(duration >= 0)
+    withDuration(duration, timeUnit)
+  }
+
+  def withEndTimeBPM(endTimeBPM: BigDecimal, tempoBPM: Double): MusicalElement =
+    withEndTime(MusicalElement.fromBPM(endTimeBPM, tempoBPM))
 
   def withDuration(duration: BigInt, timeUnit: TimeUnit = NANOSECONDS): MusicalElement
 
@@ -87,4 +96,6 @@ trait MusicalElement {
   def getStartTime(timeUnit: TimeUnit): BigInt
 
   def getEndTimeNS: BigInt = getStartTimeNS + getDurationNS
+
+  override def toString: String = s"${getClass.getTypeName} => startTime: ${getStartTime(MILLISECONDS)}; duration: ${getDuration(MILLISECONDS)} "
 }

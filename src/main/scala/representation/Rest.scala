@@ -10,6 +10,7 @@ object Rest {
 case class Rest(
     durationNS: BigInt = Rest.DEFAULT_DURATION,
     startTimeNS: BigInt = Rest.DEFAULT_START_TIME) extends MusicalElement {
+
   override def getDuration(timeUnit: TimeUnit): BigInt =
     timeUnit.convert(durationNS.toLong, NANOSECONDS)
 

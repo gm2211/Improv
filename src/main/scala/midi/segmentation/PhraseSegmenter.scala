@@ -28,7 +28,6 @@ trait PhraseSegmenter {
     }
 
     for (curTime <- splitTimes if curPhrase.isDefined) {
-      println(s"curTime: ${import scala.concurrent.duration.NANOSECONDS; NANOSECONDS.toMillis(curTime.toLong)}")
       val (newPhrase, rest) = Phrase.split(curPhrase.get, curTime)
       newPhrase.foreach(phrases.+=)
       curPhrase = rest

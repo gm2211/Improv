@@ -4,7 +4,7 @@ import utils.ImplicitConversions.toEnhancedTraversable
 import utils.functional.{FunctionalUtils, MemoizedFunc}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
+import scala.concurrent.duration.{NANOSECONDS, MILLISECONDS, TimeUnit}
 import scala.math
 import scalaz.Scalaz._
 
@@ -21,7 +21,7 @@ object Phrase {
   }
 
   def computeStartTime(phrase: Phrase, timeUnit: TimeUnit): BigInt =
-    phrase.minBy(_.getDuration(timeUnit)).getDuration(timeUnit)
+    phrase.minBy(_.getStartTime(timeUnit)).getStartTime(timeUnit)
 
   def apply(): Phrase = {
     new Phrase()
@@ -83,12 +83,14 @@ object Phrase {
     for (elem <- phrase) {
       val newTimeNS = curTimeNS + elem.getDurationNS
 
-      if (newTimeNS > splitTimeNS) {
-        val (left, right) = MusicalElement.split(elem, splitTimeNS)
-        left.foreach(leftElements.+=)
-        right.foreach(rightElements.+=)
-      } else if (curTimeNS <= splitTimeNS) {
-        leftElements += elem
+      if (curTimeNS <= splitTimeNS) {
+        if (newTimeNS > splitTimeNS) {
+          val (left, right) = MusicalElement.split(elem, splitTimeNS)
+          left.foreach(leftElements.+=)
+          right.foreach(rightElements.+=)
+        } else {
+          leftElements += elem
+        }
       } else {
         rightElements += elem
       }
@@ -96,7 +98,7 @@ object Phrase {
       curTimeNS = newTimeNS
     }
 
-    (leftElements.nonEmpty.option(phrase.withMusicalElements(leftElements)),
+    (leftElements.nonEmpty.option(phrase.withMusicalElements(leftElements).withStartTime(0)),
      rightElements.nonEmpty.option(phrase.withMusicalElements(rightElements).withStartTime(0)))
   }
 }

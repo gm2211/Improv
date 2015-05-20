@@ -64,7 +64,6 @@ class JMusicMIDIParser(
 
 object JMusicParserUtils {
   private val log = LoggerFactory.getLogger(getClass)
-  private val TIME_PRECISION_NS = 100
 
   def getTempo(part: jmData.Part): Double = {
     Try(part.getTempo)
@@ -155,7 +154,10 @@ object JMusicParserUtils {
     val elements = mutable.MutableList[MusicalElement]()
     val jmNotes = phrase.getNoteList.toList.sortBy(_.getNoteStartTime.get)
 
-    jmNotes.foreach(convertNote(_).foreach(addToPhrase(_, elements)))
+    for (jmNote <- jmNotes) {
+      val convertedNote = convertNote(jmNote)
+      convertedNote.foreach(addToPhraseElements(_, elements))
+    }
 
     new Phrase(elements.toList, tempoBPM = getTempo(phrase))
   })
@@ -173,7 +175,7 @@ object JMusicParserUtils {
     val times = notesByStartTime.keySet.toList.++(endTimes).distinct.sorted
 
     for (time <- times) {
-      mergeNotes(activeNotes, time).foreach(addToPhrase(_, phraseElements))
+      mergeNotes(activeNotes, time).foreach(addToPhraseElements(_, phraseElements))
 
       activeNotes = activeNotes.flatMap(MusicalElement.resizeIfActive(time, _))
       activeNotes ++= notesByStartTime.getOrElse(time, Set()).toList
@@ -183,27 +185,25 @@ object JMusicParserUtils {
     Phrase().withMusicalElements(phraseElements)
   }
 
-  private def addToPhrase(element: MusicalElement, phrase: mutable.MutableList[MusicalElement]): Unit = {
-
-    if (phrase.isEmpty) {
+  private def addToPhraseElements(element: MusicalElement, phraseElements: mutable.MutableList[MusicalElement]): Unit = {
+    if (phraseElements.isEmpty) {
       if (element.getStartTimeNS > 0) {
-        phrase += new Rest(durationNS = element.getStartTimeNS)
+        phraseElements += new Rest(durationNS = element.getStartTimeNS)
       }
-
-      phrase += element
+      phraseElements += element
     } else {
-      val previousElem = phrase.last
+      val previousElem = phraseElements.last
       (previousElem, element) match {
         case (previousNote: Note, note: Note) if Note.areEqual(note, previousNote, duration = false) =>
-          phrase.updateLast(previousNote.withDuration(previousNote.durationNS + note.durationNS))
+          phraseElements.updateLast(previousNote.withDuration(previousNote.durationNS + note.durationNS))
         case (previousRest: Rest, rest: Rest) =>
-          phrase.updateLast(previousRest.withDuration(previousRest.durationNS + rest.durationNS))
+          phraseElements.updateLast(previousRest.withDuration(previousRest.durationNS + rest.durationNS))
         case _ =>
-          if (element.getStartTimeNS > phrase.last.getEndTimeNS + TIME_PRECISION_NS) {
-            phrase += new Rest(startTimeNS = phrase.last.getEndTimeNS,
-                               durationNS = element.getStartTimeNS)
+          if (element.getStartTimeNS > phraseElements.last.getEndTimeNS + 1) {
+            phraseElements += new Rest(startTimeNS = phraseElements.last.getEndTimeNS)
+                                    .withEndTime(element.getStartTimeNS - 1)
           }
-          phrase += element
+          phraseElements += element
       }
     }
   }
@@ -224,7 +224,7 @@ object JMusicParserUtils {
         val elem = Try {
           activeElements(index)
         }.toOption.getOrElse(Rest(durationNS = musicalElement.getDurationNS, startTimeNS = musicalElement.getStartTimeNS))
-        addToPhrase(elem, phraseElems)
+        addToPhraseElements(elem, phraseElems)
       }
     }
 
