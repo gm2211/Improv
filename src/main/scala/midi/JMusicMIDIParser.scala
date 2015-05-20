@@ -4,7 +4,7 @@ import instruments.InstrumentType
 import instruments.InstrumentType.InstrumentType
 import jm.music.{data => jmData}
 import jm.util.Read
-import midi.segmentation.{PhraseSegmenter, DefaultSegmenter$}
+import midi.segmentation.PhraseSegmenter
 import org.slf4j.LoggerFactory
 import representation._
 import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}
@@ -21,7 +21,7 @@ object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String, phraseLength: Int) = {
     val score: jmData.Score = new jmData.Score()
     Read.midi(score, filename)
-    new JMusicMIDIParser(score, DefaultSegmenter.getDefault())
+    new JMusicMIDIParser(score, PhraseSegmenter.getDefault())
   }
 }
 
