@@ -31,7 +31,7 @@ abstract class SimpleSegmenter extends PhraseSegmenter {
     }
 
     for (curTime <- splitTimes if curPhrase.isDefined) {
-      val (newPhrase, rest) = Phrase.split(phrase, curTime)
+      val (newPhrase, rest) = Phrase.split(curPhrase.get, curTime)
       newPhrase.foreach(phrases.+=)
       curPhrase = rest
     }
