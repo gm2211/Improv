@@ -11,7 +11,7 @@ import utils.ImplicitConversions.wrapInOption
 
 object DemoMIDIOrchestra {
   def run(filename: String) = {
-    val director = Option(SimpleDirector.builder.withSyncFrequencyMS(20000L))
+    val director = Option(SimpleDirector.builder.withSyncFrequencyMS(10000))
     val orchestra = Orchestra.builder.withDirector(director).build
     val parser = JMusicMIDIParser(filename)
 
