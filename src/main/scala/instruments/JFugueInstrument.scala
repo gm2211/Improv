@@ -21,8 +21,9 @@ import scalaz.Scalaz._
 
 class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
   private val log = LoggerFactory.getLogger(getClass)
-  private val threadPool = Executors.newCachedThreadPool()
+  private val threadPool = Executors.newSingleThreadExecutor()
   private var _finishedPlaying = true
+  private var curPlayer: Option[Player] = None
 
   def finishedPlaying = _finishedPlaying
 
@@ -32,6 +33,8 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
       return
     }
 
+    import scala.concurrent.duration.MILLISECONDS
+    log.debug(s"${musicalElement.getDuration(MILLISECONDS)}")
     val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
     log.debug(musicPattern.toString)
     _finishedPlaying = false
@@ -41,6 +44,7 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
   private def playWithPlayer(pattern: String): Unit =
     threadPool.submit(() => {
       val player = new Player()
+      curPlayer = Some(player)
       player.addListener(this)
       player.play(pattern)
     })
@@ -48,6 +52,9 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
   override def notify(eventNotification: async.EventNotification): Unit = {
     eventNotification match {
       case FINISHED_PLAYING =>
+        log.debug(s"${hashCode()} => Finished playing!!")
+        curPlayer.foreach(_.removeListener(this))
+        curPlayer = None
         _finishedPlaying = true
         notifyObservers(FinishedPlaying)
     }
