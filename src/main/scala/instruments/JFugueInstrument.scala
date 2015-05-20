@@ -26,7 +26,6 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
 
   def finishedPlaying = _finishedPlaying
 
-
   override def play(musicalElement: MusicalElement): Unit = {
     if (!_finishedPlaying) {
       log.debug("Still busy. Ignoring..")
@@ -89,14 +88,12 @@ object JFugueUtils {
   def convertPolyphonicPhrase(phrase: Phrase, instrumentNumber: Int): String = {
     phrase.polyphony.option {
       phrase.musicalElements.asInstanceOf[List[Phrase]].zipped.map { case musicalElements =>
-        val phrasePattern = musicalElements.map {
+        musicalElements.map {
           case Some(elem) =>
             s"@${elem.getStartTimeBPM(phrase.tempoBPM).toDouble} ${createPatternHelper(elem, instrumentNumber, phrase.tempoBPM)}"
           case _ =>
             ""
         }.mkString(" ")
-        
-        phrasePattern
       }.mkString(" ")
     }.getOrElse("")
   }

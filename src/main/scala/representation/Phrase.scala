@@ -11,8 +11,14 @@ import scalaz.Scalaz._
 object Phrase {
   val DEFAULT_START_TIME = 0.0
 
-  def computeDuration(phrase: Phrase, timeUnit: TimeUnit): BigInt =
-    phrase.sumBy(0, _.getDuration(timeUnit))
+  def computeDuration(phrase: Phrase, timeUnit: TimeUnit): BigInt = {
+    if (phrase.polyphony)
+      phrase.map(p => computeDuration(p.asInstanceOf[Phrase], timeUnit)).max
+    else {
+      val duration: BigInt = phrase.sumBy(0, _.getDuration(timeUnit))
+      duration
+    }
+  }
 
   def computeStartTime(phrase: Phrase, timeUnit: TimeUnit): BigInt =
     phrase.minBy(_.getDuration(timeUnit)).getDuration(timeUnit)
@@ -118,17 +124,18 @@ case class Phrase(
 
   require(! polyphony || canHavePolyphony)
 
+
   private def canHavePolyphony: Boolean =
     musicalElements.forall{ case p: Phrase => true; case _ => false }
 
   def withPolyphony(polyphony: Boolean = true): Option[Phrase] =
-    (! polyphony || canHavePolyphony).option(copy(polyphony = polyphony))
+    (! polyphony || canHavePolyphony).option(myCopy(polyphony = polyphony))
 
   def withMusicalElements(musicalElements: Traversable[MusicalElement]) =
-    copy(musicalElements = musicalElements.toList)
+    myCopy(musicalElements = musicalElements.toList)
 
   def withMusicalElements(musicalElements: MusicalElement*) =
-    copy(musicalElements = musicalElements.toList)
+    myCopy(musicalElements = musicalElements.toList)
 
   override def withDuration(newDuration: BigInt, timeUnit: TimeUnit): Phrase =
     scaled(BigDecimal(newDuration / getDuration(timeUnit)), timeUnit)
@@ -142,7 +149,7 @@ case class Phrase(
    */
   override def withStartTime(startTime: BigInt, timeUnit: TimeUnit): Phrase = {
     val shiftedMusicalElements = getShiftedElements(startTime, timeUnit)
-    copy(musicalElements = shiftedMusicalElements)
+    myCopy(musicalElements = shiftedMusicalElements)
   }
 
   private def getShiftedElements(startTime: BigInt, timeUnit: TimeUnit): List[MusicalElement] = {
@@ -168,10 +175,19 @@ case class Phrase(
       elem.withDuration((BigDecimal(elem.getDuration(timeUnit)) * durationRatio).toBigInt(), timeUnit)
     }
 
-    copy(musicalElements = scaledElems)
+    myCopy(musicalElements = scaledElems)
   }
 
   override def getDuration(timeUnit: TimeUnit): BigInt = duration((this, timeUnit))
   override def foreach[U](f: (MusicalElement) => U): Unit = musicalElements.foreach(f)
   override def getStartTime(timeUnit: TimeUnit): BigInt = startTime((this, timeUnit))
+
+  private def myCopy(
+      musicalElements: List[MusicalElement] = musicalElements,
+      polyphony: Boolean = polyphony,
+      tempoBPM: Double = tempoBPM): Phrase = {
+    new Phrase(musicalElements = musicalElements,
+               polyphony = polyphony,
+               tempoBPM = tempoBPM)
+  }
 }

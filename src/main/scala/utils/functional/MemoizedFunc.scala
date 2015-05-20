@@ -26,5 +26,11 @@ class MemoizedFunc[From, To](private val function: From => To) extends Serializa
    */
   def update(from: From, to: To) = results.put(from, to)
 
+  /**
+   * Returns another memoized function with a clean cache
+   * @return
+   */
+  def getFreshCopy: MemoizedFunc[From, To] = new MemoizedFunc[From, To](function)
+
   override def apply(v1: From): To = apply(v1, refresh = false)
 }
