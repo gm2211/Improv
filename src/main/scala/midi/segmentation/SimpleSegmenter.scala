@@ -25,55 +25,19 @@ abstract class SimpleSegmenter extends PhraseSegmenter {
 
   override def split(phrase: Phrase): List[Phrase] = phrase match {
     case p@Phrase(_, true, _) =>
-      splitPolyphonic(p)
+      splitPhrase(p, Phrase.splitPolyphonic)
     case p@Phrase(_, false, _) =>
       splitPhrase(p)
   }
 
-  //TODO: Rewrite this more simply
-  private def splitPolyphonic(polyphonicPhrase: Phrase) = {
-    require(polyphonicPhrase.polyphony)
-    val resultPhrases = ListBuffer[Phrase]()
-    var currentPhrases = polyphonicPhrase.map(_ => ListBuffer[MusicalElement]()).toList
-    val elements: List[Iterator[MusicalElement]] = polyphonicPhrase.musicalElements.map(_.asInstanceOf[Phrase].toIterator)
-    var activeElements = {
-      mutable.MutableList(elements
-        .toStream
-        .zipWithIndex
-        .collect { case (it, idx) if it.hasNext => (idx, it.next()) }: _*)
-    }
-    var inactiveElements = mutable.MutableList[(Int, MusicalElement)]()
-    val tempoBPM = polyphonicPhrase.tempoBPM
-    var splitTimes = getSplitTimes(polyphonicPhrase)
-    var curTimeNS: BigInt = getMinStartTime(activeElements)
-
-    while (activeElements.nonEmpty && splitTimes.nonEmpty) {
-      val (act, inact) = activeElements.partition{ case (idx, elem) => MusicalElement.isActive(curTimeNS, elem) }
-      activeElements = act
-      inactiveElements = inact
-      inactiveElements.foreach{ case (idx, elem) =>
-        currentPhrases(idx) += elem
-        Try(elements(idx).next()).foreach(newElem => activeElements.+=((idx, newElem)))
-      }
-      curTimeNS += getMinDuration(activeElements)
-
-      if (curTimeNS >= splitTimes.head) {
-        splitTimes = splitTimes.tail
-        val (newAct, newPhrase, newCurrPhrases) = createPhrases(activeElements, currentPhrases, curTimeNS, tempoBPM)
-        activeElements = newAct
-        newPhrase.foreach(resultPhrases.+=)
-        currentPhrases = newCurrPhrases
-      }
-    }
-    val (_, newPhrase, _) = createPhrases(mutable.MutableList(), currentPhrases, 0, tempoBPM, last = true)
-    (resultPhrases ++ newPhrase).toList
-  }
-
-  private def splitPhrase(phrase: Phrase): List[Phrase] = {
+  private def splitPhrase(
+      phrase: Phrase,
+      splitFN: (Phrase, BigInt) => (Option[Phrase], Option[Phrase]) = Phrase.split): List[Phrase] = {
     var curPhrase = Option(phrase)
     val phrases = ListBuffer[Phrase]()
+    val splitTimes = getSplitTimes(phrase)
 
-    for (curTime <- getSplitTimes(phrase) if curPhrase.isDefined) {
+    for (curTime <- splitTimes if curPhrase.isDefined) {
       val (newPhrase, rest) = Phrase.split(phrase, curTime)
       newPhrase.foreach(phrases.+=)
       curPhrase = rest

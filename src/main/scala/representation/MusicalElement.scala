@@ -1,10 +1,7 @@
 package representation
 
-import utils.NumericUtils
-
 import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
 import scalaz.Scalaz._
-import scala.math
 
 object MusicalElement {
   val DEFAULT_TEMPO_BPM = 120.0
@@ -35,7 +32,8 @@ object MusicalElement {
   }
 
   def fromNewStartTimeToPreviousEndTime(newStartTimeNS: BigInt, elem: MusicalElement): Option[MusicalElement] = {
-    val newDuration: BigInt = elem.getStartTimeNS + elem.getDurationNS - newStartTimeNS
+    require(newStartTimeNS > 0)
+    val newDuration: BigInt = elem.getEndTimeNS - newStartTimeNS
     (newDuration > 0).option {
       elem
         .withStartTime(newStartTimeNS)
@@ -43,14 +41,26 @@ object MusicalElement {
     }
   }
 
-  
   def fromPreviousStartTimeToNewEndTime(newEndTimeNS: BigInt, elem: MusicalElement): Option[MusicalElement] = {
+    require(newEndTimeNS > 0)
     val newDuration = newEndTimeNS - elem.getStartTimeNS
     (newDuration > 0).option(elem.withDuration(newDuration))
   }
 
-  def split(elem: MusicalElement, timeNS: BigInt): (Option[MusicalElement], Option[MusicalElement]) =
-    (fromPreviousStartTimeToNewEndTime(timeNS, elem), fromNewStartTimeToPreviousEndTime(timeNS, elem))
+  def split(elem: MusicalElement, splitTimeNS: BigInt): (Option[MusicalElement], Option[MusicalElement]) = {
+    var left: Option[MusicalElement] = None
+    var right: Option[MusicalElement] = None
+
+    if (elem.getStartTimeNS <= splitTimeNS && splitTimeNS <= elem.getEndTimeNS) {
+      left = fromPreviousStartTimeToNewEndTime(splitTimeNS, elem)
+      right = fromNewStartTimeToPreviousEndTime(splitTimeNS, elem)
+    } else if (splitTimeNS > elem.getEndTimeNS) {
+      left = Some(elem)
+    } else if (splitTimeNS < elem.getStartTimeNS) {
+      right = Some(elem)
+    }
+    (left, right)
+  }
 }
 
 trait MusicalElement {
@@ -75,4 +85,6 @@ trait MusicalElement {
   def getStartTimeNS: BigInt = getStartTime(NANOSECONDS)
 
   def getStartTime(timeUnit: TimeUnit): BigInt
+
+  def getEndTimeNS: BigInt = getStartTimeNS + getDurationNS
 }

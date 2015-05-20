@@ -7,7 +7,6 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
 import scala.math
-import scala.util.Try
 import scalaz.Scalaz._
 
 object Phrase {
@@ -47,34 +46,53 @@ object Phrase {
       case (i, _) => i
     }
   }
-  
-  def split(phrase: Phrase, splitTimeNS: BigInt): (Option[Phrase], Option[Phrase]) = {
-    require(! phrase.polyphony && phrase.nonEmpty)
-    var curTime = phrase.getStartTimeNS
-    val phraseIter = phrase.toIterator
-    val leftElements = mutable.MutableList[MusicalElement]()
 
-    do {
-      Try(phraseIter.next()).foreach{ elem =>
-        leftElements.+=(elem)
-        curTime += elem.getDurationNS
-      }
-    } while (curTime < splitTimeNS || ! phraseIter.hasNext)
+  def split(phrase: Phrase, splitTimeNS: BigInt): (Option[Phrase], Option[Phrase]) = phrase match {
+    case p@Phrase(_, true, _) =>
+      splitPolyphonic(p, splitTimeNS)
+    case p@Phrase(_, false, _) =>
+      splitNonPolyphonic(p, splitTimeNS)
+  }
 
-    val rightElements = mutable.MutableList[MusicalElement]()
+  def splitPolyphonic(phrase: Phrase, splitTimeNS: BigInt): (Option[Phrase], Option[Phrase]) = {
+    require(phrase.polyphony)
+    val left = ListBuffer[Phrase]()
+    val right = ListBuffer[Phrase]()
 
-    if (curTime > splitTimeNS) {
-      val (leftHalf, rightHalf) = MusicalElement.split(leftElements.last, splitTimeNS)
-      leftHalf.foreach(leftElements.updateLast)
-      rightHalf.foreach(rightElements.+=)
+    for (curPhrase <- phrase) {
+      val (lPhrase, rPhrase) = split(curPhrase.asInstanceOf[Phrase], splitTimeNS)
+      lPhrase.foreach(left.+=)
+      rPhrase.foreach(right.+=)
     }
 
-    if (phraseIter.hasNext) {
-      rightElements ++= phraseIter
+    (left.nonEmpty.option(phrase.withMusicalElements(left)),
+      right.nonEmpty.option(phrase.withMusicalElements(right)))
+  }
+
+  def splitNonPolyphonic(phrase: Phrase, splitTimeNS: BigInt): (Option[Phrase], Option[Phrase]) = {
+    require(! phrase.polyphony && phrase.nonEmpty)
+    var curTimeNS = phrase.getStartTimeNS
+    val leftElements = ListBuffer[MusicalElement]()
+    val rightElements = ListBuffer[MusicalElement]()
+
+    for (elem <- phrase) {
+      val newTimeNS = curTimeNS + elem.getDurationNS
+
+      if (newTimeNS > splitTimeNS) {
+        val (left, right) = MusicalElement.split(elem, splitTimeNS)
+        left.foreach(leftElements.+=)
+        right.foreach(rightElements.+=)
+      } else if (curTimeNS <= splitTimeNS) {
+        leftElements += elem
+      } else {
+        rightElements += elem
+      }
+
+      curTimeNS = newTimeNS
     }
 
     (leftElements.nonEmpty.option(phrase.withMusicalElements(leftElements)),
-     rightElements.nonEmpty.option(phrase.withMusicalElements(rightElements).withStartTime(splitTimeNS)))
+     rightElements.nonEmpty.option(phrase.withMusicalElements(rightElements).withStartTime(0)))
   }
 }
 
@@ -124,15 +142,24 @@ case class Phrase(
    * @return A phrase with all its elements shifted
    */
   override def withStartTime(startTime: BigInt, timeUnit: TimeUnit): Phrase = {
-    var curTimeNS: BigInt = timeUnit.toNanos(startTime.toLong)
+    val shiftedMusicalElements = getShiftedElements(startTime, timeUnit)
+    copy(musicalElements = shiftedMusicalElements)
+  }
+
+  private def getShiftedElements(startTime: BigInt, timeUnit: TimeUnit): List[MusicalElement] = {
+    if (polyphony) {
+      return musicalElements.map(_.withStartTime(startTime, timeUnit))
+    }
+
     val shiftedMusicalElements = ListBuffer[MusicalElement]()
+    var curTimeNS: BigInt = timeUnit.toNanos(startTime.toLong)
     for (idx <- musicalElements.indices.dropRight(1)) {
       val startTimeDeltaNS = musicalElements(idx + 1).getStartTimeNS - musicalElements(idx).getStartTimeNS
       shiftedMusicalElements += musicalElements(idx).withStartTime(curTimeNS, NANOSECONDS)
       curTimeNS += startTimeDeltaNS
     }
     shiftedMusicalElements += musicalElements.last.withStartTime(curTimeNS, NANOSECONDS)
-    copy(musicalElements = shiftedMusicalElements.toList)
+    shiftedMusicalElements.toList
   }
 
   def getMaxChordSize: Int = maxChordSize(this)
