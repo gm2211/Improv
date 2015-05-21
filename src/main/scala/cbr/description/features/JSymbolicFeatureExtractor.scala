@@ -6,8 +6,8 @@ import jsymbolic.features.{AverageNoteDurationFeature, MIDIFeatureExtractor}
 import jsymbolic.processing.MIDIFeatureProcessor
 import representation.Phrase
 
-object PhraseFeatureExtractor {
-  def getDefaultExtractor = {
+object JSymbolicFeatureExtractor {
+  def getDefault = {
     val featureExtractors = getDefaultFeatureExtractors
 
     val processor = new MIDIFeatureProcessor(
@@ -20,7 +20,7 @@ object PhraseFeatureExtractor {
       false,  // Save overall features
       "dummy", // Save path
       "dummy") // Save path for features definitions
-    new PhraseFeatureExtractor(processor) with DescriptionCreator[Phrase]
+    new JSymbolicFeatureExtractor(processor)
   }
 
   private def getDefaultFeatureExtractors: Array[MIDIFeatureExtractor] = {
@@ -28,9 +28,19 @@ object PhraseFeatureExtractor {
   }
 }
 
-class PhraseFeatureExtractor(private val processor: MIDIFeatureProcessor) extends FeatureExtractor[Phrase] {
+class JSymbolicFeatureExtractor(private val processor: MIDIFeatureProcessor) extends FeatureExtractor[Phrase] {
   override def extractFeatures(phrase: Phrase): List[(Double, Feature[Phrase])] = {
-    val features = processor.getFeatures(Array(JFugueUtils.toSequence(phrase)))
-    List((1.0,  Feature.from[Phrase](new Array[Double](0))))
+    val jsFeatures = processor.getFeatures(Array(JFugueUtils.toSequence(phrase)))
+    val features = JSymbolicUtils.convertFeatures[Phrase](jsFeatures)
+    val weight = 1.0 / features.length
+    features.map(f => (weight, f))
+  }
+
+  override def maxFeatureSize: Int = ???
+}
+
+object JSymbolicUtils {
+  def convertFeatures[A](jsFeatures: Array[Array[Array[Double]]]): List[Feature[A]] = {
+    List() // TODO: Implement this
   }
 }
