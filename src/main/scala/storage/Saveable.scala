@@ -1,6 +1,6 @@
 package storage
 
-trait FileSerialisable {
+trait Saveable {
   /**
    * Serialise the instance that implements this interface to file.
    * If no path is provided, the implementation will attempt to serialise from the file from which it was loaded
