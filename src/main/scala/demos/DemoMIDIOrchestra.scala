@@ -7,7 +7,7 @@ import actors.musicians.AIMusician
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 import midi.JMusicMIDIParser
-import net.sf.javaml.classification.KDtreeKNN
+import representation.Phrase
 import storage.KDTreeIndex
 import utils.ImplicitConversions.wrapInOption
 
@@ -22,7 +22,8 @@ object DemoMIDIOrchestra {
           .withMIDIParser(JMusicMIDIParser)
           .build
       case "cbr" =>
-        new CBRComposer(KDTreeIndex.getDefault)
+        val index = KDTreeIndex.loadDefault[Phrase].get
+        new CBRComposer(index)
     }
   }
 
