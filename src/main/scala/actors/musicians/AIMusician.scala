@@ -47,7 +47,6 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
   private val musicComposer: Composer = builder.composer.getOrElse(new RandomComposer)
   private val messageOnly: Boolean = builder.messageOnly.get
 
-  //TODO: Consider using a cache (http://spray.io/documentation/1.2.3/spray-caching/)
   private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = CollectionUtils.createHashMultimap
   private var currentMusicTime: Long = 0
 

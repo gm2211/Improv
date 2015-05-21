@@ -16,8 +16,6 @@ class TunePlayTest extends FlatSpec with MockFactory with Matchers {
 
 
     val musicianBuilder = (instrType: OvertoneInstrumentType) => {
-//      val instrument = mock[Instrument]
-//      (instrument.play _).expects(*) //TODO: Actually verify that the right thing is played
       val instrument = new OvertoneInstrument
       AIMusician.builder.withInstrument(instrument)
     }

@@ -13,7 +13,7 @@ import utils.collections.CollectionUtils
 import scala.collection.mutable
 
 object JFugueMIDIParser extends MIDIParserFactory {
- override def apply(filename: String, phraseLength: Int): JFugueMIDIParser = {
+ override def apply(filename: String): JFugueMIDIParser = {
     val parser = new MidiParser()
     val parserListener = new JFugueParseListener
     parser.addParserListener(parserListener)

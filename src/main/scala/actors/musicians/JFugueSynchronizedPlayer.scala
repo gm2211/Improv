@@ -18,8 +18,11 @@ class JFugueSynchronizedPlayer extends Musician {
   val player: Player = new Player()
 
   private def prepare(messages: mutable.Set[MusicInfoMessage]): String = {
-    val pattern = JFugueUtils.mergePatterns(messages.map(message => JFugueUtils.createPattern(message.musicalElement, message.instrument.instrumentNumber)))
-    println(pattern) //TODO: Remove print statement
+    val pattern = JFugueUtils.mergePatterns(
+      messages.map(message =>
+        JFugueUtils.createPattern(message.musicalElement, message.instrument.instrumentNumber))
+    )
+
     pattern
   }
 

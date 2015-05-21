@@ -1,5 +1,7 @@
 package cbr
 
+import cbr.description.CaseDescription
+
 trait CaseIndex[CD <: CaseDescription, CaseSolution] extends Traversable[CaseDescription] {
 
   /**

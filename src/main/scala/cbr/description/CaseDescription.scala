@@ -1,5 +1,6 @@
-package cbr
+package cbr.description
 
+import cbr.Feature
 import utils.functional.{FunctionalUtils, MemoizedValue}
 
 import scala.collection.mutable.ArrayBuffer

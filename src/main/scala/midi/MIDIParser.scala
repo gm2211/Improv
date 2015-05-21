@@ -6,10 +6,7 @@ import representation.Phrase
 import scala.collection.mutable
 
 trait MIDIParserFactory {
-  // TODO: Define exactly what length means
-  val DEFAULT_PHRASE_LENGTH = 10
-
-  def apply(filename: String, phraseLength: Int = DEFAULT_PHRASE_LENGTH): MIDIParser
+  def apply(filename: String): MIDIParser
 }
 
 trait MIDIParser {

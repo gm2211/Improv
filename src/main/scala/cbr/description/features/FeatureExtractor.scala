@@ -1,4 +1,4 @@
-package training
+package cbr.description.features
 
 import cbr.Feature
 

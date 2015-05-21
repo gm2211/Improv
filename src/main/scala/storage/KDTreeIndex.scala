@@ -1,8 +1,10 @@
 package storage
 
-import cbr.{CaseDescription, CaseIndex, CaseSolutionStore}
+import cbr.description.CaseDescription
+import cbr.{CaseIndex, CaseSolutionStore}
 import com.fasterxml.jackson.annotation.{JsonCreator, JsonProperty}
 import net.sf.javaml.core.kdtree.KDTree
+import representation.Phrase
 import utils.{IOUtils, SerialisationUtils}
 
 import scala.collection.JavaConversions._
@@ -11,14 +13,19 @@ import scala.math
 import scala.util.Try
 
 object KDTreeIndex {
-  val DEFAULT_KDTREE_REBALANCING_THRESHOLD = 1000
+  private val DEFAULT_KDTREE_REBALANCING_THRESHOLD = 1000
+  private val DEFAULT_INDEX_RESOURCE: String = "knowledgeBase/caseIndex"
+  private val DEFAULT_SOLUTION_STORE_RESOURCE: String = "knowledgeBase/solutionStore"
+
+  def getDefault[CD <: CaseDescription : Manifest, CS : Manifest]: KDTreeIndex[CD, CS] =
+    KDTreeIndex.loadOrCreate(IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
 
   def loadOrCreate[CD <: CaseDescription : Manifest, CS : Manifest](
       filename: String,
       descriptionSize: Int = 10): KDTreeIndex[CD, CS] = {
     SerialisationUtils.deserialise[KDTreeIndex[CD, CS]](filename).toOption.getOrElse{
-      val store = new MapDBSolutionStore[CS](IOUtils.getResourcePath("knowledgeBase/solutionStore"))
-      new KDTreeIndex[CD, CS](store, descriptionSize, IOUtils.getResourcePath("knowledgeBase/caseIndex"))
+      val store = new MapDBSolutionStore[CS](IOUtils.getResourcePath(DEFAULT_SOLUTION_STORE_RESOURCE))
+      new KDTreeIndex[CD, CS](store, descriptionSize, IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
     }
   }
 }

@@ -1,6 +1,7 @@
-package training
+package cbr.description.features
 
 import cbr.Feature
+import cbr.description.DescriptionCreator
 import instruments.JFugueUtils
 import jsymbolic.features.{AverageNoteDurationFeature, MIDIFeatureExtractor}
 import jsymbolic.processing.MIDIFeatureProcessor

@@ -18,7 +18,7 @@ import scala.util.Try
 import scalaz.Scalaz._
 
 object JMusicMIDIParser extends MIDIParserFactory {
-  override def apply(filename: String, phraseLength: Int) = {
+  override def apply(filename: String) = {
     val score: jmData.Score = new jmData.Score()
     Read.midi(score, filename)
     new JMusicMIDIParser(score, PhraseSegmenter.getDefault())

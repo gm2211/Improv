@@ -1,6 +1,8 @@
 package training
 
-import cbr.{CaseDescription, CaseIndex}
+import cbr.CaseIndex
+import cbr.description.CaseDescription
+import cbr.description.features.PhraseFeatureExtractor
 import instruments.InstrumentType.PIANO
 import midi.JMusicMIDIParser
 import representation.Phrase
