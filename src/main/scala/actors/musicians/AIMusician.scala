@@ -51,23 +51,21 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
   private var currentMusicTime: Long = 0
 
   def play(time: Long): Unit = {
-    val musicalElements: Traversable[MusicalElement] = musicInfoMessageCache.get(time)
-      .map(messages => messages.map(_.musicalElement)).getOrElse(Set())
-
-    val phrase = Phrase().withMusicalElements(musicalElements)
+    val phrases: Traversable[Phrase] = musicInfoMessageCache.get(time)
+      .map(messages => messages.map(_.phrase)).getOrElse(Set())
 
     musicInfoMessageCache.remove(time)
 
-    val responsePhrase = musicComposer.compose(phrase)
+    val responsePhrase = musicComposer.compose(phrases)
     responsePhrase.foreach(play)
   }
 
-  override def play(musicalElement: MusicalElement): Unit = {
-    if (!messageOnly) instrument.play(musicalElement)
+  override def play(phrase: Phrase): Unit = {
+    if (!messageOnly) instrument.play(phrase)
 
     ActorUtils.broadcast(
       MusicInfoMessage(
-        musicalElement,
+        phrase,
         currentMusicTime,
         instrument.instrumentType))
   }

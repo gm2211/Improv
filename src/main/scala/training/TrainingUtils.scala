@@ -8,15 +8,15 @@ import midi.JMusicMIDIParser
 import representation.Phrase
 
 object TrainingUtils {
-  def addCasesToIndex(index: CaseIndex[CaseDescription, Phrase], filename: String): Unit =
+  def addCasesToIndex(index: CaseIndex[CaseDescription[Phrase], Phrase], filename: String): Unit =
     getCasesFromMIDI(filename).foreach(tup => (index.addCase _).tupled(tup))
 
-  def getCasesFromMIDI(filename: String): List[(CaseDescription, Phrase)] = {
+  def getCasesFromMIDI(filename: String): List[(CaseDescription[Phrase], Phrase)] = {
     val extractor = MusicCaseExtractor.builder
-      .withMIDIParser(JMusicMIDIParser(filename))
+      .withMIDIParser(JMusicMIDIParser)
       .withDescriptionCreator(PhraseFeatureExtractor.getDefaultExtractor)
       .build
 
-    extractor.getCasesFromPart(0, PIANO(1))
+    extractor.getCases(filename)
   }
 }

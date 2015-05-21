@@ -1,20 +1,20 @@
 package cbr.description
 
-import cbr.Feature
+import cbr.description.features.Feature
 import utils.functional.{FunctionalUtils, MemoizedValue}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.language.implicitConversions
 
 object CaseDescription {
-  implicit def fromArray(array: Array[Double]): CaseDescription = new CaseDescription {
+  implicit def fromArray[Case](array: Array[Double]): CaseDescription[Case] = new CaseDescription[Case] {
     override def getSignature: Array[Double] = array
-    override val weightedFeatures: List[(Double, Feature)] = List()
+    override val weightedFeatures: List[(Double, Feature[Case])] = List()
   }
 }
 
-trait CaseDescription {
-  val weightedFeatures: List[(Double, Feature)]
+trait CaseDescription[Case] {
+  val weightedFeatures: List[(Double, Feature[Case])]
   val size: MemoizedValue[Int] = FunctionalUtils.memoized(weightedFeatures.foldLeft(0)(_ + _._2.size))
 
   /**

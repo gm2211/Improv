@@ -1,12 +1,11 @@
 package cbr.description
 
-import cbr.Feature
-import cbr.description.features.FeatureExtractor
+import cbr.description.features.{Feature, FeatureExtractor}
 
-trait DescriptionCreator[A] {
-  this: FeatureExtractor[A] =>
+trait DescriptionCreator[Element] {
+  this: FeatureExtractor[Element] =>
 
-  def createCaseDescription(elem: A): CaseDescription = new CaseDescription {
-    override val weightedFeatures: List[(Double, Feature)] = extractFeatures(elem)
+  def createCaseDescription(elem: Element): CaseDescription[Element] = new CaseDescription[Element] {
+    override val weightedFeatures: List[(Double, Feature[Element])] = extractFeatures(elem)
   }
 }

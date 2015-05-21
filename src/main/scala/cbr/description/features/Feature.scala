@@ -1,13 +1,10 @@
-package cbr
+package cbr.description.features
 
 object Feature {
-  def from(array: Array[Double]) = new Feature {
-    override def getSignature: Array[Double] = array
-    override def size: Int = array.length
-  }
+  def from[Element](array: Array[Double]) = new SimpleFeature[Element](array)
 }
 
-trait Feature {
+trait Feature[Element] {
   /**
    * Returns the size of this feature in terms of the size of its signature
    * @return

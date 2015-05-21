@@ -3,9 +3,9 @@ package actors.musicians
 import instruments.JFugueUtils
 import messages.{MusicInfoMessage, SyncMessage}
 import org.jfugue.player.Player
-import representation.MusicalElement
-import utils.collections.MultiCache
+import representation.Phrase
 import utils.ImplicitConversions.anyToRunnable
+import utils.collections.MultiCache
 
 import scala.collection.mutable
 
@@ -20,7 +20,7 @@ class JFugueSynchronizedPlayer extends Musician {
   private def prepare(messages: mutable.Set[MusicInfoMessage]): String = {
     val pattern = JFugueUtils.mergePatterns(
       messages.map(message =>
-        JFugueUtils.createPattern(message.musicalElement, message.instrument.instrumentNumber))
+        JFugueUtils.createPattern(message.phrase, message.instrument.instrumentNumber))
     )
 
     pattern
@@ -38,5 +38,5 @@ class JFugueSynchronizedPlayer extends Musician {
       musicInfoMessageCache.remove(syncMessage.time - 1)
   }
 
-  override def play(musicalElement: MusicalElement): Unit = ()
+  override def play(phrase: Phrase): Unit = ()
 }

@@ -8,7 +8,7 @@ import utils.IOUtils
 
 object DemoPopulateDB {
   def run(filename: String): Unit = {
-    val index = KDTreeIndex.getDefault[CaseDescription, Phrase]
+    val index = KDTreeIndex.getDefault[CaseDescription[Phrase], Phrase]
 //    TrainingUtils.addCasesToIndex(index, filename)
     println(TrainingUtils.getCasesFromMIDI(filename))
     index.save()

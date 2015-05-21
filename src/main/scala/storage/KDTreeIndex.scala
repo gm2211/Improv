@@ -17,10 +17,10 @@ object KDTreeIndex {
   private val DEFAULT_INDEX_RESOURCE: String = "knowledgeBase/caseIndex"
   private val DEFAULT_SOLUTION_STORE_RESOURCE: String = "knowledgeBase/solutionStore"
 
-  def getDefault[CD <: CaseDescription : Manifest, CS : Manifest]: KDTreeIndex[CD, CS] =
+  def getDefault[CD <: CaseDescription[CS] : Manifest, CS : Manifest]: KDTreeIndex[CD, CS] =
     KDTreeIndex.loadOrCreate(IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
 
-  def loadOrCreate[CD <: CaseDescription : Manifest, CS : Manifest](
+  def loadOrCreate[CD <: CaseDescription[CS] : Manifest, CS : Manifest](
       filename: String,
       descriptionSize: Int = 10): KDTreeIndex[CD, CS] = {
     SerialisationUtils.deserialise[KDTreeIndex[CD, CS]](filename).toOption.getOrElse{
@@ -32,21 +32,21 @@ object KDTreeIndex {
 
 
 @JsonCreator
-class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
-      @JsonProperty("store") private val store: CaseSolutionStore[CaseSolution],
+class KDTreeIndex[CD <: CaseDescription[Case], Case] (
+      @JsonProperty("store") private val store: CaseSolutionStore[Case],
       @JsonProperty("ignored") descriptionSize: Int,
       @JsonProperty("path") private var path: String
-    )  extends CaseIndex[CD, CaseSolution] with FileSerialisable {
+    )  extends CaseIndex[CD, Case] with FileSerialisable {
   @JsonProperty("kdTree")
   private val kdTree = new KDTree[String](descriptionSize, KDTreeIndex.DEFAULT_KDTREE_REBALANCING_THRESHOLD)
 
-  def addCase(caseDescription: CD, caseSolution: CaseSolution): Unit = {
+  def addCase(caseDescription: CD, caseSolution: Case): Unit = {
     removeCase(caseDescription) // The implementation of KDTree I'm using does not support multiple keys
     val storedSolutionID = store.addSolution(caseSolution)
     kdTree.insert(caseDescription.getSignature, storedSolutionID)
   }
 
-  override def findKNearestNeighbours(caseDescription: CD, k: Int): Traversable[CaseSolution] = {
+  override def findKNearestNeighbours(caseDescription: CD, k: Int): Traversable[Case] = {
     val maxNumOfNeighbours = math.min(k, kdTree.getNodeCount)
     Try(kdTree.nearest(caseDescription.getSignature, maxNumOfNeighbours).toList)
       .toOption
@@ -66,7 +66,7 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
     removeEntry(key)
   }
 
-  override def foreach[U](f: (CaseDescription) => U): Unit = {
+  override def foreach[U](f: (CaseDescription[Case]) => U): Unit = {
     kdTree.withFilter(!_.isDeleted).foreach( node => f(node.getKey.getCoord))
   }
 

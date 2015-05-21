@@ -1,7 +1,5 @@
 package cbr.description.features
 
-import cbr.Feature
-
-trait FeatureExtractor[A] {
-  def extractFeatures(elem: A): List[(Double, Feature)]
+trait FeatureExtractor[Element] {
+  def extractFeatures(elem: Element): List[(Double, Feature[Element])]
 }

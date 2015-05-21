@@ -5,7 +5,7 @@ import representation.Phrase
 /**
  * Extracts cases from a file
  */
-trait CaseExtractor[CaseSolution] {
+trait CaseExtractor[Case] {
 
-  def getCases(filename: String): List[(CaseDescription, CaseSolution)]
+  def getCases(filename: String): List[(CaseDescription[Case], Case)]
 }

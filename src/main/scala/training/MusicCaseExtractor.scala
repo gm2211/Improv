@@ -13,7 +13,7 @@ case class MusicCaseExtractorBuilder[
     midiParserFactory: Option[MIDIParserFactory] = None,
     descriptionCreator: Option[DescriptionCreator[Phrase]] = None) {
 
-  def withMIDIParser(mIDIParserFactory: MIDIParserFactory) =
+  def withMIDIParser(midiParserFactory: MIDIParserFactory) =
     copy[Once, DescriptionCreatorCount](midiParserFactory = Some(midiParserFactory))
 
   def withDescriptionCreator(descriptionCreator: DescriptionCreator[Phrase]) =
@@ -35,7 +35,7 @@ class MusicCaseExtractor (builder: MusicCaseExtractorBuilder[Once, Once]) extend
   private val parserFactory: MIDIParserFactory = builder.midiParserFactory.get
   private val descriptionCreator: DescriptionCreator[Phrase] = builder.descriptionCreator.get
 
-  override def getCases(filename: String): List[(CaseDescription, Phrase)] = {
+  override def getCases(filename: String): List[(CaseDescription[Phrase], Phrase)] = {
     val parser = parserFactory.apply(filename)
     parser.getPartIndexByInstrument.flatMap { case (instrumentType, partIndices) =>
       val parts = partIndices.map(parser.getMultiVoicePhrases)
@@ -44,11 +44,13 @@ class MusicCaseExtractor (builder: MusicCaseExtractorBuilder[Once, Once]) extend
   }
 
   private def getCasesFromParts(
-    parts: Traversable[Traversable[Phrase]],
-    instrumentType: InstrumentType): List[(CaseDescription, Phrase)] =
+      parts: Traversable[Traversable[Phrase]],
+      instrumentType: InstrumentType): List[(CaseDescription[Phrase], Phrase)] =
     parts.flatMap(part => getCasesFromPart(part, instrumentType)).toList
 
-  private def getCasesFromPart(partPhrases: Traversable[Phrase], instrumentType: InstrumentType): List[(CaseDescription, Phrase)] = {
+  private def getCasesFromPart(
+      partPhrases: Traversable[Phrase],
+      instrumentType: InstrumentType): List[(CaseDescription[Phrase], Phrase)] = {
     var curPhrase = partPhrases.headOption
 
     for (nextPhrase <- partPhrases.drop(1).toList) yield {

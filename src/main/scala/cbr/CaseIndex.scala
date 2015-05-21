@@ -2,7 +2,7 @@ package cbr
 
 import cbr.description.CaseDescription
 
-trait CaseIndex[CD <: CaseDescription, CaseSolution] extends Traversable[CaseDescription] {
+trait CaseIndex[CD <: CaseDescription[Case], Case] extends Traversable[CaseDescription[Case]] {
 
   /**
    * Finds the `k` nearest neighbours of the specified case
@@ -10,14 +10,14 @@ trait CaseIndex[CD <: CaseDescription, CaseSolution] extends Traversable[CaseDes
    * @param k number of neighbours to be retrieved
    * @return A traversable of up to `k` neighbours
    */
-  def findKNearestNeighbours(caseDescription: CD, k: Int): Traversable[CaseSolution]
+  def findKNearestNeighbours(caseDescription: CD, k: Int): Traversable[Case]
 
   /**
    * Adds a case to the index
    * @param caseDescription Description of the case
    * @param caseSolution Solution of the case
    */
-  def addCase(caseDescription: CD, caseSolution: CaseSolution): Unit
+  def addCase(caseDescription: CD, caseSolution: Case): Unit
 
   /**
    * Removes a case from the index

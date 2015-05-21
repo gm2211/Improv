@@ -1,6 +1,5 @@
 package cbr.description.features
 
-import cbr.Feature
 import cbr.description.DescriptionCreator
 import instruments.JFugueUtils
 import jsymbolic.features.{AverageNoteDurationFeature, MIDIFeatureExtractor}
@@ -30,8 +29,8 @@ object PhraseFeatureExtractor {
 }
 
 class PhraseFeatureExtractor(private val processor: MIDIFeatureProcessor) extends FeatureExtractor[Phrase] {
-  override def extractFeatures(phrase: Phrase): List[(Double, Feature)] = {
+  override def extractFeatures(phrase: Phrase): List[(Double, Feature[Phrase])] = {
     val features = processor.getFeatures(Array(JFugueUtils.toSequence(phrase)))
-    List((1.0,  Feature.from(new Array[Double](0))))
+    List((1.0,  Feature.from[Phrase](new Array[Double](0))))
   }
 }

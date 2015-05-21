@@ -1,10 +1,10 @@
 package messages
 
 import instruments.InstrumentType.InstrumentType
-import representation.MusicalElement
+import representation.{Phrase, MusicalElement}
 
 case class MusicInfoMessage(
-  musicalElement: MusicalElement,
+  phrase: Phrase,
   time: Long,
   instrument: InstrumentType) extends Message {
 }
