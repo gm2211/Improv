@@ -28,16 +28,14 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
   def finishedPlaying = _finishedPlaying
 
   override def play(musicalElement: MusicalElement): Unit = {
-    if (!_finishedPlaying) {
-      log.debug("Still busy. Ignoring..")
-      return
-    }
+//    if (!_finishedPlaying) {
+//      log.debug("Still busy. Ignoring..")
+//      return
+//    }
 
-    import scala.concurrent.duration.MILLISECONDS
-    log.debug(s"${musicalElement.getDuration(MILLISECONDS)}")
     val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
     log.debug(musicPattern.toString)
-    _finishedPlaying = false
+//    _finishedPlaying = false
     playWithPlayer(musicPattern.toString)
   }
 
@@ -52,10 +50,10 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
   override def notify(eventNotification: async.EventNotification): Unit = {
     eventNotification match {
       case FINISHED_PLAYING =>
-        log.debug(s"${hashCode()} => Finished playing!!")
+        log.debug(s"$instrumentType => Finished playing!!")
         curPlayer.foreach(_.removeListener(this))
         curPlayer = None
-        _finishedPlaying = true
+//        _finishedPlaying = true
         notifyObservers(FinishedPlaying)
     }
   }
