@@ -45,7 +45,7 @@ class JMusicMIDIParser(
     multiVoicePhrase.map(split).getOrElse(List())
   })
 
-  override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] = getMultiVoicePhrasesM(partNum)
+  override def getMultiVoicePhrases(partNum: Int): List[Phrase] = getMultiVoicePhrasesM(partNum).toList
 
   private val partIndexByInstrumentM = FunctionalUtils.memoized[mutable.MultiMap[InstrumentType, Int]]({
     val partsArray = score.getPartArray

@@ -13,7 +13,7 @@ trait MIDIParser {
 
   def getPhrases(partNum: Int): Traversable[Phrase]
 
-  def getMultiVoicePhrases(partNum: Int): Traversable[Phrase]
+  def getMultiVoicePhrases(partNum: Int): List[Phrase]
 
   def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int]
 }

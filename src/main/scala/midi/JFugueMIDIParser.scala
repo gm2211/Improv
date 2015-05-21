@@ -28,7 +28,7 @@ class JFugueMIDIParser extends MIDIParser {
 
   override def getPhrases(partNum: Int): Traversable[Phrase] = List()
 
-  override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] = List()
+  override def getMultiVoicePhrases(partNum: Int): List[Phrase] = List()
 }
 
 class JFugueParseListener extends ParserListener {
