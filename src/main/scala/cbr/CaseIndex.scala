@@ -1,6 +1,6 @@
 package cbr
 
-import cbr.description.{DescriptionCreator, CaseDescription}
+import cbr.description.{CaseDescription, DescriptionCreator}
 
 trait CaseIndex[Problem] extends Traversable[CaseDescription[Problem]] {
   val descriptionCreator: DescriptionCreator[Problem]

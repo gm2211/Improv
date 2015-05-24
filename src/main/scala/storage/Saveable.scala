@@ -1,5 +1,7 @@
 package storage
 
+import scala.util.Try
+
 trait Saveable {
   /**
    * Serialise the instance that implements this interface to file.
@@ -7,5 +9,5 @@ trait Saveable {
    * @param path Path of the file to which the instance should be serialised
    * @return
    */
-  def save(path: Option[String] = None): Boolean
+  def save(path: Option[String] = None): Try[Boolean]
 }

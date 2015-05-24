@@ -1,14 +1,16 @@
 package cbr.description
 
 import cbr.description.features.{Feature, FeatureExtractor}
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type
+import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
 import representation.Phrase
 
-object DescriptionCreator {
-  def getDefaultPhraseDescriptionCreator: DescriptionCreator[Phrase] = new DescriptionCreator[Phrase] {
-    override val featureExtractor: FeatureExtractor[Phrase] = FeatureExtractor.getDefault
-  }
+object PhraseDescriptionCreators extends DescriptionCreatorFactory[Phrase] {
+  def getDefault: DescriptionCreator[Phrase] = new JSymbolicPhraseDescriptionCreator
+  override def make = getDefault
 }
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 trait DescriptionCreator[Element] {
   val featureExtractor: FeatureExtractor[Element]
 
@@ -16,7 +18,7 @@ trait DescriptionCreator[Element] {
    * Returns the maximum of CaseDescription(s) that can be created by this creator
    * @return Max description size
    */
-  def getDescriptionSize: Int = featureExtractor.maxFeatureSize
+  def getDescriptionSize: Int = featureExtractor.totalFeaturesSize
 
   /**
    * Creates a description for the provided element by using the feature extractor to extract features from the case
