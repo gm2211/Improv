@@ -1,8 +1,7 @@
 package cbr.description
 
 import cbr.description.features.{Feature, FeatureExtractor}
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import representation.Phrase
 
 object PhraseDescriptionCreators extends DescriptionCreatorFactory[Phrase] {

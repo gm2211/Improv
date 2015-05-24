@@ -1,10 +1,9 @@
 package storage
 
-import cbr.description.{DescriptionCreatorFactory, DescriptionCreator, CaseDescription}
+import cbr.description.{CaseDescription, DescriptionCreator}
 import cbr.{CaseIndex, CaseSolutionStore}
-import com.fasterxml.jackson.annotation.{JsonIgnore, JsonCreator, JsonProperty}
+import com.fasterxml.jackson.annotation.{JsonCreator, JsonProperty}
 import net.sf.javaml.core.kdtree.KDTree
-import representation.Phrase
 import utils.{IOUtils, SerialisationUtils}
 
 import scala.collection.JavaConversions._
@@ -67,7 +66,7 @@ class KDTreeIndex[Problem] (
     kdTree.insert(problemDescription.getSignature, storedSolutionID)
   }
 
-  override def findSolutionsToSimilarProblems(caseDescription: CaseDescription[Problem], k: Int): Traversable[Solution] = {
+  override def findSolutionsToSimilarProblems(caseDescription: CaseDescription[Problem], k: Int): List[Solution] = {
     val maxNumOfNeighbours = math.min(k, kdTree.getNodeCount)
     Try(kdTree.nearest(caseDescription.getSignature, maxNumOfNeighbours).toList)
       .toOption
@@ -99,8 +98,9 @@ class KDTreeIndex[Problem] (
    * Note: My modified version of KDTree will already re-balance itself every time
    * a certain threshold of nodes marked as deleted
    */
-  def compact(): Unit = {
+  def compact(): KDTreeIndex.this.type = {
     kdTree.rebalance()
+    this
   }
 
   override def foreach[U](f: (CaseDescription[Problem]) => U): Unit = {

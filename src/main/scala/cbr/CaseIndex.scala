@@ -12,7 +12,7 @@ trait CaseIndex[Problem] extends Traversable[CaseDescription[Problem]] {
    * @param k number of similar problems to be retrieved
    * @return A traversable of up to `k` solutions
    */
-  def findSolutionsToSimilarProblems(problem: Problem, k: Int): Traversable[Solution] = {
+  def findSolutionsToSimilarProblems(problem: Problem, k: Int): List[Solution] = {
     findSolutionsToSimilarProblems(descriptionCreator.createCaseDescription(problem), k)
   }
   
@@ -22,7 +22,7 @@ trait CaseIndex[Problem] extends Traversable[CaseDescription[Problem]] {
    * @param k number of similar problems to be retrieved
    * @return A traversable of up to `k` solutions
    */
-  def findSolutionsToSimilarProblems(problemDescription: CaseDescription[Problem], k: Int): Traversable[Solution]
+  def findSolutionsToSimilarProblems(problemDescription: CaseDescription[Problem], k: Int): List[Solution]
 
   /**
    * Adds a solution to a problem to the index
@@ -65,5 +65,5 @@ trait CaseIndex[Problem] extends Traversable[CaseDescription[Problem]] {
   /**
    * Compacts the index potentially removing entries marked for removal
    */
-  def compact(): Unit
+  def compact(): this.type
 }

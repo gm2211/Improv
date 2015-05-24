@@ -1,6 +1,6 @@
 package utils
 
-import java.io.{RandomAccessFile, FileInputStream, FileOutputStream}
+import java.io.{FileInputStream, FileOutputStream, RandomAccessFile}
 
 import com.google.common.io.ByteStreams
 

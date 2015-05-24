@@ -31,9 +31,8 @@ object JSymbolicPhraseFeatureExtractor {
 class JSymbolicPhraseFeatureExtractor(private val processor: MIDIFeatureProcessor) extends FeatureExtractor[Phrase] {
   override def extractFeatures(phrase: Phrase): List[(Double, Feature[Phrase])] = {
     val jsFeatures = processor.getFeatures(Array(JFugueUtils.toSequence(phrase)))
-//    val features = JSymbolicUtils.convertFeatures[Phrase](jsFeatures)
-    val features = (1 to totalFeaturesSize).map(i => Feature.from[Phrase](Array.fill[Double](1)(0))).toList //FIXME: use JSymbolicUtils instead
-    val weight = 1.0 / features.length
+    val features = JSymbolicUtils.convertFeatures[Phrase](jsFeatures)
+    val weight = 1.0 / features.length // TODO: Play around with weights?
     features.map(f => (weight, f))
   }
 
@@ -43,6 +42,9 @@ class JSymbolicPhraseFeatureExtractor(private val processor: MIDIFeatureProcesso
 
 object JSymbolicUtils {
   def convertFeatures[A](jsFeatures: Array[Array[Array[Double]]]): List[Feature[A]] = {
-    ???
+    require(jsFeatures.length == 1)
+    for (featureValues <- jsFeatures(0).toList) yield {
+      Feature.from[A](featureValues)
+    }
   }
 }

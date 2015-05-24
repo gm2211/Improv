@@ -4,7 +4,7 @@ import actors.composers.{Composer, RandomComposer}
 import akka.actor.{ActorLogging, ActorSystem, Props}
 import instruments.Instrument
 import messages.{MusicInfoMessage, SyncMessage}
-import representation.{MusicalElement, Phrase}
+import representation.Phrase
 import utils.ActorUtils
 import utils.builders.{Count, IsOnce, Once, Zero}
 import utils.collections.CollectionUtils

@@ -4,7 +4,7 @@ import utils.ImplicitConversions.toEnhancedTraversable
 import utils.functional.{FunctionalUtils, MemoizedFunc}
 
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.duration.{NANOSECONDS, MILLISECONDS, TimeUnit}
+import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
 import scala.math
 import scalaz.Scalaz._
 

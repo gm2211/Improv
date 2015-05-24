@@ -1,7 +1,6 @@
 package cbr.description.features
 
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type
-import com.fasterxml.jackson.annotation.{JsonSubTypes, JsonTypeInfo}
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 
 object FeatureExtractor {
   def getDefaultForPhrase = JSymbolicPhraseFeatureExtractor.getDefault

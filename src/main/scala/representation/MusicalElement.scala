@@ -1,6 +1,6 @@
 package representation
 
-import scala.concurrent.duration.{NANOSECONDS, MILLISECONDS, TimeUnit}
+import scala.concurrent.duration.{MILLISECONDS, NANOSECONDS, TimeUnit}
 import scalaz.Scalaz._
 
 object MusicalElement {
