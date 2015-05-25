@@ -2,10 +2,10 @@ package utils.collections
 
 import scala.collection.mutable
 import scala.math
-import scala.util.Random
+import scala.util.{Try, Random}
 
 object CollectionUtils {
-  
+
   def mergeMultiMaps[K, V, A](multiMaps: A*)(implicit fn: A => mutable.MultiMap[K, V]): mutable.MultiMap[K, V] = {
     val mergedMMap = createHashMultimap[K, V]
     for (mmap <- multiMaps; (key, values) <- mmap; value <- values) {
@@ -42,6 +42,14 @@ object CollectionUtils {
     new mutable.HashMap[Keys, mutable.Set[Values]]() with mutable.MultiMap[Keys, Values] {
       override def makeSet = new mutable.LinkedHashSet()
     }
+  }
+
+  def mostFrequent[Element](elements: Iterable[Element]): Option[Element] = {
+    Try(elements.groupBy(identity).maxBy(_._2.size)._1).toOption
+  }
+
+  def print[Elem](elements: Traversable[Elem]): Unit = {
+    println(s"{${elements.mkString(",")}}")
   }
 }
 

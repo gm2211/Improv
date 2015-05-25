@@ -1,6 +1,7 @@
 package cbr.description.features.extractors.phrase
 
 import cbr.description.features.Feature
+import cbr.description.features.extractors.WeightedFeatureExtractor
 import instruments.JFugueUtils
 import jsymbolic.features._
 import jsymbolic.processing.MIDIFeatureProcessor

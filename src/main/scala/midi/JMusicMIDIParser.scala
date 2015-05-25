@@ -133,7 +133,7 @@ object JMusicParserUtils {
 
       noteName.flatMap(name => Some(Note(name = name,
         octave = Note.pitchToOctave(notePitch),
-        pitch = notePitch,
+        midiPitch = notePitch,
         durationNS = duration,
         intonation = intonation,
         loudness = loudness,

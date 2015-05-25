@@ -1,8 +1,18 @@
 package cbr.description.features.extractors.phrase
 
-/**
- * Created by gm2211 on 5/25/15.
- */
-class DirectionOfMotionExtractor {
+import cbr.description.features.Feature
+import representation.Phrase
+
+import scala.util.Try
+
+class DirectionOfMotionExtractor extends PhraseFeatureExtractor {
+  override def extractFeatureFromNonPolyphonic(phrase: Phrase): Feature[Phrase] = {
+    val intervals = Phrase.computeMelodicIntervals(phrase)
+    val (ups, downs) = intervals.partition(_ > 0)
+    val direction = Try(ups.length.toDouble / (ups.length + downs.length)).getOrElse(0.0)
+    Feature.from(direction)
+  }
+
+  override val featureSize: Int = 1
 
 }

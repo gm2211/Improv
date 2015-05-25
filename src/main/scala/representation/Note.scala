@@ -30,9 +30,8 @@ object Note {
   }
 
   def pitchToOctave(pitch: Int): Int = math.floor(pitch / 12.0).toInt
-
-  val MAX_OCTAVE = 8
-
+  
+  val MAX_MIDI_PITCH = 127
   val DEFAULT_NAME = NoteName.A
   val DEFAULT_OCTAVE = 4
   val DEFAULT_PITCH = 60
@@ -91,12 +90,12 @@ object NoteName extends Enumeration {
 
 case class Note(name: NoteName = Note.DEFAULT_NAME,
   octave: Int = Note.DEFAULT_OCTAVE,
-  pitch: Int = Note.DEFAULT_PITCH,
+  midiPitch: Int = Note.DEFAULT_PITCH,
   durationNS: BigInt = Note.DEFAULT_DURATION,
   intonation: Intonation = Note.DEFAULT_INTONATION,
   loudness: Loudness = Note.DEFAULT_LOUDNESS,
   startTimeNS: BigInt = Note.DEFAULT_START_TIME) extends MusicalElement {
-
+  require((0 to Note.MAX_MIDI_PITCH) contains midiPitch, s"$midiPitch is not within ${0 to Note.MAX_MIDI_PITCH}")
 
   def withName(newName: NoteName) = copy(name = newName)
 

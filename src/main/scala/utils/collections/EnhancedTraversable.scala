@@ -46,4 +46,19 @@ class EnhancedTraversable[A](val traversable: TraversableOnce[A]) {
       iterators.map(iter => Try{ iter.next() }.getOrElse(defaultValue))
     }
   }
+
+  /**
+   * Retuns the number of elements that have type T
+   * @tparam T Type of the elements to be counted
+   * @return
+   */
+  def countIfMatchesType[T : Manifest]: Int = {
+    var count = 0
+    traversable.foreach {
+      case elem: T =>
+        count += 1
+      case _ =>
+    }
+    count
+  }
 }

@@ -12,7 +12,7 @@ object PhraseFeatureExtractors {
     List(
       new AverageNoteDurationExtractor,
       new AverageMelodicIntervalExtractor,
-      new AverageTimeBetweenAttacksExtractor,
+      new AverageStartTimeIntervalExtractor,
       new BasicPitchHistogramExtractor,
       new DirectionOfMotionExtractor,
       new DurationExtractor,
@@ -25,9 +25,13 @@ object PhraseFeatureExtractors {
       new MostCommonMelodicIntervalExtractor,
       new NoteDensityExtractor,
       new RepeatedNotesExtractor,
-      new VariabilityOfNoteDurationExtractor,
-      new VariabilityOfTimeBetweenAttacksExtractor
+      new VarianceOfNoteDurationExtractor,
+      new VarianceOfStartTimeIntervals,
+      new TempoExtractor
+//      new KeyExtractor
     )
   }
+
+  def getJSymbolicFeatureExtractor = JSymbolicPhraseWeightedFeatureExtractor.getDefault
 
 }

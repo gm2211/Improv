@@ -1,12 +1,12 @@
 package cbr.description
 
 import cbr.description.features.Feature
-import cbr.description.features.extractors.WeightedFeatureExtractor$
+import cbr.description.features.extractors.WeightedFeatureExtractor
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import representation.Phrase
 
 object PhraseDescriptionCreators extends DescriptionCreatorFactory[Phrase] {
-  def getDefault: DescriptionCreator[Phrase] = new JSymbolicPhraseDescriptionCreator
+  def getDefault: DescriptionCreator[Phrase] = new DefaultPhraseDescriptionCreator
   override def make = getDefault
 }
 

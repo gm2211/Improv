@@ -3,10 +3,12 @@ package cbr.description.features.extractors
 import cbr.description.features.Feature
 import utils.ImplicitConversions.toEnhancedTraversable
 
-class CombinedWeightedFeatureExtractor[Element](featureExtractors: List[SingleFeatureExtractor[Element]]) extends WeightedFeatureExtractor[Element] {
+class CombinedWeightedFeatureExtractor[Element](private val featureExtractors: List[SingleFeatureExtractor[Element]])
+    extends WeightedFeatureExtractor[Element] {
   override def extractFeatures(elem: Element): List[(Double, Feature[Element])] = {
-    featureExtractors.flatMap(_.extractFeatures(elem))
+    val weight = 1.0 / featureExtractors.size //TODO: Play around with weighting
+    featureExtractors.map(extractor => (weight, extractor.extractFeature(elem)))
   }
 
-  override def totalFeaturesSize: Int = featureExtractors.sumBy(0, _.totalFeaturesSize)
+  override def totalFeaturesSize: Int = featureExtractors.sumBy(0, _.featureSize)
 }

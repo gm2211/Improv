@@ -1,8 +1,17 @@
 package cbr.description.features.extractors.phrase
 
-/**
- * Created by gm2211 on 5/25/15.
- */
-class MaximumPitchExtractor {
+import cbr.description.features.Feature
+import representation.{Note, Phrase}
 
+import scala.util.Try
+
+class MaximumPitchExtractor extends PhraseFeatureExtractor {
+  override def extractFeatureFromNonPolyphonic(phrase: Phrase): Feature[Phrase] = {
+    val notePitches = phrase
+      .collect{ case n: Note => n.midiPitch }
+    val maxPitch = Try(notePitches.max).getOrElse(0)
+    Feature.from(maxPitch)
+  }
+
+  override val featureSize: Int = 1
 }

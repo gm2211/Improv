@@ -1,8 +1,12 @@
 package cbr.description.features.extractors.phrase
 
-/**
- * Created by gm2211 on 5/25/15.
- */
-class DurationExtractor {
+import cbr.description.features.Feature
+import representation.{MusicalElement, Phrase}
+
+class DurationExtractor extends PhraseFeatureExtractor {
+  override def extractFeatureFromNonPolyphonic(phrase: Phrase): Feature[Phrase] =
+    Feature.from(phrase.getDurationBPM(MusicalElement.DEFAULT_TEMPO_BPM).toDouble)
+
+  override val featureSize: Int = 1
 
 }

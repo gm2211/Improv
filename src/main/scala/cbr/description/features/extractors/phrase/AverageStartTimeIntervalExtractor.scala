@@ -3,10 +3,10 @@ package cbr.description.features.extractors.phrase
 import cbr.description.features.Feature
 import representation.Phrase
 
-class AverageMelodicIntervalExtractor extends PhraseFeatureExtractor {
+class AverageStartTimeIntervalExtractor extends PhraseFeatureExtractor {
   override def extractFeatureFromNonPolyphonic(phrase: Phrase): Feature[Phrase] = {
-    val intervals: List[Double] = Phrase.computeMelodicIntervals(phrase)
-    Feature.from[Phrase](Array(intervals.sum / intervals.length))
+    val startTimeIntervals = Phrase.computeStartTimeIntervals(phrase)
+    Feature.from(Array(startTimeIntervals.sum / phrase.size))
   }
 
   override val featureSize: Int = 1

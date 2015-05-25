@@ -1,6 +1,8 @@
 package cbr.description.features
 
 object Feature {
+  def from[Element](value: Double)(implicit dummyImplicit: DummyImplicit): Feature[Element] = from[Element](Array(value))
+
   def from[Element](array: Array[Double]) = new SimpleFeature[Element](array)
 }
 

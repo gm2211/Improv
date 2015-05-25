@@ -9,6 +9,8 @@ import scala.math
 import scalaz.Scalaz._
 
 object Phrase {
+
+
   val DEFAULT_START_TIME = 0.0
 
   def computeDuration(phrase: Phrase, timeUnit: TimeUnit): BigInt = {
@@ -25,6 +27,50 @@ object Phrase {
 
   def apply(): Phrase = {
     new Phrase()
+  }
+
+  def computeMelodicIntervals(phrase: Phrase): List[Double] = {
+    require(! phrase.polyphony)
+    var prevNote: Option[Note] = None
+    val intervals = ListBuffer[Double]()
+    for (elem <- phrase) {
+      elem match {
+        case note: Note =>
+          if (prevNote.isDefined) {
+            intervals += note.midiPitch - prevNote.get.midiPitch
+          }
+          prevNote = Some(note)
+        case _ =>
+      }
+    }
+    intervals.toList
+  }
+
+  def computePitchHistogram(phrase: Phrase): Array[Double] = {
+    require(! phrase.polyphony)
+    val histogram = Array.fill[Double](Note.MAX_MIDI_PITCH + 1)(0)
+    for (elem <- phrase) {
+      elem match {
+        case note: Note =>
+          histogram(note.midiPitch) += 1
+        case _ =>
+      }
+    }
+    histogram
+  }
+
+  def computeStartTimeIntervals(phrase: Phrase): Array[Double] = {
+    require(! phrase.polyphony)
+    val timesBetweenStartTimes = ListBuffer[Double]()
+    var prevElem: Option[MusicalElement] = None
+    for (elem <- phrase) {
+      if (prevElem.isDefined) {
+        timesBetweenStartTimes += elem.getStartTimeBPM(phrase.tempoBPM).toDouble -
+          prevElem.get.getStartTimeBPM(phrase.tempoBPM).toDouble
+      }
+      prevElem = Some(elem)
+    }
+    timesBetweenStartTimes.toArray
   }
 
   def apply(musicalElements: List[Traversable[MusicalElement]], tempoBPM: Double): Option[Phrase] = {

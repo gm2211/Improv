@@ -27,7 +27,7 @@ object JMusicConverterUtils {
     jmNote.setDuration(duration)
     jmNote.setRhythmValue(duration / jmData.Note.DEFAULT_DURATION_MULTIPLIER)
     jmNote.setPitchType(jmData.Note.MIDI_PITCH)
-    jmNote.setPitch(note.pitch)
+    jmNote.setPitch(note.midiPitch)
     jmNote.setDynamic(note.loudness.loudness)
     jmNote
   }
