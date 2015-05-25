@@ -1,9 +1,11 @@
 package cbr.description.features
 
 import instruments.JFugueUtils
-import jsymbolic.features.{AverageNoteDurationFeature, MIDIFeatureExtractor}
+import jsymbolic.features._
 import jsymbolic.processing.MIDIFeatureProcessor
 import representation.Phrase
+
+import scala.util.Try
 
 object JSymbolicPhraseFeatureExtractor {
   def getDefault = {
@@ -16,7 +18,7 @@ object JSymbolicPhraseFeatureExtractor {
       featureExtractors,
       Array.fill(featureExtractors.length)(true.asInstanceOf[java.lang.Boolean]), // Features to be saved to file
       false, // Do not save features for each window
-      false,  // Do not save overall features
+      false, // Do not save overall features
       false, // Do not save to file
       "/dev/null", // Save path
       "/dev/null") // Save path for features definitions
@@ -24,7 +26,32 @@ object JSymbolicPhraseFeatureExtractor {
   }
 
   private def getDefaultFeatureExtractors: Array[MIDIFeatureExtractor] = {
-    Array(new AverageNoteDurationFeature)
+    Array(
+      new AverageNoteDurationFeature,
+      new AverageNoteToNoteDynamicsChangeFeature,
+      new AverageMelodicIntervalFeature,
+      new AverageTimeBetweenAttacksFeature,
+      new BasicPitchHistogramFeature,
+      new ChangesOfMeterFeature,
+      new ChromaticMotionFeature,
+      new CombinedStrengthOfTwoStrongestRhythmicPulsesFeature,
+      new DirectionOfMotionFeature,
+      new DurationFeature,
+      new DistanceBetweenMostCommonMelodicIntervalsFeature,
+      new IntervalBetweenStrongestPitchesFeature,
+      new MinimumNoteDurationFeature,
+      new MostCommonMelodicIntervalFeature,
+      new MostCommonMelodicIntervalPrevalenceFeature,
+      new MostCommonPitchClassFeature,
+      new MostCommonPitchClassPrevalenceFeature,
+      new MostCommonPitchFeature,
+      new MostCommonPitchPrevalenceFeature,
+      new NoteDensityFeature,
+      new NumberOfCommonPitchesFeature,
+      new RepeatedNotesFeature,
+      new VariabilityOfNoteDurationFeature,
+      new VariabilityOfTimeBetweenAttacksFeature
+    )
   }
 }
 
