@@ -1,13 +1,13 @@
-package cbr.description.features
+package cbr.description.features.extractors
 
+import cbr.description.features.Feature
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
-object FeatureExtractor {
-  def getDefaultForPhrase = JSymbolicPhraseFeatureExtractor.getDefault
+object WeightedFeatureExtractor {
 }
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
-trait FeatureExtractor[Element] {
+trait WeightedFeatureExtractorj[Element] {
   def totalFeaturesSize: Int
   def extractFeatures(elem: Element): List[(Double, Feature[Element])]
 }

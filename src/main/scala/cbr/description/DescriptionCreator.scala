@@ -1,6 +1,7 @@
 package cbr.description
 
-import cbr.description.features.{Feature, FeatureExtractor}
+import cbr.description.features.Feature
+import cbr.description.features.extractors.WeightedFeatureExtractor$
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import representation.Phrase
 
@@ -11,7 +12,7 @@ object PhraseDescriptionCreators extends DescriptionCreatorFactory[Phrase] {
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 trait DescriptionCreator[Element] {
-  val featureExtractor: FeatureExtractor[Element]
+  val featureExtractor: WeightedFeatureExtractor[Element]
 
   /**
    * Returns the maximum of CaseDescription(s) that can be created by this creator

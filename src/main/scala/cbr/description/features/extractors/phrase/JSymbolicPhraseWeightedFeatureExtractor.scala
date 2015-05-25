@@ -1,13 +1,12 @@
-package cbr.description.features
+package cbr.description.features.extractors.phrase
 
+import cbr.description.features.Feature
 import instruments.JFugueUtils
 import jsymbolic.features._
 import jsymbolic.processing.MIDIFeatureProcessor
 import representation.Phrase
 
-import scala.util.Try
-
-object JSymbolicPhraseFeatureExtractor {
+object JSymbolicPhraseWeightedFeatureExtractor {
   def getDefault = {
     val featureExtractors = getDefaultFeatureExtractors
 
@@ -22,7 +21,7 @@ object JSymbolicPhraseFeatureExtractor {
       false, // Do not save to file
       "/dev/null", // Save path
       "/dev/null") // Save path for features definitions
-    new JSymbolicPhraseFeatureExtractor(processor)
+    new JSymbolicPhraseWeightedFeatureExtractor(processor)
   }
 
   private def getDefaultFeatureExtractors: Array[MIDIFeatureExtractor] = {
@@ -55,7 +54,7 @@ object JSymbolicPhraseFeatureExtractor {
   }
 }
 
-class JSymbolicPhraseFeatureExtractor(private val processor: MIDIFeatureProcessor) extends FeatureExtractor[Phrase] {
+class JSymbolicPhraseWeightedFeatureExtractor(private val processor: MIDIFeatureProcessor) extends WeightedFeatureExtractor[Phrase] {
   override def extractFeatures(phrase: Phrase): List[(Double, Feature[Phrase])] = {
     val jsFeatures = processor.getFeatures(Array(JFugueUtils.toSequence(phrase)))
     val features = JSymbolicUtils.convertFeatures[Phrase](jsFeatures)
