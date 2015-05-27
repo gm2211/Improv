@@ -1,10 +1,11 @@
 package cbr.description.features.extractors.phrase
 
 import cbr.description.features.Feature
+import cbr.description.features.extractors.SingleFeatureExtractor
 import representation.{Note, Phrase}
 
-class AverageNoteDurationExtractor extends PhraseFeatureExtractor {
-    override def extractFeatureFromNonPolyphonic(phrase: Phrase): Feature[Phrase] = {
+class AverageNoteDurationExtractor extends SingleFeatureExtractor[Phrase] {
+    override def extractFeature(phrase: Phrase): Feature[Phrase] = {
     var noteCount = 0
     var noteDuration = 0.0
     for (elem <- phrase) {

@@ -1,13 +1,13 @@
 package tests
 
 import _root_.instruments.Instrument
+import _root_.utils.ImplicitConversions._
 import actors.musicians.AIMusicianBuilder
 import akka.actor.{ActorSystem, Props}
 import akka.testkit.TestActorRef
 import messages.SyncMessage
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, Matchers}
-import _root_.utils.ImplicitConversions._
 
 class MessagePassingTest extends FlatSpec with MockFactory with Matchers {
   "An actor" should "play something when a sync message is received" in {

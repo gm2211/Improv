@@ -9,6 +9,7 @@ import instruments.JFugueInstrument
 import midi.segmentation.PhraseSegmenter
 import representation.Phrase
 import storage.KDTreeIndex
+
 import scala.concurrent.duration.{NANOSECONDS => NANOS}
 
 object DemoCBROrchestra {

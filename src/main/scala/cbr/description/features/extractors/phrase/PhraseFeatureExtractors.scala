@@ -1,11 +1,11 @@
 package cbr.description.features.extractors.phrase
 
-import cbr.description.features.extractors.{CombinedWeightedFeatureExtractor, SingleFeatureExtractor}
+import cbr.description.features.extractors.SingleFeatureExtractor
 import representation.Phrase
 
 object PhraseFeatureExtractors {
   def getDefault = {
-    new CombinedWeightedFeatureExtractor[Phrase](getDefaultSimpleExtractors)
+    new CompositePhraseFeatureExtractor(getDefaultSimpleExtractors)
   }
 
   def getDefaultSimpleExtractors: List[SingleFeatureExtractor[Phrase]] = {

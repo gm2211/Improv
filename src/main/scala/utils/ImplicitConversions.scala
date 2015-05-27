@@ -1,7 +1,7 @@
 package utils
 
-import utils.collections.{EnhancedTraversable, FasterMutableListWrapper}
 import com.google.common.base
+import utils.collections.{EnhancedTraversable, FasterMutableListWrapper}
 
 import scala.collection.mutable
 import scala.language.implicitConversions

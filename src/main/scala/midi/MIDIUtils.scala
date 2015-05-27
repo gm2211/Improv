@@ -3,7 +3,7 @@ package midi
 import javax.sound.midi.Sequence
 
 import instruments.JFugueUtils
-import representation.{Phrase, MusicalElement}
+import representation.Phrase
 
 object MIDIUtils {
 

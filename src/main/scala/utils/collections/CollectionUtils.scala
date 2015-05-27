@@ -2,7 +2,7 @@ package utils.collections
 
 import scala.collection.mutable
 import scala.math
-import scala.util.{Try, Random}
+import scala.util.{Random, Try}
 
 object CollectionUtils {
   def filterNonNumbers(array: Array[Double]): Array[Double] = {

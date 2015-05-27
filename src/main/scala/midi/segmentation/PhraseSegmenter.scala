@@ -1,10 +1,7 @@
 package midi.segmentation
 
-import representation.{MusicalElement, Phrase}
-import utils.ImplicitConversions.toEnhancedTraversable
-import utils.NumericUtils
+import representation.Phrase
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.SECONDS
 

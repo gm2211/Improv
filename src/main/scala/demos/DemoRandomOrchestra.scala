@@ -5,7 +5,6 @@ import actors.directors.SimpleDirector
 import actors.musicians.AIMusician
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
-import utils.ImplicitConversions.wrapInOption
 
 object DemoRandomOrchestra {
   def run() = {

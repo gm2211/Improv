@@ -3,9 +3,9 @@ package training
 import instruments.InstrumentType.InstrumentType
 import midi.MIDIParserFactory
 import representation.Phrase
+import utils.ImplicitConversions.toEnhancedTraversable
 
 import scala.collection.mutable.ListBuffer
-import utils.ImplicitConversions.toEnhancedTraversable
 
 /**
  * Extracts cases from a midi file

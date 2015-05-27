@@ -2,11 +2,11 @@ package utils
 
 import java.io.{File, FileInputStream, FileOutputStream, RandomAccessFile}
 
-import com.google.common.io.{Files, ByteStreams}
-
-import scala.util.{Failure, Success, Try}
+import com.google.common.io.{ByteStreams, Files}
 import utils.ImplicitConversions.toGuavaFunction
+
 import scala.collection.JavaConversions._
+import scala.util.{Failure, Success, Try}
 
 object IOUtils {
   private val SYNCHRONOUS_RW = "rws"
