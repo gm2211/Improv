@@ -2,7 +2,6 @@ import utils.IOUtils
 
 object Main extends App {
 //  val filename = IOUtils.getResourcePath("musicScores/midi_export.mid")
-  val filename = IOUtils.getResourcePath("musicScores/test.mid")
 //  val filename = IOUtils.getResourcePath("musicScores/shorterTest.mid")
 //    val filename = IOUtils.getResourcePath("musicScores/shortPiano.mid")
 //  val filename = IOUtils.getResourcePath("musicScores/piano.mid")
@@ -11,6 +10,8 @@ object Main extends App {
   //    demos.DemoRandomOrchestra.run()
 //      demos.DemoJMusicMIDIPlayer.run(filename)
 //  demos.DemoJFugueMIDIPlayer.run(filename)
-  demos.DemoPopulateDB.run(filename)
+  val trainingDir = IOUtils.getResourcePath("musicScores")
+  demos.DemoPopulateDB.run(trainingDir)
+  demos.DemoCBROrchestra.run
 }
 

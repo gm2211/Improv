@@ -9,7 +9,6 @@ import instruments.JFugueInstrument
 import midi.JMusicMIDIParser
 import representation.Phrase
 import storage.KDTreeIndex
-import utils.ImplicitConversions.wrapInOption
 
 object DemoMIDIOrchestra {
   private def createComposer(filename: String, partNumber: Int) = {

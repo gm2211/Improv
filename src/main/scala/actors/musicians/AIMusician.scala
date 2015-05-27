@@ -18,11 +18,11 @@ ActorSysCount <: Count](
   var actorSystem: Option[ActorSystem] = None,
   var composer: Option[Composer] = None,
   var messageOnly: Option[Boolean] = Some(false)) {
-  def withInstrument(instrument: Option[Instrument]) = copy[Once, ActorSysCount](instrument = instrument)
+  def withInstrument(instrument: Instrument) = copy[Once, ActorSysCount](instrument = Some(instrument))
 
-  def withActorSystem(actorSystem: Option[ActorSystem]) = copy[InstrumentCount, Once](actorSystem = actorSystem)
+  def withActorSystem(actorSystem: ActorSystem) = copy[InstrumentCount, Once](actorSystem = Some(actorSystem))
 
-  def withComposer(composer: Option[Composer]) = copy[InstrumentCount, ActorSysCount](composer = composer)
+  def withComposer(composer: Composer) = copy[InstrumentCount, ActorSysCount](composer = Some(composer))
 
   def isMessageOnly = copy[InstrumentCount, ActorSysCount](messageOnly = Some(true))
 
