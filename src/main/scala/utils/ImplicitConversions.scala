@@ -1,6 +1,7 @@
 package utils
 
 import utils.collections.{EnhancedTraversable, FasterMutableListWrapper}
+import com.google.common.base`
 
 import scala.collection.mutable
 import scala.language.implicitConversions
@@ -30,4 +31,9 @@ object ImplicitConversions {
   implicit def toDouble(bigDecimal: BigDecimal): Double = bigDecimal.toDouble
 
   implicit def toLong(bigInt: BigInt): Long = bigInt.toLong
+
+  implicit def toGuavaFunction[From, To](fn: From => To): base.Function[From, To] =
+    new base.Function[From, To] {
+      override def apply(input: From): To = fn(input)
+    }
 }

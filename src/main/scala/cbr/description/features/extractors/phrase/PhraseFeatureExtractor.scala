@@ -25,7 +25,8 @@ abstract class PhraseFeatureExtractor extends SingleFeatureExtractor[Phrase] {
     for (
           (feature, featIdx) <- features.zipWithIndex;
           (value, idx) <- feature.getSignature.zipWithIndex ) {
-      values(idx) = value * weights(featIdx)
+//      values(idx) = value * weights(featIdx)
+      values(idx) = scala.math.max(values(idx), value)
     }
     Feature.from(values)
   }

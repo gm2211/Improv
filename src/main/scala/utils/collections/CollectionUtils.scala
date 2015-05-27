@@ -5,6 +5,13 @@ import scala.math
 import scala.util.{Try, Random}
 
 object CollectionUtils {
+  def filterNonNumbers(array: Array[Double]): Array[Double] = {
+    array.map {
+      case d if d.isNaN || d.isInfinity => 0.0
+      case d => d
+    }
+  }
+
 
   def mergeMultiMaps[K, V, A](multiMaps: A*)(implicit fn: A => mutable.MultiMap[K, V]): mutable.MultiMap[K, V] = {
     val mergedMMap = createHashMultimap[K, V]

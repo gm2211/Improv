@@ -13,7 +13,6 @@ object PhraseFeatureExtractors {
       new AverageNoteDurationExtractor,
       new AverageMelodicIntervalExtractor,
       new AverageStartTimeIntervalExtractor,
-      new BasicPitchHistogramExtractor,
       new DirectionOfMotionExtractor,
       new DurationExtractor,
       new AverageDurationExtractor,
@@ -27,8 +26,9 @@ object PhraseFeatureExtractors {
       new RepeatedNotesExtractor,
       new VarianceOfNoteDurationExtractor,
       new VarianceOfStartTimeIntervals,
-      new TempoExtractor
-//      new KeyExtractor
+      new TempoExtractor,
+//      new KeyExtractor,
+      new BasicPitchHistogramExtractor
     )
   }
 

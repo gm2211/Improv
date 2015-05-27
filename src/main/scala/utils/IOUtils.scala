@@ -1,13 +1,15 @@
 package utils
 
-import java.io.{FileInputStream, FileOutputStream, RandomAccessFile}
+import java.io.{File, FileInputStream, FileOutputStream, RandomAccessFile}
 
-import com.google.common.io.ByteStreams
+import com.google.common.io.{Files, ByteStreams}
 
 import scala.util.{Failure, Success, Try}
+import utils.ImplicitConversions.toGuavaFunction
+import scala.collection.JavaConversions._
 
 object IOUtils {
-  val SYNCHRONOUS_RW = "rws"
+  private val SYNCHRONOUS_RW = "rws"
 
   def deleteContent(path: String): Boolean = {
     Try{
@@ -46,4 +48,15 @@ object IOUtils {
 
   def getResourcePath(resourceName: String): String =
     ClassLoader.getSystemClassLoader.getResource(resourceName).getPath
+
+  def filesInDir(dirPath: String): Try[List[String]] = {
+    Try{
+      val dir = new File(dirPath)
+      Files.fileTreeTraverser()
+        .breadthFirstTraversal(dir)
+        .transform((file: File) => file.getPath)
+        .toList
+        .toList
+    }
+  }
 }
