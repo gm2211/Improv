@@ -5,31 +5,37 @@ import midi.MIDIParserFactory
 import representation.Phrase
 
 import scala.collection.mutable.ListBuffer
+import utils.ImplicitConversions.toEnhancedTraversable
 
 /**
  * Extracts cases from a midi file
  */
-class MusicCaseExtractor (private val parserFactory: MIDIParserFactory) extends CaseExtractor[Phrase] {
-  override def getCases(filename: String): List[(Phrase, Phrase)] = {
+class MusicCaseExtractor(private val parserFactory: MIDIParserFactory) extends CaseExtractor[(InstrumentType, Phrase)] {
+
+
+
+  override def getCases(filename: String): List[((InstrumentType, Phrase), (InstrumentType, Phrase))] = {
     val parser = parserFactory.apply(filename)
-    parser.getPartIndexByInstrument.toList.flatMap { case (instrumentType, partIndices) =>
-      val parts = partIndices.map(parser.getMultiVoicePhrases).toList
-      getCasesFromParts(parts, instrumentType)
+    val instrParts: List[(InstrumentType, List[Phrase])] = parser.getPartIndexByInstrument.toList.flatMap {
+      case (instrument, partIndices) =>
+        partIndices.map(idx => (instrument, parser.getMultiVoicePhrases(idx))).toList
     }
+    getAllCases(instrParts)
   }
 
-  private def getCasesFromParts(
-      parts: List[List[Phrase]],
-      instrumentType: InstrumentType): List[(Phrase, Phrase)] = {
-    parts.flatMap(part => getCasesFromPart(part, instrumentType))
-  }
+  def getAllCases(instrParts: List[(InstrumentType, List[Phrase])]) = {
+    val indices = instrParts.indices
+    val cases = ListBuffer[((InstrumentType, Phrase), (InstrumentType, Phrase))]()
 
-  private def getCasesFromPart(
-      partPhrases: List[Phrase],
-      instrumentType: InstrumentType): List[(Phrase, Phrase)] = {
-    val cases = ListBuffer[(Phrase, Phrase)]()
-    for (idx <- 1 until partPhrases.size) {
-      cases += (( partPhrases(idx - 1), partPhrases(idx)))
+    for (
+          (instr, part) <- instrParts;
+          (phrase, phraseIdx) <- part.zipWithIndex;
+          otherPartIdx <- indices
+        ) {
+      val (otherInstr, otherPart) = instrParts(otherPartIdx)
+      if (otherPart.inBounds(phraseIdx + 1)) {
+        cases += ( ((instr, phrase), (otherInstr, otherPart(phraseIdx + 1))) )
+      }
     }
     cases.toList
   }

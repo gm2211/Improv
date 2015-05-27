@@ -27,15 +27,15 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
 
   def finishedPlaying = _finishedPlaying
 
-  override def play(musicalElement: MusicalElement): Unit = {
-//    if (!_finishedPlaying) {
-//      log.debug("Still busy. Ignoring..")
-//      return
-//    }
+  override def play(phrase: Phrase): Unit = {
+    if (!_finishedPlaying) {
+      log.debug("Still busy. Ignoring..")
+      return
+    }
 
-    val musicPattern: Pattern = JFugueUtils.createPattern(musicalElement, instrumentType.instrumentNumber)
+    val musicPattern: Pattern = JFugueUtils.createPattern(phrase, instrumentType.instrumentNumber)
     log.debug(musicPattern.toString)
-//    _finishedPlaying = false
+    _finishedPlaying = false
     playWithPlayer(musicPattern.toString)
   }
 
@@ -53,7 +53,7 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
         log.debug(s"$instrumentType => Finished playing!!")
         curPlayer.foreach(_.removeListener(this))
         curPlayer = None
-//        _finishedPlaying = true
+        _finishedPlaying = true
         notifyObservers(FinishedPlaying)
     }
   }
@@ -65,9 +65,9 @@ object JFugueUtils {
   val log = LoggerFactory.getLogger(getClass)
   val MAX_VOICE: Int = 15
 
-  def createPattern(musicalElement: MusicalElement, instrumentNumber: Int): Pattern = {
-    val tempo = Try(musicalElement.asInstanceOf[Phrase].tempoBPM).getOrElse(MusicalElement.DEFAULT_TEMPO_BPM)
-    createPatternHelper(musicalElement, instrumentNumber, tempo)
+  def createPattern(phrase: Phrase, instrumentNumber: Int): Pattern = {
+    val tempo = Try(phrase.tempoBPM).getOrElse(MusicalElement.DEFAULT_TEMPO_BPM)
+    createPatternHelper(phrase, instrumentNumber, tempo)
       .setInstrument(instrumentNumber)
       .setTempo(tempo.toInt)
   }
@@ -133,7 +133,7 @@ object JFugueUtils {
     phrasePatternString
   }
 
-  def toSequence(musicalElement: MusicalElement): Sequence = toSequence(createPattern(musicalElement, PIANO(1)))
+  def toSequence(phrase: Phrase): Sequence = toSequence(createPattern(phrase, PIANO(1)))
 
   def toSequence(pattern: Pattern): Sequence = {
     val parser = new StaccatoParser()

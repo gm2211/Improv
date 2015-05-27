@@ -3,12 +3,12 @@ package midi
 import javax.sound.midi.Sequence
 
 import instruments.JFugueUtils
-import representation.MusicalElement
+import representation.{Phrase, MusicalElement}
 
 object MIDIUtils {
 
-  def toSequence(musicalElement: MusicalElement, instrumentNumber: Int): Sequence = {
-    val pattern = JFugueUtils.createPattern(musicalElement, instrumentNumber)
+  def toSequence(phrase: Phrase, instrumentNumber: Int): Sequence = {
+    val pattern = JFugueUtils.createPattern(phrase, instrumentNumber)
     JFugueUtils.toSequence(pattern)
   }
 

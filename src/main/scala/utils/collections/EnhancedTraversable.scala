@@ -61,4 +61,6 @@ class EnhancedTraversable[A](val traversable: TraversableOnce[A]) {
     }
     count
   }
+
+  def inBounds(idx: Int): Boolean = 0 until traversable.size contains idx
 }

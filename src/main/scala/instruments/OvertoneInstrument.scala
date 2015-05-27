@@ -10,13 +10,15 @@ class OvertoneInstrument(val overtoneWrapper: OvertoneWrapper = new OvertoneWrap
   private val overtoneInstrumentType = OvertoneInstrumentType.fromInstrumentType(instrumentType)
   OvertoneUtils.useInstrument(overtoneInstrumentType, overtoneWrapper)
 
-  override def play(musicalElement: MusicalElement): Unit = musicalElement match {
+  override def play(phrase: Phrase): Unit = phrase.foreach(playElement)
+
+  def playElement(musicalElement: MusicalElement): Unit = musicalElement match {
     case note: Note =>
       play(note)
     case rest: Rest =>
       Thread.sleep(rest.durationNS.toInt)
     case phrase: Phrase =>
-      phrase.foreach(play)
+      phrase.foreach(playElement)
   }
 
   def play(note: Note): Unit = {

@@ -10,8 +10,8 @@ object Main extends App {
   //    demos.DemoRandomOrchestra.run()
 //      demos.DemoJMusicMIDIPlayer.run(filename)
 //  demos.DemoJFugueMIDIPlayer.run(filename)
-  val trainingDir = IOUtils.getResourcePath("musicScores")
+  val trainingDir = IOUtils.getResourcePath("trainingMIDIs")
   demos.DemoPopulateDB.run(trainingDir)
-  demos.DemoCBROrchestra.run
+//  demos.DemoCBROrchestra.run
 }
 
