@@ -1,16 +1,16 @@
 package training
 
-import cbr.CaseIndex
-import instruments.InstrumentType.InstrumentType
+import cbr.{CaseIndex, MusicalCase}
 import midi.JMusicMIDIParser
-import representation.Phrase
 
 object TrainingUtils {
-  def addCasesToIndex(index: CaseIndex[(InstrumentType, Phrase)], filename: String): Unit =
-    getCasesFromMIDI(filename).foreach{ case (desc, sol) => index.addSolutionToProblem(desc, sol) }
+  def addCasesToIndex(index: CaseIndex[MusicalCase], filename: String): Unit = {
+    val cases = getCasesFromMIDI(filename)
+    cases.foreach { case (desc, sol) => index.addSolutionToProblem(desc, sol) }
+  }
 
-  def getCasesFromMIDI(filename: String): List[((InstrumentType, Phrase), (InstrumentType, Phrase))] = {
-    val extractor = new MusicCaseExtractor(JMusicMIDIParser)
+  def getCasesFromMIDI(filename: String): List[(MusicalCase, MusicalCase)] = {
+    val extractor = new MusicalCaseExtractor(JMusicMIDIParser)
 
     extractor.getCases(filename)
   }

@@ -1,16 +1,17 @@
 package cbr.description.features.extractors.phrase
 
+import cbr.MusicalCase
 import cbr.description.features.Feature
 import cbr.description.features.extractors.{SingleFeatureExtractor, WeightedFeatureExtractor}
 import instruments.InstrumentType.InstrumentType
 import representation.Phrase
 
 class CompositePhraseFeatureExtractor(featureExtractors: List[SingleFeatureExtractor[Phrase]])
-  extends WeightedFeatureExtractor[(InstrumentType, Phrase)] {
+  extends WeightedFeatureExtractor[MusicalCase] {
   override def extractFeatures(
-      instrumentAndPhrase: (InstrumentType, Phrase)): List[(Double, Feature[(InstrumentType, Phrase)])] = {
+      musicalCase: MusicalCase): List[(Double, Feature[MusicalCase])] = {
     val weight = 1.0 / featureExtractors.size
-    val (instrumentType, phrase) = instrumentAndPhrase
+    val phrase = musicalCase.phrase
     for (extractor <- featureExtractors) yield {
       var feature: Option[Feature[Phrase]] = None
       if (phrase.polyphony) {
@@ -18,7 +19,7 @@ class CompositePhraseFeatureExtractor(featureExtractors: List[SingleFeatureExtra
       } else {
         feature = Some(extractor.extractFeature(phrase))
       }
-      (weight, addInstrumentType(feature.get, instrumentType))
+      (weight, addInstrumentType(feature.get, musicalCase.instrumentType))
     }
   }
 
@@ -47,7 +48,7 @@ class CompositePhraseFeatureExtractor(featureExtractors: List[SingleFeatureExtra
     Feature.from(values)
   }
 
-  private def addInstrumentType(feature: Feature[Phrase], instr: InstrumentType): Feature[(InstrumentType, Phrase)] =
+  private def addInstrumentType(feature: Feature[Phrase], instr: InstrumentType): Feature[MusicalCase] =
     Feature.from(instr.instrumentNumber.toDouble +: feature.getSignature)
 
   override def totalFeaturesSize: Int =

@@ -1,13 +1,14 @@
 package cbr.description
 
+import cbr.MusicalCase
 import cbr.description.features.Feature
 import cbr.description.features.extractors.WeightedFeatureExtractor
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import instruments.InstrumentType.InstrumentType
 import representation.Phrase
 
-object PhraseDescriptionCreators extends DescriptionCreatorFactory[(InstrumentType, Phrase)] {
-  def getDefault: DescriptionCreator[(InstrumentType, Phrase)] = new DefaultPhraseDescriptionCreator
+object PhraseDescriptionCreators extends DescriptionCreatorFactory[MusicalCase] {
+  def getDefault: DescriptionCreator[MusicalCase] = new DefaultPhraseDescriptionCreator
   override def make = getDefault
 }
 

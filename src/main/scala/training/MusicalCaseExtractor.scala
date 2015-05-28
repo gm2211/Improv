@@ -1,5 +1,6 @@
 package training
 
+import cbr.MusicalCase
 import instruments.InstrumentType.InstrumentType
 import midi.MIDIParserFactory
 import representation.Phrase
@@ -10,11 +11,11 @@ import scala.collection.mutable.ListBuffer
 /**
  * Extracts cases from a midi file
  */
-class MusicCaseExtractor(private val parserFactory: MIDIParserFactory) extends CaseExtractor[(InstrumentType, Phrase)] {
+class MusicalCaseExtractor(private val parserFactory: MIDIParserFactory) extends CaseExtractor[MusicalCase] {
 
 
 
-  override def getCases(filename: String): List[((InstrumentType, Phrase), (InstrumentType, Phrase))] = {
+  override def getCases(filename: String): List[(MusicalCase, MusicalCase)] = {
     val parser = parserFactory.apply(filename)
     val instrParts: List[(InstrumentType, List[Phrase])] = parser.getPartIndexByInstrument.toList.flatMap {
       case (instrument, partIndices) =>
@@ -25,7 +26,7 @@ class MusicCaseExtractor(private val parserFactory: MIDIParserFactory) extends C
 
   def getAllCases(instrParts: List[(InstrumentType, List[Phrase])]) = {
     val indices = instrParts.indices
-    val cases = ListBuffer[((InstrumentType, Phrase), (InstrumentType, Phrase))]()
+    val cases = ListBuffer[(MusicalCase, MusicalCase)]()
 
     for (
           (instr, part) <- instrParts;
@@ -34,7 +35,7 @@ class MusicCaseExtractor(private val parserFactory: MIDIParserFactory) extends C
         ) {
       val (otherInstr, otherPart) = instrParts(otherPartIdx)
       if (otherPart.inBounds(phraseIdx + 1)) {
-        cases += ( ((instr, phrase), (otherInstr, otherPart(phraseIdx + 1))) )
+        cases += ( (MusicalCase(instr, phrase), MusicalCase(otherInstr, otherPart(phraseIdx + 1))) )
       }
     }
     cases.toList
