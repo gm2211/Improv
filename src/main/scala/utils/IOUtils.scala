@@ -3,7 +3,7 @@ package utils
 import java.io.{File, FileInputStream, FileOutputStream, RandomAccessFile}
 
 import com.google.common.io.{ByteStreams, Files}
-import utils.ImplicitConversions.toGuavaFunction
+import utils.ImplicitConversions.{toGuavaFunction, toGuavaPredicate}
 
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
@@ -54,6 +54,7 @@ object IOUtils {
       val dir = new File(dirPath)
       Files.fileTreeTraverser()
         .breadthFirstTraversal(dir)
+        .filter((file: File) => file.isFile)
         .transform((file: File) => file.getPath)
         .toList
         .toList

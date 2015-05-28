@@ -6,7 +6,8 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.SECONDS
 
 object PhraseSegmenter {
-  val DEFAULT_SUB_PHRASE_LENGTH_NS: BigInt = SECONDS.toNanos(10)
+  private val TIME_WARP = 3 // 1s in the system corresponds to 3s in real life
+  val DEFAULT_SUB_PHRASE_LENGTH_NS: BigInt = SECONDS.toNanos(5) / TIME_WARP
 
   def getDefault(splitEveryNS: BigInt = DEFAULT_SUB_PHRASE_LENGTH_NS): PhraseSegmenter =
     new SimpleSplitTimesFinder(splitEveryNS) with PhraseSegmenter

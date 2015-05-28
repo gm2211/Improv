@@ -29,7 +29,7 @@ class MusicCaseExtractor(private val parserFactory: MIDIParserFactory) extends C
 
     for (
           (instr, part) <- instrParts;
-          (phrase, phraseIdx) <- part.zipWithIndex;
+          (phrase: Phrase, phraseIdx) <- part.zipWithIndex;
           otherPartIdx <- indices
         ) {
       val (otherInstr, otherPart) = instrParts(otherPartIdx)

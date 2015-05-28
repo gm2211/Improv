@@ -1,6 +1,7 @@
 package utils
 
 import com.google.common.base
+import com.google.common.base.Predicate
 import utils.collections.{EnhancedTraversable, FasterMutableListWrapper}
 
 import scala.collection.mutable
@@ -35,5 +36,10 @@ object ImplicitConversions {
   implicit def toGuavaFunction[From, To](fn: From => To): base.Function[From, To] =
     new base.Function[From, To] {
       override def apply(input: From): To = fn(input)
+    }
+
+  implicit def toGuavaPredicate[From](fn: From => Boolean): base.Predicate[From] =
+    new Predicate[From] {
+      override def apply(input: From): Boolean = fn(input)
     }
 }
