@@ -11,7 +11,7 @@ import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import scala.util.Try
 
 object SerialisationUtils {
-  private val mapper = new ObjectMapper() with ScalaObjectMapper
+  val mapper = new ObjectMapper() with ScalaObjectMapper
 
   mapper
     .registerModule(DefaultScalaModule)

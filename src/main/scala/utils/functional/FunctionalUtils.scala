@@ -1,4 +1,5 @@
 package utils.functional
+
 import scala.util.Try
 
 object FunctionalUtils {

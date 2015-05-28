@@ -20,7 +20,7 @@ object DemoCBROrchestra {
 
     val musicianBuilder = (instrType: InstrumentType, partNumber: Int) => {
       val instrument = new JFugueInstrument(instrType)
-      val composer = new CBRComposer(KDTreeIndex.loadDefault[Phrase].get)
+      val composer = new CBRComposer(KDTreeIndex.loadDefault[(InstrumentType, Phrase)].get)
 
       AIMusician.builder
         .withInstrument(instrument)

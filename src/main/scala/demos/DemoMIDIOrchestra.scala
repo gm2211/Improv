@@ -21,7 +21,7 @@ object DemoMIDIOrchestra {
           .withMIDIParser(JMusicMIDIParser)
           .build
       case "cbr" =>
-        val index = KDTreeIndex.loadDefault[Phrase].get
+        val index = KDTreeIndex.loadDefault[(InstrumentType, Phrase)].get
         new CBRComposer(index)
     }
   }

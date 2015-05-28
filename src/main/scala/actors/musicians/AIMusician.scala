@@ -3,6 +3,7 @@ package actors.musicians
 import actors.composers.{Composer, RandomComposer}
 import akka.actor.{ActorLogging, ActorSystem, Props}
 import instruments.Instrument
+import instruments.InstrumentType.InstrumentType
 import messages.{MusicInfoMessage, SyncMessage}
 import representation.Phrase
 import utils.ActorUtils
@@ -51,12 +52,12 @@ class AIMusician(builder: AIMusicianBuilder[Once, Once]) extends Musician with A
   private var currentMusicTime: Long = 0
 
   def play(time: Long): Unit = {
-    val phrases: Traversable[Phrase] = musicInfoMessageCache.get(time)
-      .map(messages => messages.map(_.phrase)).getOrElse(Set())
+    val instrumentsAndPhrases: Traversable[(InstrumentType, Phrase)] = musicInfoMessageCache.get(time)
+      .map(_.map(m => (m.instrument, m.phrase))).getOrElse(Set())
 
     musicInfoMessageCache.remove(time)
 
-    val responsePhrase = musicComposer.compose(phrases)
+    val responsePhrase = musicComposer.compose(instrumentsAndPhrases)
     responsePhrase.foreach(play)
   }
 
