@@ -7,7 +7,7 @@ class SyncMessageReceivedBehaviour extends AIMusicianBehaviour with ReceiveBehav
     case m: SyncMessage =>
       musician.foreach(_.currentMusicTime = m.time)
       musician.foreach(_.play(m.time))
-
-    case _ =>
   }
+
+  override def isDefinedAt(x: Message): Boolean = x.isInstanceOf[SyncMessage]
 }

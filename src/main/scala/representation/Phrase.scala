@@ -1,6 +1,6 @@
 package representation
 
-import utils.ImplicitConversions.toEnhancedTraversable
+import utils.ImplicitConversions.toEnhancedIterable
 import utils.functional.{FunctionalUtils, MemoizedFunc}
 
 import scala.collection.mutable.ListBuffer

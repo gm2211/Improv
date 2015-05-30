@@ -1,7 +1,7 @@
 package actors.musicians
 
 import actors.composers.{Composer, RandomComposer}
-import actors.musicians.behaviour.{ReceiveBehaviour, AIMusicianBehaviour, ActorBehaviour}
+import actors.musicians.behaviour._
 import akka.actor.{ActorLogging, ActorSystem, Props}
 import instruments.Instrument
 import instruments.InstrumentType.InstrumentType
@@ -10,6 +10,8 @@ import representation.Phrase
 import utils.ActorUtils
 import utils.builders.{Count, IsAtLeastOnce, AtLeastOnce, Zero}
 import utils.collections.CollectionUtils
+import utils.ImplicitConversions.toEnhancedIterable
+import utils.functional.FunctionalUtils
 
 import scala.collection.mutable
 
@@ -55,6 +57,13 @@ case class AIMusicianBuilder
 }
 
 object AIMusician {
+  def getDefaultBehaviours: List[ActorBehaviour] = {
+    List(
+      new SyncMessageReceivedBehaviour,
+      new MusicMessageInfoReceivedBehaviour
+    )
+  }
+
   def builder: AIMusicianBuilder[Zero, Zero, Zero] = new AIMusicianBuilder[Zero, Zero, Zero]
 }
 
@@ -92,9 +101,6 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
 
   override def receive = {
     case m: Message =>
-      behaviours.foreach{
-        case (behaviour: ReceiveBehaviour) => behaviour(m)
-        case _ =>
-      }
+      FunctionalUtils.combine(behaviours.filterByType[ReceiveBehaviour])(m)
   }
 }

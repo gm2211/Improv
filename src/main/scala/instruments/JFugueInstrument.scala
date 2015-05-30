@@ -14,7 +14,7 @@ import org.jfugue.{async, theory}
 import org.slf4j.LoggerFactory
 import org.staccato.StaccatoParser
 import representation._
-import utils.ImplicitConversions.{anyToRunnable, toDouble, toEnhancedTraversable}
+import utils.ImplicitConversions.{anyToRunnable, toDouble, toEnhancedIterable}
 
 import scala.util.Try
 import scalaz.Scalaz._

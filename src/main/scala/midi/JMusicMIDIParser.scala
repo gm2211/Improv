@@ -7,7 +7,7 @@ import jm.util.Read
 import midi.segmentation.PhraseSegmenter
 import org.slf4j.LoggerFactory
 import representation._
-import utils.ImplicitConversions.{toEnhancedTraversable, toFasterMutableList}
+import utils.ImplicitConversions.{toEnhancedIterable, toFasterMutableList}
 import utils.collections.CollectionUtils
 import utils.functional.FunctionalUtils
 

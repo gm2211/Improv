@@ -74,4 +74,18 @@ class EnhancedIterable[A](val iterable: Iterable[A]) {
   def filter(filters: Traversable[A => Boolean]): Iterable[A] = {
     withFilters(filters).map(identity)
   }
+
+  def withTypeFilter[T : Manifest]: FilterMonadic[A, Iterable[A]] = {
+    iterable.withFilter{
+      case elem: T => true
+      case _ => false
+    }
+  }
+
+  def filterByType[T : Manifest]: Iterable[T] = {
+    iterable.filter{
+      case elem: T => true
+      case _ => false
+    }.asInstanceOf[Iterable[T]]
+  }
 }

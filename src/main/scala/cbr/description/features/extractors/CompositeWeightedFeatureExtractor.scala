@@ -1,7 +1,7 @@
 package cbr.description.features.extractors
 
 import cbr.description.features.Feature
-import utils.ImplicitConversions.toEnhancedTraversable
+import utils.ImplicitConversions.toEnhancedIterable
 
 class CompositeWeightedFeatureExtractor[Element](protected val featureExtractors: List[SingleFeatureExtractor[Element]])
     extends WeightedFeatureExtractor[Element] {

@@ -6,6 +6,7 @@ class MusicMessageInfoReceivedBehaviour extends AIMusicianBehaviour with Receive
   override def apply(message: Message): Unit = message match {
     case m: MusicInfoMessage =>
       musician.foreach(_.musicInfoMessageCache.addBinding(m.time, m))
-    case _ =>
   }
+
+  override def isDefinedAt(x: Message): Boolean = x.isInstanceOf[MusicInfoMessage]
 }

@@ -40,8 +40,7 @@ object DemoMIDIOrchestra {
 
       AIMusician.builder
         .withInstrument(instrument)
-        .addBehaviour(new MusicMessageInfoReceivedBehaviour)
-        .addBehaviour(new SyncMessageReceivedBehaviour)
+        .withBehaviours(AIMusician.getDefaultBehaviours)
         .withComposer(composer)
       //        .isMessageOnly
     }

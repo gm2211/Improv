@@ -17,16 +17,16 @@ object ImplicitConversions {
 
   implicit def toFasterMutableList[A](mutableList: mutable.MutableList[A]): FasterMutableListWrapper[A] = new FasterMutableListWrapper[A](mutableList)
 
-  implicit def fromEnhancedTraversable[A](enhancedTraversable: EnhancedIterable[A]): TraversableOnce[A] =
+  implicit def fromEnhancedIterable[A](enhancedTraversable: EnhancedIterable[A]): TraversableOnce[A] =
     enhancedTraversable.iterable
 
-  implicit def toEnhancedTraversable[A](list: java.util.List[A]): EnhancedIterable[A] =
+  implicit def toEnhancedIterable[A](list: java.util.List[A]): EnhancedIterable[A] =
     new EnhancedIterable[A](list)
 
-  implicit def toEnhancedTraversable[A](traversable: Traversable[A]): EnhancedIterable[A] =
+  implicit def toEnhancedIterable[A](traversable: Traversable[A]): EnhancedIterable[A] =
     new EnhancedIterable[A](traversable.toIterable)
 
-  implicit def toEnhancedTraversable[A](traversable: TraversableOnce[A]): EnhancedIterable[A] =
+  implicit def toEnhancedIterable[A](traversable: TraversableOnce[A]): EnhancedIterable[A] =
     new EnhancedIterable[A](traversable.toIterable)
 
   implicit def toDouble(bigDecimal: BigDecimal): Double = bigDecimal.toDouble

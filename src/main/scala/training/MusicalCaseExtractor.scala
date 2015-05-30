@@ -4,7 +4,7 @@ import cbr.MusicalCase
 import instruments.InstrumentType.InstrumentType
 import midi.MIDIParserFactory
 import representation.Phrase
-import utils.ImplicitConversions.toEnhancedTraversable
+import utils.ImplicitConversions.toEnhancedIterable
 
 import scala.collection.mutable.ListBuffer
 
