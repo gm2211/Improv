@@ -1,5 +1,5 @@
 package utils
 
 package object builders {
-  type IsOnce[T] = =:=[T, Once]
+  type IsAtLeastOnce[T] = =:=[T, AtLeastOnce]
 }

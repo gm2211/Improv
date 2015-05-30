@@ -5,7 +5,7 @@ import akka.actor.{ActorLogging, ActorSystem, Cancellable}
 import messages.{MusicInfoMessage, Start, Stop, SyncMessage}
 import utils.ActorUtils
 import utils.ImplicitConversions.anyToRunnable
-import utils.builders.{Count, IsOnce, Once, Zero}
+import utils.builders.{Count, IsAtLeastOnce, AtLeastOnce, Zero}
 
 case class SimpleDirectorBuilder[ActorSysCount <: Count](
     var actorSystem: Option[ActorSystem] = None,
@@ -13,7 +13,7 @@ case class SimpleDirectorBuilder[ActorSysCount <: Count](
     var healthMonitorFactory: Option[HealthMonitorFactory[Zero]] = None) extends DirectorBuilder[ActorSysCount] {
 
   override def withActorSystem(actorSystem: ActorSystem) =
-    copy[Once](actorSystem = Some(actorSystem))
+    copy[AtLeastOnce](actorSystem = Some(actorSystem))
 
   def withSyncFrequencyMS(syncFrequencyMS: Long) =
     copy[ActorSysCount](syncFrequencyMS = Some(syncFrequencyMS))
@@ -21,8 +21,8 @@ case class SimpleDirectorBuilder[ActorSysCount <: Count](
   def withHealthMonitor(healthMonitorFactory: HealthMonitorFactory[Zero]) =
     copy[ActorSysCount](healthMonitorFactory = Some(healthMonitorFactory))
 
-  override def build[A <: ActorSysCount : IsOnce]: Director =
-    new SimpleDirector(this.asInstanceOf[SimpleDirectorBuilder[Once]])
+  override def build[A <: ActorSysCount : IsAtLeastOnce]: Director =
+    new SimpleDirector(this.asInstanceOf[SimpleDirectorBuilder[AtLeastOnce]])
 }
 
 object SimpleDirector {
@@ -31,7 +31,7 @@ object SimpleDirector {
   val DEFAULT_SYNC_FREQ_MS: Long = 200
 }
 
-class SimpleDirector(builder: SimpleDirectorBuilder[Once]) extends Director with ActorLogging {
+class SimpleDirector(builder: SimpleDirectorBuilder[AtLeastOnce]) extends Director with ActorLogging {
   implicit val actorSystem: ActorSystem = builder.actorSystem.get
   val syncFrequencyMS: Long = builder.syncFrequencyMS.getOrElse(SimpleDirector.DEFAULT_SYNC_FREQ_MS)
 

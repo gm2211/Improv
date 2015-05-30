@@ -3,6 +3,7 @@ package demos
 import actors.Orchestra
 import actors.directors.SimpleDirector
 import actors.musicians.AIMusician
+import actors.musicians.behaviour.{SyncMessageReceivedBehaviour, MusicMessageInfoReceivedBehaviour}
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 
@@ -16,6 +17,8 @@ object DemoRandomOrchestra {
       val instrument = new JFugueInstrument(instrumentType = instrType)
       AIMusician.builder
         .withInstrument(instrument)
+        .addBehaviour(new MusicMessageInfoReceivedBehaviour)
+        .addBehaviour(new SyncMessageReceivedBehaviour)
     }
 
     instrSet

@@ -34,7 +34,6 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
     }
 
     val musicPattern: Pattern = JFugueUtils.createPattern(phrase, instrumentType.instrumentNumber)
-    log.debug(musicPattern.toString)
     _finishedPlaying = false
     playWithPlayer(musicPattern.toString)
   }
@@ -50,7 +49,6 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
   override def notify(eventNotification: async.EventNotification): Unit = {
     eventNotification match {
       case FINISHED_PLAYING =>
-        log.debug(s"$instrumentType => Finished playing!!")
         curPlayer.foreach(_.removeListener(this))
         curPlayer = None
         _finishedPlaying = true

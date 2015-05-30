@@ -4,6 +4,7 @@ import _root_.instruments.OvertoneInstrument
 import _root_.instruments.OvertoneInstrumentType._
 import actors.Orchestra
 import actors.musicians.AIMusician
+import actors.musicians.behaviour.SyncMessageReceivedBehaviour
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, Matchers}
 import tests.TestTags.SlowTest
@@ -16,7 +17,7 @@ class TunePlayTest extends FlatSpec with MockFactory with Matchers {
 
     val musicianBuilder = (instrType: OvertoneInstrumentType) => {
       val instrument = new OvertoneInstrument
-      AIMusician.builder.withInstrument(instrument)
+      AIMusician.builder.withInstrument(instrument).addBehaviour(new SyncMessageReceivedBehaviour)
     }
 
     instrSet

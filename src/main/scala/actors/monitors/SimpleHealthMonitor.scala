@@ -2,7 +2,7 @@ package actors.monitors
 
 import akka.actor._
 import messages.MusicInfoMessage
-import utils.builders.{Count, IsOnce, Once, Zero}
+import utils.builders.{Count, IsAtLeastOnce, AtLeastOnce, Zero}
 import utils.collections.MultiCache
 
 case class SimpleHealthMonitorBuilder[TickFrequencyCount <: Count]
@@ -12,7 +12,7 @@ case class SimpleHealthMonitorBuilder[TickFrequencyCount <: Count]
     cacheSize: Option[Long] = None,
     statsMonitor: Option[StatsMonitor] = None) extends HealthMonitorFactory[TickFrequencyCount] {
 
-  def withTickFrequency(tickFrequency: Long) = copy[Once](tickFrequency = Some(tickFrequency))
+  def withTickFrequency(tickFrequency: Long) = copy[AtLeastOnce](tickFrequency = Some(tickFrequency))
 
   def withTimeout(timeoutMS: Long) = copy[TickFrequencyCount](timeoutMS = Some(timeoutMS))
 
@@ -20,10 +20,10 @@ case class SimpleHealthMonitorBuilder[TickFrequencyCount <: Count]
 
   def withStatsMonitor(statsMonitor: StatsMonitor) =  copy[TickFrequencyCount](statsMonitor = Some(statsMonitor))
 
-  def build[A <: TickFrequencyCount : IsOnce]: SimpleHealthMonitor = new SimpleHealthMonitor(this.asInstanceOf[SimpleHealthMonitorBuilder[Once]])
+  def build[A <: TickFrequencyCount : IsAtLeastOnce]: SimpleHealthMonitor = new SimpleHealthMonitor(this.asInstanceOf[SimpleHealthMonitorBuilder[AtLeastOnce]])
 
-  override def buildAsActor[A <: TickFrequencyCount : IsOnce](implicit system: ActorSystem): ActorRef = {
-    val props = Props(new SimpleHealthMonitor(this.asInstanceOf[SimpleHealthMonitorBuilder[Once]]) with Actor {
+  override def buildAsActor[A <: TickFrequencyCount : IsAtLeastOnce](implicit system: ActorSystem): ActorRef = {
+    val props = Props(new SimpleHealthMonitor(this.asInstanceOf[SimpleHealthMonitorBuilder[AtLeastOnce]]) with Actor {
         override def receive: Actor.Receive = {
           case m: MusicInfoMessage =>
             receivedHeartbeat(m.time, sender())
@@ -40,7 +40,7 @@ object SimpleHealthMonitor {
   val DEFAULT_TIMEOUT_MS: Long = 5000
 }
 
-class SimpleHealthMonitor(builder: SimpleHealthMonitorBuilder[Once]) extends HealthMonitor {
+class SimpleHealthMonitor(builder: SimpleHealthMonitorBuilder[AtLeastOnce]) extends HealthMonitor {
   val tickFrequency = builder.tickFrequency.get
   val timeoutMS = builder.timeoutMS.getOrElse(SimpleHealthMonitor.DEFAULT_TIMEOUT_MS)
   val cacheSize: Long = builder.cacheSize.getOrElse(SimpleHealthMonitor.DEFAULT_CACHE_SIZE)
