@@ -6,6 +6,7 @@ import utils.collections.{EnhancedIterable, FasterMutableListWrapper}
 
 import scala.collection.mutable
 import scala.language.implicitConversions
+import scala.util.Try
 
 object ImplicitConversions {
   import collection.JavaConversions._
@@ -42,4 +43,8 @@ object ImplicitConversions {
     new Predicate[From] {
       override def apply(input: From): Boolean = fn(input)
     }
+
+  implicit class NotNullOption[T](val t: Try[T]) extends AnyVal {
+    def toNotNullOption = t.toOption.flatMap{Option(_)}
+  }
 }

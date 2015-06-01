@@ -4,6 +4,7 @@ import cbr.description.{CaseDescription, DescriptionCreator}
 import cbr.{CaseIndex, CaseSolutionStore}
 import com.fasterxml.jackson.annotation.{JsonCreator, JsonProperty}
 import net.sf.javaml.core.kdtree.KDTree
+import utils.ImplicitConversions.NotNullOption
 import utils.{IOUtils, SerialisationUtils}
 
 import scala.collection.JavaConversions._
@@ -54,40 +55,46 @@ class KDTreeIndex[Problem] (
     )  extends CaseIndex[Problem] with Saveable {
   @JsonProperty("kdTree")
   private val kdTree = {
-    new KDTree[String](
+    new KDTree[List[String]](
       descriptionCreator.getDescriptionSize,
       KDTreeIndex.DEFAULT_KDTREE_REBALANCING_THRESHOLD)
   }
 
  override def addSolutionToProblem(problemDescription: CaseDescription[Problem], solution: Solution): Unit = {
-    // Avoiding 'zombie' solutions since KDTree does not support multiple keys
-    removeSolutionToProblem(problemDescription)
+    val existingSolutions = searchExact(problemDescription)
     val storedSolutionID = store.addSolution(solution)
-    kdTree.insert(problemDescription.getSignature, storedSolutionID)
+    val newSolutions = existingSolutions.getOrElse(List[String]()) :+ storedSolutionID
+
+    if (existingSolutions.isDefined) {
+      // Necessary because insert does not overwrite the value of a node
+      kdTree.delete(problemDescription.getSignature)
+    }
+
+    kdTree.insert(problemDescription.getSignature, newSolutions)
   }
 
   override def findSolutionsToSimilarProblems(caseDescription: CaseDescription[Problem], k: Int): List[Solution] = {
     val maxNumOfNeighbours = math.min(k, kdTree.getNodeCount)
-    Try(kdTree.nearest(caseDescription.getSignature, maxNumOfNeighbours).toList)
+    val solutionIDs = Try(kdTree.nearest(caseDescription.getSignature, maxNumOfNeighbours).toList)
       .toOption
-      .map(_.flatMap(store.getSolution)).getOrElse(List())
+      .map(_.flatten)
+      .getOrElse(List[String]())
+    solutionIDs.flatMap(store.getSolution)
   }
 
-
-  override def removeSolutionToProblem(caseDescription: CaseDescription[Problem]): Boolean = {
-    val key: Array[Double] = caseDescription.getSignature
-    removeEntry(key)
+  override def removeSolutionsToProblem(caseDescription: CaseDescription[Problem]): Boolean = {
+    searchExact(caseDescription).exists { solutionIDs =>
+      solutionIDs.foreach(store.removeSolution)
+      kdTree.delete(caseDescription.getSignature)
+      true
+    }
   }
 
-  private def removeEntry(key: Array[Double]): Boolean = {
-    Try(kdTree.search(key)).map { solutionID =>
-      store.removeSolution(solutionID)
-      kdTree.delete(key)
-    }.isSuccess
-  }
+  def searchExact(caseDescription: CaseDescription[Problem]): Option[List[String]] =
+    Try(kdTree.search(caseDescription.getSignature)).toNotNullOption
 
   override def clear(): KDTreeIndex.this.type = {
-    this.foreach(node => removeEntry(node.getSignature))
+    this.foreach(node => removeSolutionsToProblem(node.getSignature))
     store.clear()
     this
   }

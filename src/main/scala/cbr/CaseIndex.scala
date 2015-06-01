@@ -45,8 +45,8 @@ trait CaseIndex[Problem] extends Traversable[CaseDescription[Problem]] {
     * @param problem Problem whose solution is to be removed from the index
    * @return true if successful, false otherwise (maybe trying to remove something that is not in the index)
    */
-  def removeSolutionToProblem(problem: Problem): Boolean = {
-    removeSolutionToProblem(descriptionCreator.createCaseDescription(problem))
+  def removeSolutionsToProblem(problem: Problem): Boolean = {
+    removeSolutionsToProblem(descriptionCreator.createCaseDescription(problem))
   }
 
   /**
@@ -54,7 +54,7 @@ trait CaseIndex[Problem] extends Traversable[CaseDescription[Problem]] {
    * @param problemDescription Description of the problem whose solution is to be removed from the index
    * @return true if successful, false otherwise (maybe trying to remove something that is not in the index)
    */
-  def removeSolutionToProblem(problemDescription: CaseDescription[Problem]): Boolean
+  def removeSolutionsToProblem(problemDescription: CaseDescription[Problem]): Boolean
 
   /**
    * Remove all entries
