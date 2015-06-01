@@ -19,7 +19,7 @@ import utils.ImplicitConversions.{anyToRunnable, toDouble, toEnhancedIterable}
 import scala.util.Try
 import scalaz.Scalaz._
 
-class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends Instrument with Observable with Listener {
+class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends AsyncInstrument with Listener {
   private val log = LoggerFactory.getLogger(getClass)
   private val threadPool = Executors.newSingleThreadExecutor()
   private var _finishedPlaying = true
@@ -52,12 +52,11 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
         curPlayer.foreach(_.removeListener(this))
         curPlayer = None
         _finishedPlaying = true
-        notifyObservers(FinishedPlaying)
+        notifyObservers(AsyncInstrument.FinishedPlaying)
     }
   }
 }
 
-case object FinishedPlaying extends EventNotification
 
 object JFugueUtils {
   val log = LoggerFactory.getLogger(getClass)
@@ -81,8 +80,7 @@ object JFugueUtils {
       case phrase: Phrase =>
         createPhrasePattern(phrase, instrumentNumber)
     }
-    if (PERCUSSIVE.range.contains(instrumentNumber) ||
-      CHROMATIC_PERCUSSION.range.contains(instrumentNumber)) {
+    if (PERCUSSIVE.range.contains(instrumentNumber)) {
       pattern.setVoice(9)
     }
     pattern

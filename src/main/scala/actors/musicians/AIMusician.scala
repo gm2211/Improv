@@ -1,19 +1,20 @@
 package actors.musicians
 
+import java.util.concurrent.Executors
+
 import actors.composers.{Composer, RandomComposer}
 import actors.musicians.behaviour._
-import akka.actor.{ActorLogging, ActorSystem, Props}
-import instruments.Instrument
+import akka.actor.{ActorLogging, ActorRef, ActorSystem, Props}
+import designPatterns.observer.{EventNotification, Observer}
 import instruments.InstrumentType.InstrumentType
-import messages.{Message, MusicInfoMessage, SyncMessage}
+import instruments.{AsyncInstrument, Instrument}
+import messages.{FinishedPlaying, DirectorIdentityInfoMessage, Message, MusicInfoMessage}
 import representation.Phrase
 import utils.ActorUtils
-import utils.builders.{Count, IsAtLeastOnce, AtLeastOnce, Zero}
+import utils.ImplicitConversions.{toEnhancedIterable, anyToRunnable}
+import utils.builders.{AtLeastOnce, Count, IsAtLeastOnce, Zero}
 import utils.collections.CollectionUtils
-import utils.ImplicitConversions.toEnhancedIterable
 import utils.functional.FunctionalUtils
-
-import scala.collection.mutable
 
 case class AIMusicianBuilder
 [InstrumentCount <: Count,
@@ -67,12 +68,21 @@ object AIMusician {
   def builder: AIMusicianBuilder[Zero, Zero, Zero] = new AIMusicianBuilder[Zero, Zero, Zero]
 }
 
-class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnce]) extends Musician with ActorLogging {
+class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnce])
+    extends Musician with ActorLogging with Observer {
   private val instrument: Instrument = builder.instrument.get
   private val behaviours: List[ActorBehaviour] = builder.behaviours.get
+  private val receiveBehaviours = FunctionalUtils.combine(behaviours.filterByType[ReceiveBehaviour])
   implicit private val actorSystem: ActorSystem = builder.actorSystem.get
   private val musicComposer: Composer = builder.composer.getOrElse(new RandomComposer)
   private val messageOnly: Boolean = builder.messageOnly.get
+  private var director: Option[ActorRef] = None
+
+  instrument match {
+    case instr: AsyncInstrument =>
+      instr.addObserver(this)
+    case _ =>
+  }
 
   private[musicians] val musicInfoMessageCache = CollectionUtils.createHashMultimap[Long, MusicInfoMessage]
   private[musicians] var currentMusicTime: Long = 0
@@ -86,6 +96,7 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
     musicInfoMessageCache.remove(time)
 
     val responsePhrase = musicComposer.compose(instrumentsAndPhrases)
+    log.debug("playing")
     responsePhrase.foreach(play)
   }
 
@@ -96,11 +107,22 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
       MusicInfoMessage(
         phrase,
         currentMusicTime,
-        instrument.instrumentType))
+        instrument.instrumentType,
+        self,
+        director))
   }
 
   override def receive = {
+    case DirectorIdentityInfoMessage(_, director_) =>
+      log.debug(s"${self.path.name} got message from director")
+      this.director = Some(director_)
     case m: Message =>
-      FunctionalUtils.combine(behaviours.filterByType[ReceiveBehaviour])(m)
+      receiveBehaviours(m)
+  }
+
+  override def notify(eventNotification: EventNotification): Unit = eventNotification match {
+    case AsyncInstrument.FinishedPlaying =>
+      log.debug(s"${self.path.name} sending finished playing to ${director.map(_.path.name)}")
+      director.foreach(_ ! FinishedPlaying(self))
   }
 }

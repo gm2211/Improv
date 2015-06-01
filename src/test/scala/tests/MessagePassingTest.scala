@@ -20,6 +20,6 @@ class MessagePassingTest extends FlatSpec with MockFactory with Matchers {
 
     (instrument.play _).expects(*).returning().once()
     // Directly injecting message in order to avoid concurrency issues
-    musician.receive(new SyncMessage(1))
+    musician.receive(new SyncMessage(musician, 1))
   }
 }

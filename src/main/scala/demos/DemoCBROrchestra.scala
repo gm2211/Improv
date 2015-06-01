@@ -15,7 +15,7 @@ import scala.concurrent.duration.{NANOSECONDS => NANOS}
 object DemoCBROrchestra {
   def run(): Unit = {
     val syncFreq = NANOS.toMillis(PhraseSegmenter.DEFAULT_SUB_PHRASE_LENGTH_NS.toLong)
-    val director = Option(SimpleDirector.builder.withSyncFrequencyMS(syncFreq))
+    val director = SimpleDirector.builder.withSyncFrequencyMS(syncFreq)
     val orchestra = Orchestra.builder.withDirector(director).build
 
     val musicianBuilder = (instrType: InstrumentType, partNumber: Int) => {

@@ -2,7 +2,7 @@ package tests.instruments
 
 import designPatterns.observer.{EventNotification, Observer}
 import instruments.InstrumentType.PIANO
-import instruments.{FinishedPlaying, JFugueInstrument}
+import instruments.{AsyncInstrument, JFugueInstrument}
 import org.scalatest.FlatSpec
 import representation.{MusicalElement, Note, Phrase, Rest}
 import tests.TestTags.SlowTest
@@ -30,7 +30,7 @@ class JFugueInstrumentTest extends FlatSpec {
 
     val listener = new Observer {
       override def notify(eventNotification: EventNotification): Unit = eventNotification match {
-        case FinishedPlaying =>
+        case AsyncInstrument.FinishedPlaying =>
           println("FinishedPlaying")
           lock.synchronized(lock.notifyAll())
       }

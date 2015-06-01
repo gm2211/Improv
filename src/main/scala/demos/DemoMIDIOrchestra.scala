@@ -2,9 +2,11 @@ package demos
 
 import actors.Orchestra
 import actors.composers.{RandomComposer, CBRComposer, MIDIReaderComposer}
-import actors.directors.SimpleDirector
+import actors.directors.{WaitingDirector, SimpleDirector}
+import actors.monitors.SimpleHealthMonitor
 import actors.musicians.AIMusician
 import actors.musicians.behaviour.{SyncMessageReceivedBehaviour, MusicMessageInfoReceivedBehaviour}
+import akka.actor.ActorSystem
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 import midi.JMusicMIDIParser
@@ -13,7 +15,7 @@ import storage.KDTreeIndex
 
 object DemoMIDIOrchestra {
   private def createComposer(filename: String, partNumber: Int) = {
-    val composer = "rand"
+    val composer = "midi"
     composer match {
       case "rand" =>
         new RandomComposer
@@ -30,8 +32,9 @@ object DemoMIDIOrchestra {
   }
 
   def run(filename: String) = {
-    val director = Option(SimpleDirector.builder.withSyncFrequencyMS(6000))
-    val orchestra = Orchestra.builder.withDirector(director).build
+    val orchestra = Orchestra.builder
+      .withDirector(WaitingDirector.builder)
+      .build
     val parser = JMusicMIDIParser(filename)
 
     val musicianBuilder = (instrType: InstrumentType, partNumber: Int) => {

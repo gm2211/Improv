@@ -15,17 +15,17 @@ object ActorUtils {
 
   def schedule(delayMS: Long,
     intervalMS: Long,
-    task: Runnable)(implicit system: ActorSystem): Option[Cancellable] = {
+    task: Runnable)(implicit system: ActorSystem): Cancellable = {
     val delay = FiniteDuration(delayMS, TimeUnit.MILLISECONDS)
     val duration = FiniteDuration(intervalMS, TimeUnit.MILLISECONDS)
 
-    Some(system.scheduler.schedule(delay, duration, task))
+    system.scheduler.schedule(delay, duration, task)
   }
 
   def scheduleOnce(delayMS: Long,
-    task: Runnable)(implicit system: ActorSystem): Option[Cancellable] = {
+    task: Runnable)(implicit system: ActorSystem): Cancellable = {
     val delay = FiniteDuration(delayMS, TimeUnit.MILLISECONDS)
-    Some(system.scheduler.scheduleOnce(delay, task))
+    system.scheduler.scheduleOnce(delay, task)
   }
 
   def subscribe(a: ActorRef, c: Class[_])(implicit sys: ActorSystem): Unit = {
