@@ -4,6 +4,7 @@ import actors.Orchestra
 import actors.composers.CBRComposer
 import actors.directors.SimpleDirector
 import actors.musicians.AIMusician
+import cbr.MusicalCase
 import instruments.InstrumentType.InstrumentType
 import instruments.JFugueInstrument
 import midi.segmentation.PhraseSegmenter
@@ -20,7 +21,7 @@ object DemoCBROrchestra {
 
     val musicianBuilder = (instrType: InstrumentType, partNumber: Int) => {
       val instrument = new JFugueInstrument(instrType)
-      val composer = new CBRComposer(KDTreeIndex.loadDefault[(InstrumentType, Phrase)].get)
+      val composer = new CBRComposer(KDTreeIndex.loadDefault[MusicalCase].get)
 
       AIMusician.builder
         .withInstrument(instrument)

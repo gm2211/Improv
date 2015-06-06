@@ -7,7 +7,7 @@ import representation.{Note, Phrase}
 class RepeatedNotesExtractor extends SingleFeatureExtractor[Phrase] {
   override def extractFeature(phrase: Phrase): Feature[Phrase] = {
     val notes = phrase.collect{ case note: Note =>
-      (note.octave, note.midiPitch, note.durationNS, note.loudness, note.intonation)
+      (note.octave, note.midiPitch, note.durationNS, note.loudness, note.accidental)
     }.toList
     val distinctNotes = notes.distinct
     Feature.from(notes.size - distinctNotes.size)

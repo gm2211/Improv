@@ -5,10 +5,10 @@ import representation.Phrase
 import utils.ImplicitConversions.toEnhancedIterable
 import utils.collections.CollectionUtils
 
-class RandomSelector extends PopulationSelector[(InstrumentType, Phrase)] {
+class RandomSelector[Elem] extends PopulationSelector[Elem] {
   override def selectSolution(
-      candidates: Traversable[(InstrumentType, Phrase)],
-      constraints: Traversable[((InstrumentType, Phrase)) => Boolean]): Option[(InstrumentType, Phrase)] = {
+      candidates: Traversable[Elem],
+      constraints: Traversable[(Elem) => Boolean]): Option[Elem] = {
     CollectionUtils.chooseRandom(candidates.filter(constraints))
   }
 }

@@ -1,5 +1,6 @@
 package actors.musicians
 
+import akka.actor.ActorLogging
 import instruments.JFugueUtils
 import messages.{MusicInfoMessage, SyncMessage}
 import org.jfugue.player.Player
@@ -13,7 +14,7 @@ import scala.collection.mutable
  * This musician listens to all the music messages sent by other musicians and plays them all at the same time on the
  * next sync message (this kind of acts like a sync barrier)
  */
-class JFugueSynchronizedPlayer extends Musician {
+class JFugueSynchronizedPlayer extends Musician with ActorLogging {
   private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = MultiCache.buildDefault(5000, 50)
   val player: Player = new Player()
 
@@ -33,7 +34,8 @@ class JFugueSynchronizedPlayer extends Musician {
       val pattern = musicInfoMessageCache.get(syncMessage.time - 1)
         .map(prepare).getOrElse("")
 
-      new Thread(() => player.play(pattern)).start()
+      log.debug(s"Playing $pattern")
+      player.play(pattern)
 
       musicInfoMessageCache.remove(syncMessage.time - 1)
   }

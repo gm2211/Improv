@@ -1,8 +1,8 @@
 package actors.composers
 
-import instruments.InstrumentType.InstrumentType
+import cbr.MusicalCase
 import representation.Phrase
 
 trait Composer {
-  def compose(phrasesByOthers: Traversable[(InstrumentType, Phrase)]): Option[Phrase]
+  def compose(phrasesByOthers: Traversable[MusicalCase]): Option[Phrase]
 }

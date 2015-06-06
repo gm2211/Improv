@@ -1,27 +1,35 @@
+import javax.sound.midi.{MetaMessage, MetaEventListener, MidiSystem, Sequencer}
+
+import instruments.InstrumentType.PIANO
+import instruments.JFugueUtils
+import midi.JMusicMIDIParser
+import org.jfugue.player.Player
 import utils.IOUtils
+import utils.collections.CollectionUtils
+import utils.ImplicitConversions.anyToRunnable
 
 object Main extends App {
   //  val filename = IOUtils.getResourcePath("musicScores/midi_export.mid")
 //    val filename = IOUtils.getResourcePath("musicScores/shorterTest.mid")
-  val filename = IOUtils.getResourcePath("musicScores/test.mid")
   //    val filename = IOUtils.getResourcePath("musicScores/shortPiano.mid")
   //  val filename = IOUtils.getResourcePath("musicScores/piano.mid")
+  val filename = IOUtils.getResourcePath("musicScores/test.mid")
   //  val filename = IOUtils.getResourcePath("trainingMIDIs/myTrainingExample.mid")
   //  demos.DemoCompareParserOutput.run(filename)
-//    demos.DemoMIDIOrchestra.run(filename)
+    demos.DemoMIDIOrchestra.run(filename)
   //    demos.DemoRandomOrchestra.run()
   //      demos.DemoJMusicMIDIPlayer.run(filename)
   //  demos.DemoJFugueMIDIPlayer.run(filename)
   val trainingDir = "trainingMIDIs"
-      demos.DemoPopulateDB.run(trainingDir)
+//      demos.DemoPopulateDB.run(trainingDir)
 //      demos.DemoCBROrchestra.run()
-//  val index = KDTreeIndex.loadDefault[MusicalCase].get
-//  index.foreach(cd => println(index.findSolutionsToSimilarProblems(cd, 1).head.instrumentType))
-//  val store = new MapDBSolutionStore[MusicalCase](IOUtils.getResourcePath("knowledgeBase/solutionStore"))
-////  println(store.addSolution(MusicalCase(BRASS(57), Phrase())))
-////  println(store.addSolution(MusicalCase(PIANO(1), Phrase())))
-////  store.commit()
-//  println(store.getSolution("ff82ef93-f9fc-44e3-9779-fc77f64e3ce6"))
-//  println(store.getSolution("6f66d7e5-29f2-43f3-9cc4-60da49edb3c0"))
+
+//  def runnable: Runnable = () => {
+//    val filename = IOUtils.getResourcePath("musicScores/test.mid")
+//    val phrase = CollectionUtils.chooseRandom(JMusicMIDIParser(filename).getMultiVoicePhrases(1)).get
+//    new Player().play(JFugueUtils.createPattern(phrase, PIANO(1)))
+//  }
+//
+//  (1 to 10).foreach(i => new Thread(runnable).start())
 }
 

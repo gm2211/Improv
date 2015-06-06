@@ -20,7 +20,7 @@ trait DescriptionCreator[Element] {
    * Returns the maximum of CaseDescription(s) that can be created by this creator
    * @return Max description size
    */
-  def getDescriptionSize: Int = featureExtractor.totalFeaturesSize
+  def getMaxDescriptionSize: Int = featureExtractor.totalFeaturesSize
 
   /**
    * Creates a description for the provided element by using the feature extractor to extract features from the case

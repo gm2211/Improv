@@ -4,9 +4,10 @@ import actors.Orchestra
 import actors.composers.{RandomComposer, CBRComposer, MIDIReaderComposer}
 import actors.directors.{WaitingDirector, SimpleDirector}
 import actors.monitors.SimpleHealthMonitor
-import actors.musicians.AIMusician
+import actors.musicians.{JFugueSynchronizedPlayer, AIMusician}
 import actors.musicians.behaviour.{SyncMessageReceivedBehaviour, MusicMessageInfoReceivedBehaviour}
 import akka.actor.ActorSystem
+import cbr.MusicalCase
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 import midi.JMusicMIDIParser
@@ -15,7 +16,7 @@ import storage.KDTreeIndex
 
 object DemoMIDIOrchestra {
   private def createComposer(filename: String, partNumber: Int) = {
-    val composer = "midi"
+    val composer = "cbr"
     composer match {
       case "rand" =>
         new RandomComposer
@@ -26,7 +27,7 @@ object DemoMIDIOrchestra {
           .withMIDIParser(JMusicMIDIParser)
           .build
       case "cbr" =>
-        val index = KDTreeIndex.loadDefault[(InstrumentType, Phrase)].get
+        val index = KDTreeIndex.loadDefault[MusicalCase].get
         new CBRComposer(index)
     }
   }
@@ -45,7 +46,7 @@ object DemoMIDIOrchestra {
         .withInstrument(instrument)
         .withBehaviours(AIMusician.getDefaultBehaviours)
         .withComposer(composer)
-      //        .isMessageOnly
+//        .isMessageOnly
     }
 
     for (((instrument, parts), idx) <- parser.getPartIndexByInstrument.zipWithIndex if idx < 2) {
@@ -54,7 +55,7 @@ object DemoMIDIOrchestra {
         .foreach(m => orchestra.registerMusician(m.build))
     }
 
-    //    orchestra.registerMusician(new JFugueSynchronizedPlayer)
+//        orchestra.registerMusician(new JFugueSynchronizedPlayer)
 
     orchestra.start()
   }

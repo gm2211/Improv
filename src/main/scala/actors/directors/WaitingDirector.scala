@@ -80,12 +80,13 @@ class WaitingDirector(builder: WaitingDirectorBuilder[AtLeastOnce]) extends Dire
       playersStillPlaying.remove(actor.path)
       sync()
     case _ =>
-      log.debug("SHOULD NEVER HAPPEN")
+      log.debug("Unknown event received from HealthMonitor")
   }
 
   def sync(): Unit = {
+    log.debug(s"Waiting on ${playersStillPlaying.size} musician")
     if (playersStillPlaying.isEmpty) {
-      log.debug(s"syncing $timeTick")
+      log.debug(s"Sending Sync($timeTick)")
       ActorUtils.broadcast(SyncMessage(self, timeTick))
       timeTick += 1
     }

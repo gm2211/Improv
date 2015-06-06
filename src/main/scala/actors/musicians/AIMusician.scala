@@ -5,6 +5,7 @@ import java.util.concurrent.Executors
 import actors.composers.{Composer, RandomComposer}
 import actors.musicians.behaviour._
 import akka.actor.{ActorLogging, ActorRef, ActorSystem, Props}
+import cbr.MusicalCase
 import designPatterns.observer.{EventNotification, Observer}
 import instruments.InstrumentType.InstrumentType
 import instruments.{AsyncInstrument, Instrument}
@@ -90,8 +91,8 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
   behaviours.foreach{ case b: AIMusicianBehaviour => b.registerMusician(this) case _ => }
 
   def play(time: Long): Unit = {
-    val instrumentsAndPhrases: Traversable[(InstrumentType, Phrase)] = musicInfoMessageCache.get(time)
-      .map(_.map(m => (m.instrument, m.phrase))).getOrElse(Set())
+    val instrumentsAndPhrases = musicInfoMessageCache.get(time)
+      .map(_.map(m => MusicalCase(m.instrument, m.phrase))).getOrElse(Set())
 
     musicInfoMessageCache.remove(time)
 
@@ -103,6 +104,7 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
   override def play(phrase: Phrase): Unit = {
     if (!messageOnly) instrument.play(phrase)
 
+    log.debug(s"Playing $phrase")
     ActorUtils.broadcast(
       MusicInfoMessage(
         phrase,

@@ -38,13 +38,14 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
     playWithPlayer(musicPattern.toString)
   }
 
-  private def playWithPlayer(pattern: String): Unit =
-    threadPool.submit(() => {
+  private def playWithPlayer(pattern: String): Unit = {
+//    threadPool.submit(() => {
       val player = new Player()
       curPlayer = Some(player)
       player.addListener(this)
       player.play(pattern)
-    })
+//    })
+  }
 
   override def notify(eventNotification: async.EventNotification): Unit = {
     eventNotification match {
@@ -110,7 +111,7 @@ object JFugueUtils {
     new Pattern(chord.notes.map(convertNote(_, instrumentNumber, tempoBPM).getPattern.toString).mkString("+"))
 
   def convertNote(note: Note, instrumentNumber: Int, tempoBPM: Double): theory.Note = {
-    new theory.Note(s"${note.name.toString}${note.intonation.toString}${note.octave}")
+    new theory.Note(s"${note.name.toString}${note.accidental.toString}${note.octave}")
       .setDuration(note.getDurationBPM(tempoBPM))
       .setOnVelocity(note.loudness.loudness.toByte)
       .setOffVelocity(0)

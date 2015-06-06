@@ -56,7 +56,7 @@ class KDTreeIndex[Problem] (
   @JsonProperty("kdTree")
   private val kdTree = {
     new KDTree[List[String]](
-      descriptionCreator.getDescriptionSize,
+      descriptionCreator.getMaxDescriptionSize,
       KDTreeIndex.DEFAULT_KDTREE_REBALANCING_THRESHOLD)
   }
 

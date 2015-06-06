@@ -24,7 +24,7 @@ object Note {
       octave: Boolean = true,
       duration: Boolean = true) = {
     note1.name == note2.name &&
-      note1.intonation == note2.intonation &&
+      note1.accidental == note2.accidental &&
       (! octave || note1.octave == note2.octave) &&
       (! duration || note1.durationNS == note2.durationNS)
   }
@@ -36,7 +36,7 @@ object Note {
   val DEFAULT_OCTAVE = 4
   val DEFAULT_PITCH = 60
   val DEFAULT_DURATION = 2000
-  val DEFAULT_INTONATION = Natural
+  val DEFAULT_ACCIDENTAL = Natural
   val DEFAULT_LOUDNESS = MF
   val DEFAULT_START_TIME = 0
 
@@ -47,12 +47,12 @@ object Note {
    * @param noteString String representing a note
    * @return a tuple of the (name, intonation, octave)
    */
-  def parseString(noteString: String): (Option[NoteName], Option[Intonation], Option[Int]) = {
+  def parseString(noteString: String): (Option[NoteName], Option[Accidental], Option[Int]) = {
     val regex = "([A-Z]){1}([b#])?(\\d)?".r
     noteString match {
       case regex(name, intonation, octave) =>
         (Try(NoteName.withName(name)).toOption,
-          Some(Intonation(intonation)),
+          Some(Accidental(intonation)),
           Try(octave.toInt).toOption)
 
       case _ =>
@@ -63,7 +63,7 @@ object Note {
   def fromString(noteString: String): Note = {
     val (name, intonation, octave) = parseString(noteString)
     Note(name = name.getOrElse(Note.DEFAULT_NAME),
-      intonation = intonation.getOrElse(Note.DEFAULT_INTONATION),
+      accidental = intonation.getOrElse(Note.DEFAULT_ACCIDENTAL),
       octave = octave.getOrElse(Note.DEFAULT_OCTAVE))
   }
 
@@ -79,7 +79,7 @@ object Note {
       name = NoteName.withName(name),
       octave = octave,
       durationNS = duration,
-      intonation = intonation)
+      accidental = intonation)
   }
 }
 
@@ -92,7 +92,7 @@ case class Note(name: NoteName = Note.DEFAULT_NAME,
   octave: Int = Note.DEFAULT_OCTAVE,
   midiPitch: Int = Note.DEFAULT_PITCH,
   durationNS: BigInt = Note.DEFAULT_DURATION,
-  intonation: Intonation = Note.DEFAULT_INTONATION,
+  accidental: Accidental = Note.DEFAULT_ACCIDENTAL,
   loudness: Loudness = Note.DEFAULT_LOUDNESS,
   startTimeNS: BigInt = Note.DEFAULT_START_TIME) extends MusicalElement {
   require((0 to Note.MAX_MIDI_PITCH) contains midiPitch, s"$midiPitch is not within ${0 to Note.MAX_MIDI_PITCH}")
@@ -101,7 +101,7 @@ case class Note(name: NoteName = Note.DEFAULT_NAME,
 
   def withOctave(newOctave: Int) = copy(octave = newOctave)
 
-  def withIntonation(newIntonation: Intonation) = copy(intonation = newIntonation)
+  def withAccidental(newAccidental: Accidental) = copy(accidental = newAccidental)
 
   def withLoudness(newLoudness: Loudness) = copy(loudness = loudness)
 

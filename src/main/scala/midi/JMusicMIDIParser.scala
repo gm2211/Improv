@@ -135,7 +135,7 @@ object JMusicParserUtils {
         octave = Note.pitchToOctave(notePitch),
         midiPitch = notePitch,
         durationNS = duration,
-        intonation = intonation,
+        accidental = intonation,
         loudness = loudness,
         startTimeNS = startTime)))
     }
