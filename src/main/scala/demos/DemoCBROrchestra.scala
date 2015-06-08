@@ -7,7 +7,7 @@ import actors.musicians.AIMusician
 import cbr.MusicalCase
 import instruments.InstrumentType.InstrumentType
 import instruments.JFugueInstrument
-import midi.segmentation.PhraseSegmenter
+import training.segmentation.PhraseSegmenter
 import representation.Phrase
 import storage.KDTreeIndex
 

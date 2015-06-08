@@ -1,4 +1,4 @@
-package midi.segmentation
+package training.segmentation
 
 import representation.Phrase
 
