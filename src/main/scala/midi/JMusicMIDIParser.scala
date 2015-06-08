@@ -30,7 +30,7 @@ class JMusicMIDIParser(
   val phraseSplitter: PhraseSegmenter) extends MIDIParser {
 
   def split(phrase: Phrase): Traversable[Phrase] = {
-    phraseSplitter.split(phrase)
+    phraseSplitter.segment(phrase)
   }
 
   private val getPhrasesM = FunctionalUtils.memoized[Int, Traversable[Phrase]]((partNum: Int) => {

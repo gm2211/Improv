@@ -16,7 +16,7 @@ object PhraseSegmenter {
 trait PhraseSegmenter {
   this: SplitTimesFinder =>
 
-  def split(phrase: Phrase): List[Phrase] = {
+  def segment(phrase: Phrase): List[Phrase] = {
     var curPhrase = Option(phrase)
     val phrases = ListBuffer[Phrase]()
     val splitTimes = getSplitTimes(phrase)
