@@ -147,6 +147,18 @@ object Phrase {
     (leftElements.nonEmpty.option(phrase.withMusicalElements(leftElements).withStartTime(0)),
      rightElements.nonEmpty.option(phrase.withMusicalElements(rightElements).withStartTime(0)))
   }
+
+  /**
+   * If it is a polyphonic phrase, it returns the sub-phrase with more elements. Otherwise, it returns the provided
+   * phrase
+   * @param phrase
+   */
+  def getLongestSubPhrase(phrase: Phrase) = {
+    if (phrase.polyphony)
+      phrase.musicalElements.asInstanceOf[List[Phrase]].maxBy(_.size)
+    else
+      phrase
+  }
 }
 
 /**

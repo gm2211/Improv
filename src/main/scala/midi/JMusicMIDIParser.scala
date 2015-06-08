@@ -2,6 +2,7 @@ package midi
 
 import instruments.InstrumentType
 import instruments.InstrumentType.InstrumentType
+import jm.music.data.Score
 import jm.music.{data => jmData}
 import jm.util.Read
 import training.segmentation.PhraseSegmenter
@@ -19,30 +20,41 @@ import scalaz.Scalaz._
 
 object JMusicMIDIParser extends MIDIParserFactory {
   override def apply(filename: String) = {
-    val score: jmData.Score = new jmData.Score()
-    Read.midi(score, filename)
+    val score: Score = getScore(filename)
     new JMusicMIDIParser(score, PhraseSegmenter.getDefault())
+  }
+
+  def apply(filename: String, phraseSegmenter: PhraseSegmenter) = {
+    val score: Score = getScore(filename)
+    new JMusicMIDIParser(score, phraseSegmenter)
+  }
+
+  private def getScore(filename: String): Score = {
+    val score: Score = new Score()
+    Read.midi(score, filename)
+    score
   }
 }
 
 class JMusicMIDIParser(
   val score: jmData.Score,
-  val phraseSplitter: PhraseSegmenter) extends MIDIParser {
+  val phraseSegmenter: PhraseSegmenter) extends MIDIParser {
 
   def split(phrase: Phrase): Traversable[Phrase] = {
-    phraseSplitter.segment(phrase)
+    phraseSegmenter.segment(phrase)
   }
 
+  def getMultiVoicePhrase(partNum: Int): Option[Phrase] =
+    JMusicParserUtils.convertPart(score.getPart(partNum))
+
   private val getPhrasesM = FunctionalUtils.memoized[Int, Traversable[Phrase]]((partNum: Int) => {
-    val multiVoicePhrase = JMusicParserUtils.convertPart(score.getPart(partNum))
-    multiVoicePhrase.flatMap(phrase => JMusicParserUtils.mergePhrases(phrase).map(split)).getOrElse(List())
+    getMultiVoicePhrase(partNum).flatMap(phrase => JMusicParserUtils.mergePhrases(phrase).map(split)).getOrElse(List())
   })
 
   override def getPhrases(partNum: Int): Traversable[Phrase] = getPhrasesM(partNum)
 
   private val getMultiVoicePhrasesM = FunctionalUtils.memoized((partNum: Int) => {
-    val multiVoicePhrase = JMusicParserUtils.convertPart(score.getPart(partNum))
-    multiVoicePhrase.map(split).getOrElse(List())
+    getMultiVoicePhrase(partNum).map(split).getOrElse(List())
   })
 
   override def getMultiVoicePhrases(partNum: Int): List[Phrase] = getMultiVoicePhrasesM(partNum).toList

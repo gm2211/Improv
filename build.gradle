@@ -70,6 +70,9 @@ dependencies {
     // Feature Extraction
     compile name: "jSymbolic"
 
+    // Plotting
+    compile "com.quantifind:wisp_2.11:$wisp_version"
+
     // Dependency Injection
     //compile "net.codingwell:scala-guice_2.10:$scala_guice_version"
 

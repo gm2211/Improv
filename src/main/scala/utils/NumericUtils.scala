@@ -30,7 +30,7 @@ object NumericUtils {
   }
 
   def normalise(numbers: Iterable[BigInt]): Iterable[BigDecimal] = {
-    val total = BigDecimal(numbers.sum)
+    val total = BigDecimal(max(1, numbers.sum))
     numbers.map(n => BigDecimal(n) / total)
   }
 
@@ -41,7 +41,7 @@ object NumericUtils {
    * @return
    */
   def findPeaks(numbers: List[BigDecimal]): List[(BigDecimal, Int)] = {
-    for (idx <- 1 until numbers.size - 1
+    for (idx <- (1 until numbers.size - 1).toList
          if numbers(idx - 1) < numbers(idx) &&
             numbers(idx) > numbers(idx + 1)) yield {
       (numbers(idx), idx)
