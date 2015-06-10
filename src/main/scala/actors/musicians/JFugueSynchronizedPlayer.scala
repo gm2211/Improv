@@ -5,7 +5,6 @@ import instruments.JFugueUtils
 import messages.{MusicInfoMessage, SyncMessage}
 import org.jfugue.player.Player
 import representation.Phrase
-import utils.ImplicitConversions.anyToRunnable
 import utils.collections.MultiCache
 
 import scala.collection.mutable

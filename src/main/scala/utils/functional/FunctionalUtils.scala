@@ -3,8 +3,11 @@ package utils.functional
 import scala.util.Try
 
 object FunctionalUtils {
-  def combine[A, B](functions: Iterable[PartialFunction[A, B]]): PartialFunction[A, B] = {
+  def combineOr[A, B](functions: Iterable[PartialFunction[A, B]]): PartialFunction[A, B] = {
     functions.foldLeft(PartialFunction.empty[A, B])((acc, fn) => acc orElse fn)
+  }
+  def combineAnd[A](functions: Iterable[PartialFunction[A, A]]): PartialFunction[A, A] = {
+    functions.foldLeft(PartialFunction.empty[A, A])((acc, fn) => acc andThen fn)
   }
 
   def memoized[A, B](function: A => B) = new MemoizedFunc[A, B](function)

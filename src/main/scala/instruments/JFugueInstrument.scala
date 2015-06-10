@@ -3,7 +3,6 @@ package instruments
 import java.util.concurrent.Executors
 import javax.sound.midi.Sequence
 
-import designPatterns.observer.{EventNotification, Observable}
 import instruments.InstrumentType.{CHROMATIC_PERCUSSION, InstrumentType, PERCUSSIVE, PIANO}
 import org.jfugue.async.Listener
 import org.jfugue.midi.MidiParserListener
@@ -14,7 +13,7 @@ import org.jfugue.{async, theory}
 import org.slf4j.LoggerFactory
 import org.staccato.StaccatoParser
 import representation._
-import utils.ImplicitConversions.{anyToRunnable, toDouble, toEnhancedIterable}
+import utils.ImplicitConversions.{toDouble, toEnhancedIterable, anyToRunnable}
 
 import scala.util.Try
 import scalaz.Scalaz._
@@ -39,12 +38,12 @@ class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) ex
   }
 
   private def playWithPlayer(pattern: String): Unit = {
-//    threadPool.submit(() => {
+    threadPool.submit(() => {
       val player = new Player()
       curPlayer = Some(player)
       player.addListener(this)
       player.play(pattern)
-//    })
+    })
   }
 
   override def notify(eventNotification: async.EventNotification): Unit = {

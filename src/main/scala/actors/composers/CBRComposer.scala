@@ -1,8 +1,7 @@
 package actors.composers
 
-import cbr.{MusicalCase, CaseIndex}
-import genetic.{RandomSelector, PopulationSelector}
-import instruments.InstrumentType.InstrumentType
+import cbr.{CaseIndex, MusicalCase}
+import genetic.{PopulationSelector, RandomSelector}
 import representation.Phrase
 import utils.collections.CollectionUtils
 

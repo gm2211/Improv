@@ -3,7 +3,7 @@ package demos
 import actors.Orchestra
 import actors.directors.SimpleDirector
 import actors.musicians.AIMusician
-import actors.musicians.behaviour.{SyncMessageReceivedBehaviour, MusicMessageInfoReceivedBehaviour}
+import actors.musicians.behaviour.{MusicMessageInfoReceivedBehaviour, SyncMessageReceivedBehaviour}
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 

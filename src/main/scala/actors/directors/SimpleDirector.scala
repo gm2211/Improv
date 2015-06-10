@@ -1,7 +1,8 @@
 package actors.directors
 
 import akka.actor.{ActorLogging, ActorSystem, Cancellable}
-import messages.{MusicInfoMessage, Start, Stop, SyncMessage}
+import messages.SyncMessage
+import messages.consensus.DecisionType
 import utils.ActorUtils
 import utils.ImplicitConversions.anyToRunnable
 import utils.builders.{AtLeastOnce, Count, IsAtLeastOnce, Zero}
@@ -49,6 +50,10 @@ class SimpleDirector(builder: SimpleDirectorBuilder[AtLeastOnce]) extends Direct
   def sync(): Unit = {
     ActorUtils.broadcast(SyncMessage(self, tickCount))
     tickCount += 1
+  }
+
+  override protected def haveAllActorsVoted(decisionType: DecisionType): Boolean = {
+    true
   }
 }
 

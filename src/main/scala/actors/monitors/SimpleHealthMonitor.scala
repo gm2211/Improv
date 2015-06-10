@@ -73,4 +73,9 @@ class SimpleHealthMonitor(builder: SimpleHealthMonitorBuilder[AtLeastOnce, AtLea
   override def isActorHealthy(actor: ActorRef): Boolean = heartbeatsCache.contains(actor.path)
 
   override def getHealthyActors: List[ActorPath] = heartbeatsCache.keySet.toList
+
+  override def reset(): Unit = {
+    heartbeatsCache.clear()
+    statsMonitor.reset()
+  }
 }
