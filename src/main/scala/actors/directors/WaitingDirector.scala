@@ -49,7 +49,7 @@ class WaitingDirector(builder: WaitingDirectorBuilder[AtLeastOnce]) extends Dire
   }
 
   override def stop(): Unit = {
-    healthMonitor.reset
+    healthMonitor.reset()
     context.become(super.receive)
   }
 

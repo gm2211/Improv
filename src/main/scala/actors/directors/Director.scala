@@ -18,11 +18,16 @@ trait Director extends Actor with ActorLogging {
   override def receive: Receive = {
     case Start =>
       start()
+
     case Stop =>
       stop()
-    case VoteRequest(_, decisionType) =>
-      log.debug(s"Received request for $decisionType")
-      ActorUtils.broadcast(VoteRequest(self, decisionType))
+
+    case VoteRequest(sender, decisionType) =>
+      if (sender.path != self.path) {
+        log.debug(s"Received request for $decisionType")
+        ActorUtils.broadcast(VoteRequest(self, decisionType))
+      }
+
     case voteResponse: VoteResponse =>
       log.debug(s"Received response $voteResponse")
       votesByDecisionType.addBinding(voteResponse.decisionType, voteResponse)
@@ -30,6 +35,8 @@ trait Director extends Actor with ActorLogging {
       if (haveAllActorsVoted(voteResponse.decisionType)) {
         val votes = votesByDecisionType.get(voteResponse.decisionType).get.map(_.decision)
         val decision = Decisions.decide(votes)
+
+        votesByDecisionType.remove(voteResponse.decisionType)
         ActorUtils.broadcast(FinalDecision(self, decision))
         processDecision(voteResponse.decisionType, decision)
       }
@@ -40,7 +47,7 @@ trait Director extends Actor with ActorLogging {
       decision match {
         case BinaryDecision.Yes =>
           stop()
-//          actorSystem.shutdown()
+          actorSystem.shutdown()
         case _ =>
       }
     case _ =>

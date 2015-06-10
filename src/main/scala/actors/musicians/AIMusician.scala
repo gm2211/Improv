@@ -76,7 +76,7 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
   implicit private val actorSystem: ActorSystem = builder.actorSystem.get
   private val musicComposer: Composer = builder.composer.getOrElse(new RandomComposer)
   private val messageOnly: Boolean = builder.messageOnly.get
-  private var directorIdentity: Option[ActorRef] = None
+  var directorIdentity: Option[ActorRef] = None
 
   instrument match {
     case instr: AsyncInstrument =>
