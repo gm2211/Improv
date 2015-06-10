@@ -1,10 +1,9 @@
 package actors.composers
 
 import cbr.MusicalCase
-import instruments.InstrumentType.InstrumentType
 import midi.{JMusicMIDIParser, MIDIParser, MIDIParserFactory}
 import representation.Phrase
-import utils.builders.{Count, IsAtLeastOnce, AtLeastOnce, Zero}
+import utils.builders.{AtLeastOnce, Count, IsAtLeastOnce, Zero}
 
 case class MIDIReaderComposerBuilder[
   FileNameCount <: Count,

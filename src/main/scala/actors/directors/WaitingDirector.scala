@@ -4,6 +4,7 @@ import actors.monitors.{HealthMonitor, HealthMonitorFactory, SimpleHealthMonitor
 import akka.actor._
 import designPatterns.observer.{EventNotification, Observer}
 import messages._
+import messages.consensus.DecisionType
 import utils.ActorUtils
 import utils.builders.{AtLeastOnce, Count, IsAtLeastOnce, Zero}
 
@@ -32,7 +33,7 @@ object WaitingDirector {
 class WaitingDirector(builder: WaitingDirectorBuilder[AtLeastOnce]) extends Director with Observer with ActorLogging {
   implicit val actorSystem: ActorSystem = builder.actorSystem.get
   private var timeTick: Long = 0
-  private val playersStillPlaying = mutable.Set[ActorPath]()
+  private val playersStillPlaying = new java.util.concurrent.ConcurrentHashMap[ActorPath, Unit]()
   private val healthMonitor: HealthMonitor = {
     builder.healthMonitorFactory
       .getOrElse(SimpleHealthMonitor.builder)
@@ -48,6 +49,7 @@ class WaitingDirector(builder: WaitingDirectorBuilder[AtLeastOnce]) extends Dire
   }
 
   override def stop(): Unit = {
+    healthMonitor.reset()
     context.become(super.receive)
   }
 
@@ -58,7 +60,7 @@ class WaitingDirector(builder: WaitingDirectorBuilder[AtLeastOnce]) extends Dire
   def getWaitForChildrenBehaviour: Receive = {
     {
       case m: MusicInfoMessage =>
-        playersStillPlaying += m.sender.path
+        playersStillPlaying.put(m.sender.path, ())
         healthMonitor.receivedHeartbeat(m.sender)
         if (m.director.isEmpty) {
           log.debug(s"Sending director identity to ${m.sender.path.name}")
@@ -91,5 +93,11 @@ class WaitingDirector(builder: WaitingDirectorBuilder[AtLeastOnce]) extends Dire
       timeTick += 1
     }
     context.become(receive)
+  }
+
+  override protected def haveAllActorsVoted(decisionType: DecisionType): Boolean = {
+    log.debug(s"${votesByDecisionType.get(decisionType).map(_.size).getOrElse(0)} actors out of "+
+      s"${healthMonitor.getHealthyActors.size} have voted")
+    votesByDecisionType.get(decisionType).map(_.size).getOrElse(0) >= healthMonitor.getHealthyActors.size
   }
 }

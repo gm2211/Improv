@@ -5,9 +5,9 @@ import instruments.InstrumentType.InstrumentType
 import jm.music.data.Score
 import jm.music.{data => jmData}
 import jm.util.Read
-import training.segmentation.PhraseSegmenter
 import org.slf4j.LoggerFactory
 import representation._
+import training.segmentation.PhraseSegmenter
 import utils.ImplicitConversions.{toEnhancedIterable, toFasterMutableList}
 import utils.collections.CollectionUtils
 import utils.functional.FunctionalUtils

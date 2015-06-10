@@ -7,9 +7,8 @@ import actors.musicians.AIMusician
 import cbr.MusicalCase
 import instruments.InstrumentType.InstrumentType
 import instruments.JFugueInstrument
-import training.segmentation.PhraseSegmenter
-import representation.Phrase
 import storage.KDTreeIndex
+import training.segmentation.PhraseSegmenter
 
 import scala.concurrent.duration.{NANOSECONDS => NANOS}
 

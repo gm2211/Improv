@@ -1,7 +1,5 @@
 package genetic
 
-import instruments.InstrumentType.InstrumentType
-import representation.Phrase
 import utils.ImplicitConversions.toEnhancedIterable
 import utils.collections.CollectionUtils
 

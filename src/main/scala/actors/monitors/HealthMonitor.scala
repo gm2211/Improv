@@ -18,4 +18,5 @@ trait HealthMonitor extends Monitor with Observable {
   def isSystemHealthy: Boolean
   def isActorHealthy(actor: ActorRef): Boolean
   def getHealthyActors: List[ActorPath]
+  def reset(): Unit
 }

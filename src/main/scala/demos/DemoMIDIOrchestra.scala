@@ -1,22 +1,18 @@
 package demos
 
 import actors.Orchestra
-import actors.composers.{RandomComposer, CBRComposer, MIDIReaderComposer}
-import actors.directors.{WaitingDirector, SimpleDirector}
-import actors.monitors.SimpleHealthMonitor
-import actors.musicians.{JFugueSynchronizedPlayer, AIMusician}
-import actors.musicians.behaviour.{SyncMessageReceivedBehaviour, MusicMessageInfoReceivedBehaviour}
-import akka.actor.ActorSystem
+import actors.composers.{CBRComposer, MIDIReaderComposer, RandomComposer}
+import actors.directors.WaitingDirector
+import actors.musicians.AIMusician
 import cbr.MusicalCase
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
 import midi.JMusicMIDIParser
-import representation.Phrase
 import storage.KDTreeIndex
 
 object DemoMIDIOrchestra {
   private def createComposer(filename: String, partNumber: Int) = {
-    val composer = "cbr"
+    val composer = "midi"
     composer match {
       case "rand" =>
         new RandomComposer

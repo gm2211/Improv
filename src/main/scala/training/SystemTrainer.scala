@@ -2,7 +2,6 @@ package training
 
 import cbr.{CaseIndex, MusicalCase}
 import storage.Saveable
-import utils.IOUtils
 
 class SystemTrainer(
   val extractor: CaseExtractor[MusicalCase] = MusicalCaseExtractors.getDefault(),
