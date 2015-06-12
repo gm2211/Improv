@@ -177,7 +177,8 @@ object Phrase {
 case class Phrase(
   musicalElements: List[MusicalElement] = List(),
   polyphony: Boolean = false,
-  tempoBPM: Double = MusicalElement.DEFAULT_TEMPO_BPM)
+  tempoBPM: Double = MusicalElement.DEFAULT_TEMPO_BPM,
+  keySignature: KeySignature = MusicalElement.DEFAULT_KEY_SIGNATURE)
     extends MusicalElement with Traversable[MusicalElement] {
   private val maxChordSize: MemoizedFunc[Phrase, Int] =
     FunctionalUtils.memoized(Phrase.computeMaxChordSize)
