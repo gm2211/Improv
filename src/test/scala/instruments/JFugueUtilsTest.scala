@@ -1,5 +1,6 @@
 package instruments
 
+import instruments.InstrumentType.PIANO
 import org.scalatest.FlatSpec
 import representation.{MusicalElement, Note, NoteName, Phrase}
 
@@ -16,7 +17,7 @@ class JFugueUtilsTest extends FlatSpec {
     ).map(nl => new Phrase(nl))
     val polyphonicPhrase = new Phrase(musicalElements = phrases.toList, polyphony = true)
 
-    val pattern = JFugueUtils.createPattern(polyphonicPhrase, 0)
+    val pattern = JFugueUtils.createPattern(polyphonicPhrase, PIANO(1))
     println(pattern)
     assert(pattern.toString == "I[Piano] @0.0 A4h @0.0 B4h @0.0 C4h @0.5 D4w @0.5 E4w @0.5 F4w")
   }

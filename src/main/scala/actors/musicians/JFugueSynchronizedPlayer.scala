@@ -20,7 +20,7 @@ class JFugueSynchronizedPlayer extends Musician with ActorLogging {
   private def prepare(messages: mutable.Set[MusicInfoMessage]): String = {
     val pattern = JFugueUtils.mergePatterns(
       messages.map(message =>
-        JFugueUtils.createPattern(message.phrase, message.instrument.instrumentNumber))
+        JFugueUtils.createPattern(message.phrase, message.instrument))
     )
 
     pattern

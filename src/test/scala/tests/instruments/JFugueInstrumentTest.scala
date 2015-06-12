@@ -37,7 +37,7 @@ class JFugueInstrumentTest extends FlatSpec {
     }
     instrument.addObserver(listener)
     instrument.play(phrase)
-    while (!instrument.finishedPlaying) {
+    while (instrument.player.playing) {
       lock.synchronized(lock.wait())
     }
   }

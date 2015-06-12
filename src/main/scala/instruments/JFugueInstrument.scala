@@ -3,55 +3,42 @@ package instruments
 import java.util.concurrent.Executors
 import javax.sound.midi.Sequence
 
+import designPatterns.observer.{EventNotification, Observer}
 import instruments.InstrumentType.{CHROMATIC_PERCUSSION, InstrumentType, PERCUSSIVE, PIANO}
-import org.jfugue.async.Listener
+import midi.MIDIPlayer
 import org.jfugue.midi.MidiParserListener
 import org.jfugue.pattern.Pattern
-import org.jfugue.player.Player
-import org.jfugue.player.PlayerEvents.FINISHED_PLAYING
-import org.jfugue.{async, theory}
+import org.jfugue.theory
 import org.slf4j.LoggerFactory
 import org.staccato.StaccatoParser
 import representation._
-import utils.ImplicitConversions.{toDouble, toEnhancedIterable, anyToRunnable}
+import utils.ImplicitConversions.{anyToRunnable, toDouble, toEnhancedIterable}
 
 import scala.util.Try
 import scalaz.Scalaz._
 
-class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends AsyncInstrument with Listener {
+class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends AsyncInstrument with Observer {
   private val log = LoggerFactory.getLogger(getClass)
   private val threadPool = Executors.newSingleThreadExecutor()
-  private var _finishedPlaying = true
-  private var curPlayer: Option[Player] = None
-
-  def finishedPlaying = _finishedPlaying
+  val player = new MIDIPlayer
+  player.addObserver(this)
 
   override def play(phrase: Phrase): Unit = {
-    if (!_finishedPlaying) {
-      log.debug("Still busy. Ignoring..")
+    if (player.playing) {
+      log.debug("Still playing")
       return
     }
 
-    val musicPattern: Pattern = JFugueUtils.createPattern(phrase, instrumentType.instrumentNumber)
-    _finishedPlaying = false
-    playWithPlayer(musicPattern.toString)
-  }
+    val musicSequence = JFugueUtils.toSequence(phrase, instrumentType)
 
-  private def playWithPlayer(pattern: String): Unit = {
     threadPool.submit(() => {
-      val player = new Player()
-      curPlayer = Some(player)
-      player.addListener(this)
-      player.play(pattern)
+      player.play(musicSequence)
     })
   }
 
-  override def notify(eventNotification: async.EventNotification): Unit = {
+  override def notify(eventNotification: EventNotification): Unit = {
     eventNotification match {
-      case FINISHED_PLAYING =>
-        curPlayer.foreach(_.removeListener(this))
-        curPlayer = None
-        _finishedPlaying = true
+      case MIDIPlayer.FinishedPlaying =>
         notifyObservers(AsyncInstrument.FinishedPlaying)
     }
   }
@@ -62,10 +49,10 @@ object JFugueUtils {
   val log = LoggerFactory.getLogger(getClass)
   val MAX_VOICE: Int = 15
 
-  def createPattern(phrase: Phrase, instrumentNumber: Int): Pattern = {
+  def createPattern(phrase: Phrase, instrumentType: InstrumentType): Pattern = {
     val tempo = Try(phrase.tempoBPM).getOrElse(MusicalElement.DEFAULT_TEMPO_BPM) *4
-    createPatternHelper(phrase, instrumentNumber, tempo)
-      .setInstrument(instrumentNumber)
+    createPatternHelper(phrase, instrumentType.instrumentNumber, tempo)
+      .setInstrument(instrumentType.instrumentNumber)
       .setTempo(tempo.toInt)
   }
 
@@ -129,7 +116,8 @@ object JFugueUtils {
     phrasePatternString
   }
 
-  def toSequence(phrase: Phrase): Sequence = toSequence(createPattern(phrase, PIANO(1)))
+  def toSequence(phrase: Phrase, instrumentType: InstrumentType): Sequence =
+    toSequence(createPattern(phrase, instrumentType))
 
   def toSequence(pattern: Pattern): Sequence = {
     val parser = new StaccatoParser()

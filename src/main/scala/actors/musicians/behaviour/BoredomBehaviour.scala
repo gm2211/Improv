@@ -20,7 +20,7 @@ object BoredomBehaviour {
 class BoredomBehaviour(
     val boredomThreshold: Double = BoredomBehaviour.getRandBoredomThreshold,
     val extremeBoredomThreshold: Double = BoredomBehaviour.getRandExtremeBoredomThreshold,
-    private val boredomFunc: Double => Double = (b: Double) => scala.math.pow(2, b))
+    private val boredomFunc: Double => Double = (b: Double) => scala.math.pow(2, b / 1000))
       extends AIMusicianBehaviour with ReceiveBehaviour with Observable {
   var boredom = 0.0
   var votingInProgress = false

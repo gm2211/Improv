@@ -45,7 +45,7 @@ object DemoMIDIOrchestra {
 //        .isMessageOnly
     }
 
-    for (((instrument, parts), idx) <- parser.getPartIndexByInstrument.zipWithIndex if idx < 2) {
+    for (((instrument, parts), idx) <- parser.getPartIndexByInstrument.zipWithIndex if idx < 7) {
       parts.map(musicianBuilder(instrument, _)
         .withActorSystem(orchestra.system))
         .foreach(m => orchestra.registerMusician(m.build))

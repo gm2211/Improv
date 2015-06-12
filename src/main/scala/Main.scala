@@ -1,5 +1,6 @@
 import demos.DemoANN
-import utils.IOUtils
+import org.jfugue.player.Player
+import utils.{ProfilingUtils, IOUtils}
 
 object Main extends App {
   //  val filename = IOUtils.getResourcePath("musicScores/midi_export.mid")
@@ -10,13 +11,13 @@ object Main extends App {
     val filename = IOUtils.getResourcePath("musicScores/test.mid")
   //  val filename = IOUtils.getResourcePath("trainingMIDIs/myTrainingExample.mid")
   //  demos.DemoCompareParserOutput.run(filename)
-//      demos.DemoMIDIOrchestra.run(filename)
+      demos.DemoMIDIOrchestra.run(filename)
 //      demos.DemoRandomOrchestra.run()
   //      demos.DemoJMusicMIDIPlayer.run(filename)
   //  demos.DemoJFugueMIDIPlayer.run(filename)
   val trainingDir = "trainingMIDIs"
   //      demos.DemoPopulateDB.run(trainingDir)
   //      demos.DemoCBROrchestra.run()
-  DemoANN.run(filename)
+//  DemoANN.run(filename)
 }
 

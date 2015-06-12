@@ -2,6 +2,7 @@ package cbr.description.features.extractors.phrase
 
 import cbr.description.features.Feature
 import cbr.description.features.extractors.WeightedFeatureExtractor
+import instruments.InstrumentType.PIANO
 import instruments.JFugueUtils
 import jsymbolic.features._
 import jsymbolic.processing.MIDIFeatureProcessor
@@ -57,7 +58,7 @@ object JSymbolicPhraseWeightedFeatureExtractor {
 
 class JSymbolicPhraseWeightedFeatureExtractor(private val processor: MIDIFeatureProcessor) extends WeightedFeatureExtractor[Phrase] {
   override def extractFeatures(phrase: Phrase): List[(Double, Feature[Phrase])] = {
-    val jsFeatures = processor.getFeatures(Array(JFugueUtils.toSequence(phrase)))
+    val jsFeatures = processor.getFeatures(Array(JFugueUtils.toSequence(phrase, PIANO(1))))
     val features = JSymbolicUtils.convertFeatures[Phrase](jsFeatures)
     val weight = 1.0 / features.length // TODO: Play around with weights?
     features.map(f => (weight, f))

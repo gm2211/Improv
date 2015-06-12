@@ -26,7 +26,7 @@ case class WaitingDirectorBuilder[ActorSysCount <: Count](
 }
 
 object WaitingDirector {
-  val DEFAULT_TIMEOUT_MS: Long = 5000
+  val DEFAULT_TIMEOUT_MS: Long = 8000
   def builder = new WaitingDirectorBuilder[Zero]()
 }
 
