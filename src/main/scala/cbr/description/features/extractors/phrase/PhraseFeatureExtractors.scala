@@ -27,7 +27,7 @@ object PhraseFeatureExtractors {
       new VarianceOfNoteDurationExtractor,
       new VarianceOfStartTimeIntervals,
       new TempoExtractor,
-//      new KeyExtractor,
+      new KeyExtractor,
       new BasicPitchHistogramExtractor
     )
   }

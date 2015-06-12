@@ -1,5 +1,6 @@
 package representation
 
+import representation.KeySignature.CMaj
 import utils.ImplicitConversions.toEnhancedIterable
 import utils.functional.{FunctionalUtils, MemoizedFunc}
 
@@ -10,6 +11,33 @@ import scalaz.Scalaz._
 
 object Phrase {
   val DEFAULT_START_TIME = 0.0
+  val DEFAULT_KEY_SIGNATURE: KeySignature = CMaj.keySignature
+
+  def apply(): Phrase = {
+    new Phrase()
+  }
+
+  def createPolyphonicPhrase(
+    musicalElements: List[Traversable[MusicalElement]],
+    tempoBPM: Double,
+    keySignature: KeySignature): Option[Phrase] = {
+    val phrases = musicalElements
+      .withFilter(_.nonEmpty)
+      .map(new Phrase(tempoBPM = tempoBPM).withMusicalElements)
+
+    phrases match {
+      case Nil =>
+        None
+      case phrase :: Nil =>
+        Some(phrase)
+      case phraseList =>
+        Some(new Phrase(
+          musicalElements = phraseList.toList,
+          polyphony = true,
+          tempoBPM = tempoBPM,
+          keySignature = keySignature))
+    }
+  }
 
   def computeDuration(phrase: Phrase, timeUnit: TimeUnit): BigInt = {
     if (phrase.polyphony)
@@ -22,10 +50,6 @@ object Phrase {
 
   def computeStartTime(phrase: Phrase, timeUnit: TimeUnit): BigInt =
     phrase.minBy(_.getStartTime(timeUnit)).getStartTime(timeUnit)
-
-  def apply(): Phrase = {
-    new Phrase()
-  }
 
   def computeMelodicIntervals(phrase: Phrase): List[Double] = {
     require(! phrase.polyphony)
@@ -71,23 +95,6 @@ object Phrase {
     timesBetweenStartTimes.toArray
   }
 
-  def apply(musicalElements: List[Traversable[MusicalElement]], tempoBPM: Double): Option[Phrase] = {
-    val phrases = musicalElements
-      .withFilter(_.nonEmpty)
-      .map(new Phrase(tempoBPM = tempoBPM).withMusicalElements)
-
-    phrases match {
-      case Nil =>
-        None
-      case phrase :: Nil =>
-        Some(phrase)
-      case phraseList =>
-        Some(new Phrase(
-          musicalElements = phraseList.toList,
-          polyphony = true,
-          tempoBPM = tempoBPM))
-    }
-  }
 
   def computeMaxChordSize(phrase: Phrase): Int = {
     phrase.musicalElements.foldLeft(1){
@@ -105,9 +112,9 @@ object Phrase {
   }
 
   def split(phrase: Phrase, splitTimeNS: BigInt): (Option[Phrase], Option[Phrase]) = phrase match {
-    case p@Phrase(_, true, _) =>
+    case p@Phrase(_, true, _, _) =>
       splitPolyphonic(p, splitTimeNS)
-    case p@Phrase(_, false, _) =>
+    case p@Phrase(_, false, _, _) =>
       splitNonPolyphonic(p, splitTimeNS)
   }
 
@@ -177,7 +184,8 @@ object Phrase {
 case class Phrase(
   musicalElements: List[MusicalElement] = List(),
   polyphony: Boolean = false,
-  tempoBPM: Double = MusicalElement.DEFAULT_TEMPO_BPM)
+  tempoBPM: Double = MusicalElement.DEFAULT_TEMPO_BPM,
+  keySignature: KeySignature = Phrase.DEFAULT_KEY_SIGNATURE)
     extends MusicalElement with Traversable[MusicalElement] {
   private val maxChordSize: MemoizedFunc[Phrase, Int] =
     FunctionalUtils.memoized(Phrase.computeMaxChordSize)

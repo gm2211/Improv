@@ -6,6 +6,7 @@ import jm.music.data.Score
 import jm.music.{data => jmData}
 import jm.util.Read
 import org.slf4j.LoggerFactory
+import representation.KeySignature.{KeyQuality, Major, Minor}
 import representation._
 import training.segmentation.PhraseSegmenter
 import utils.ImplicitConversions.{toEnhancedIterable, toFasterMutableList}
@@ -156,9 +157,26 @@ object JMusicParserUtils {
     phrase.musicalElements.groupByMultiMap[BigInt](_.getStartTime(NANOSECONDS))
   }
 
+  def extractSignature(part: jmData.Part): KeySignature = {
+    val midiSignature = part.getMyScore.getKeySignature
+    var numOfFlats = 0
+    var numOfSharps = 0
+
+    if (midiSignature > 0) {
+      numOfSharps = midiSignature
+    } else {
+      numOfFlats = midiSignature * -1
+    }
+
+    val keyQuality = if (part.getKeyQuality == 0) Major else Minor
+
+    KeySignature(flats = numOfFlats, sharps = numOfSharps, keyQuality)
+  }
+
   val convertPart = FunctionalUtils.memoized((part: jmData.Part) => {
     val phrases = part.getPhraseList.map(convertPhrase)
-    Phrase(phrases.toList, getTempo(part))
+    val keySignature = extractSignature(part)
+    Phrase.createPolyphonicPhrase(phrases.toList, getTempo(part), keySignature)
   })
 
   val convertPhrase = FunctionalUtils.memoized((phrase: jmData.Phrase) => {
