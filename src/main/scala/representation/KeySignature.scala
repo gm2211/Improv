@@ -168,11 +168,14 @@ object KeySignature {
 
 case class KeySignature(flats: Int, sharps: Int, quality: KeyQuality) {
   def withQuality(quality: KeyQuality): KeySignature = copy(quality = quality)
-
-  require(Range(KeySignature.MAX_FLATS, KeySignature.MIN_FLATS).contains(flats)
-    , s"You cannot have more than ${KeySignature.MAX_FLATS} flats or less than ${KeySignature.MIN_FLATS}")
-  require(Range(KeySignature.MAX_SHARPS, KeySignature.MIN_SHARPS).contains(sharps)
-    , s"You cannot have more than ${KeySignature.MAX_SHARPS} sharps or less than ${KeySignature.MIN_SHARPS}")
+  require((KeySignature.MIN_FLATS to KeySignature.MAX_FLATS).contains(flats)
+    , s"You cannot have more than ${KeySignature.MAX_FLATS} flats or less than ${KeySignature.MIN_FLATS};" +
+      s"You have $flats"
+  )
+  require((KeySignature.MIN_SHARPS to KeySignature.MAX_SHARPS).contains(sharps)
+    , s"You cannot have more than ${KeySignature.MAX_SHARPS} sharps or less than ${KeySignature.MIN_SHARPS};" +
+      s"You have $sharps"
+  )
 
   def toScale: Option[Scale] = KeySignature.scalesBySignature.get(this)
 }

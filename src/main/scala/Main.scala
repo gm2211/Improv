@@ -14,7 +14,7 @@ object Main extends App {
     val filename = IOUtils.getResourcePath("musicScores/test.mid")
   //  val filename = IOUtils.getResourcePath("trainingMIDIs/myTrainingExample.mid")
   //  demos.DemoCompareParserOutput.run(filename)
-//      demos.DemoMIDIOrchestra.run(filename)
+      demos.DemoMIDIOrchestra.run(filename)
 //      demos.DemoRandomOrchestra.run()
   //      demos.DemoJMusicMIDIPlayer.run(filename)
   //  demos.DemoJFugueMIDIPlayer.run(filename)
@@ -22,6 +22,6 @@ object Main extends App {
   //      demos.DemoPopulateDB.run(trainingDir)
   //      demos.DemoCBROrchestra.run()
 //    demos.DemoCreateTrainingDataANN.run(filename, fromScratch = false)
-    demos.DemoTrainANN.run()
+//    demos.DemoTrainANN.run()
 }
 

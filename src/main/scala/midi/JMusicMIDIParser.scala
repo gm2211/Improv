@@ -158,7 +158,7 @@ object JMusicParserUtils {
   }
 
   def extractSignature(part: jmData.Part): KeySignature = {
-    val midiSignature = part.getKeySignature
+    val midiSignature = part.getMyScore.getKeySignature
     var numOfFlats = 0
     var numOfSharps = 0
 
@@ -176,7 +176,7 @@ object JMusicParserUtils {
   val convertPart = FunctionalUtils.memoized((part: jmData.Part) => {
     val phrases = part.getPhraseList.map(convertPhrase)
     val keySignature = extractSignature(part)
-    Phrase(phrases.toList, getTempo(part), keySignature)
+    Phrase.createPolyphonicPhrase(phrases.toList, getTempo(part), keySignature)
   })
 
   val convertPhrase = FunctionalUtils.memoized((phrase: jmData.Phrase) => {
