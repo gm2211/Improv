@@ -120,7 +120,8 @@ object JMusicParserUtils {
   }
 
   def convertNote(jmNote: jmData.Note): Option[MusicalElement] = {
-    val durationRatio = 1.0 / 4.0 // In JMusic the duration of 1.0 represents a quarter note (CROTCHET)
+//    val durationRatio = 1.0 / 4.0 // In JMusic the duration of 1.0 represents a quarter note (CROTCHET)
+    val durationRatio = 1.0
     val tempoBPM = getTempo(jmNote.getMyPhrase)
     val fromBPM = (value: Double) => MusicalElement.fromBPM(value * durationRatio, tempoBPM)
     val duration = fromBPM(jmNote.getDuration)

@@ -1,3 +1,4 @@
+import demos.DemoANN
 import utils.IOUtils
 
 object Main extends App {
@@ -9,20 +10,13 @@ object Main extends App {
     val filename = IOUtils.getResourcePath("musicScores/test.mid")
   //  val filename = IOUtils.getResourcePath("trainingMIDIs/myTrainingExample.mid")
   //  demos.DemoCompareParserOutput.run(filename)
-      demos.DemoMIDIOrchestra.run(filename)
+//      demos.DemoMIDIOrchestra.run(filename)
 //      demos.DemoRandomOrchestra.run()
   //      demos.DemoJMusicMIDIPlayer.run(filename)
   //  demos.DemoJFugueMIDIPlayer.run(filename)
   val trainingDir = "trainingMIDIs"
   //      demos.DemoPopulateDB.run(trainingDir)
   //      demos.DemoCBROrchestra.run()
-
-  //  def runnable: Runnable = () => {
-  //    val filename = IOUtils.getResourcePath("musicScores/test.mid")
-  //    val phrase = CollectionUtils.chooseRandom(JMusicMIDIParser(filename).getMultiVoicePhrases(1)).get
-  //    new Player().play(JFugueUtils.createPattern(phrase, PIANO(1)))
-  //  }
-  //
-  //  (1 to 10).foreach(i => new Thread(runnable).start())
+  DemoANN.run(filename)
 }
 

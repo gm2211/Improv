@@ -9,8 +9,6 @@ import scala.math
 import scalaz.Scalaz._
 
 object Phrase {
-
-
   val DEFAULT_START_TIME = 0.0
 
   def computeDuration(phrase: Phrase, timeUnit: TimeUnit): BigInt = {
@@ -95,6 +93,14 @@ object Phrase {
     phrase.musicalElements.foldLeft(1){
       case (i, c: Chord) => math.max(i, c.notes.size)
       case (i, _) => i
+    }
+  }
+
+  def allRest(phrase: Phrase): Boolean = {
+    if (phrase.polyphony) {
+      phrase.musicalElements.asInstanceOf[List[Phrase]].forall(allRest)
+    } else {
+      phrase.musicalElements.forall(_.isInstanceOf[Rest])
     }
   }
 

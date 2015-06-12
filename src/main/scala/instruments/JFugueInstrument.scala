@@ -63,7 +63,7 @@ object JFugueUtils {
   val MAX_VOICE: Int = 15
 
   def createPattern(phrase: Phrase, instrumentNumber: Int): Pattern = {
-    val tempo = Try(phrase.tempoBPM).getOrElse(MusicalElement.DEFAULT_TEMPO_BPM)
+    val tempo = Try(phrase.tempoBPM).getOrElse(MusicalElement.DEFAULT_TEMPO_BPM) *4
     createPatternHelper(phrase, instrumentNumber, tempo)
       .setInstrument(instrumentNumber)
       .setTempo(tempo.toInt)
