@@ -46,7 +46,7 @@ object CollectionUtils {
   }
 
   def createHashMultimap[Keys, Values]: mutable.MultiMap[Keys, Values] = {
-    new mutable.HashMap[Keys, mutable.Set[Values]]() with mutable.MultiMap[Keys, Values] {
+    new mutable.HashMap[Keys, mutable.Set[Values]]() with Serializable with mutable.MultiMap[Keys, Values] {
       override def makeSet = new mutable.LinkedHashSet()
     }
   }

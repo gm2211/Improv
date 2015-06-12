@@ -69,6 +69,9 @@ dependencies {
 
     // Feature Extraction
     compile name: "jSymbolic"
+    
+    // Artificial Neural Network
+    compile name: "neuroph-core-2.9"
 
     // Plotting
     compile "com.quantifind:wisp_2.11:$wisp_version"

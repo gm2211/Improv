@@ -1,9 +1,9 @@
 package designPatterns.observer
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 
 trait Observable {
-  val observers = ListBuffer[Observer]()
+  val observers = mutable.HashSet[Observer]()
 
   def addObserver(observer: Observer): Unit = {
     observers += observer

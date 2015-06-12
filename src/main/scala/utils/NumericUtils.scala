@@ -3,6 +3,7 @@ package utils
 import scala.math.BigDecimal.RoundingMode
 
 object NumericUtils {
+
   def max(num1: BigInt, num2: BigInt): BigInt = if (num1 > num2) num1 else num2
   def min(num1: BigInt, num2: BigInt): BigInt = if (num1 < num2) num1 else num2
 
@@ -46,5 +47,10 @@ object NumericUtils {
             numbers(idx) > numbers(idx + 1)) yield {
       (numbers(idx), idx)
     }
+  }
+
+  def combine(array1: Array[Double], array2: Array[Double], op: (Double, Double) => Double): Array[Double] = {
+    require(array1.length == array2.length, "Cannot sum two arrays with different lengths")
+    array1.zipWithIndex.map{ case (value, idx) => op(value, array2(idx)) }
   }
 }
