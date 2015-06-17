@@ -1,6 +1,6 @@
 package utils
 
-import java.io.{File, FileInputStream, FileOutputStream, RandomAccessFile}
+import java.io._
 
 import com.google.common.io.{ByteStreams, Files}
 import utils.ImplicitConversions.{toGuavaFunction, toGuavaPredicate}
@@ -59,5 +59,13 @@ object IOUtils {
         .toList
         .toList
     }
+  }
+
+  def getBufferedReader(path: String) = {
+    Try(new BufferedReader(new InputStreamReader(new FileInputStream(path))))
+  }
+
+  def getBufferedWriter(path: String) = {
+    Try(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path))))
   }
 }

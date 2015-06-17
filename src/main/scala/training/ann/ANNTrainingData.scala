@@ -1,18 +1,58 @@
 package training.ann
 
-import java.io.{BufferedWriter, FileOutputStream, OutputStreamWriter}
-
 import org.neuroph.core.data.DataSet
 import storage.MapDBMapStore
 import utils.collections.CollectionUtils
 import utils.{IOUtils, NumericUtils}
 
-import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
 import scala.util.Try
+import collection.JavaConversions._
 
 object ANNTrainingData {
   val DEFAULT_DB_PATH: String = IOUtils.getResourcePath("annTrainingSet")
+  val INPUT = "inputDims"
+  val OUTPUT = "outputDims"
+
+
+
+  def loadFromCSV(path: String): Try[ANNTrainingData] = {
+    def parseLine(line: String, inputDims: Int) = {
+      val input = ListBuffer[Double]()
+      val output = ListBuffer[Double]()
+      for ((value, idx) <- line.split(",").toStream.zipWithIndex) {
+        if (idx < inputDims)
+          input += value.toDouble
+        else
+          output += value.toDouble
+      }
+      (input.toArray, output.toArray)
+    }
+
+    val maybeReader = IOUtils.getBufferedReader(path)
+    maybeReader.map{ reader =>
+      val (inputDims, outputDims) = dimensionsFromString(reader.readLine()).get
+      val dataSet = new ANNTrainingData(inputDims, outputDims)
+      reader.lines().iterator().toStream.foreach{ line =>
+        val (input, output) = parseLine(line, inputDims)
+        dataSet.addDataPoint(input, output)
+      }
+      dataSet
+    }
+  }
+
+  def dimensionsToString(input: Int, output: Int): String =
+    s"$INPUT:$input,$OUTPUT:$output"
+
+  def dimensionsFromString(str: String): Try[(Int, Int)] = Try {
+    val dimensions = s"$INPUT:([0-9]*),$OUTPUT:([0-9]*)".r
+
+    str match {
+      case dimensions(input, output) =>
+        (input.toInt, output.toInt)
+    }
+  }
 
   def merge(dataSets: List[ANNTrainingData]): ANNTrainingData = {
     require(dataSets.nonEmpty)
@@ -23,12 +63,12 @@ object ANNTrainingData {
     newDataSet
   }
 
-  def load(path: String) = {
+  def loadDB(path: String) = {
     MapDBMapStore.loadFromFile[String, ANNTrainingData](path)
   }
 
   def loadDefaultDB = {
-    load(DEFAULT_DB_PATH)
+    loadDB(DEFAULT_DB_PATH)
   }
 
   implicit def toNeurophDataset(aNNTrainingData: ANNTrainingData): DataSet = {
@@ -148,13 +188,18 @@ class ANNTrainingData(
   }
 
   def saveCSV(path: String): Try[Boolean] = {
-    Try{
-      val writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path)))
-      getDataPoints.foreach{ case (input, output) =>
-          writer.write((input ++ output).mkString(",") + "\n")
+    val maybeWriter = IOUtils.getBufferedWriter(path)
+    maybeWriter.map{ writer =>
+      writer.write(ANNTrainingData.dimensionsToString(inputDimensions, outputDimensions))
+      writer.newLine()
+      getDataPoints.foreach{
+        case (input, output) =>
+          writer.write((input ++ output).mkString(","))
+          writer.newLine()
       }
       writer.close()
       true
     }
   }
 }
+
