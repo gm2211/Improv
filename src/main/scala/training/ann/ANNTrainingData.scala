@@ -11,11 +11,8 @@ import scala.util.Try
 import collection.JavaConversions._
 
 object ANNTrainingData {
-  val DEFAULT_DB_PATH: String = IOUtils.getResourcePath("annTrainingSet")
   val INPUT = "inputDims"
   val OUTPUT = "outputDims"
-
-
 
   def loadFromCSV(path: String): Try[ANNTrainingData] = {
     def parseLine(line: String, inputDims: Int) = {
@@ -67,10 +64,6 @@ object ANNTrainingData {
     MapDBMapStore.loadFromFile[String, ANNTrainingData](path)
   }
 
-  def loadDefaultDB = {
-    loadDB(DEFAULT_DB_PATH)
-  }
-
   implicit def toNeurophDataset(aNNTrainingData: ANNTrainingData): DataSet = {
     toNeurophDataset(aNNTrainingData, None)
   }
@@ -115,7 +108,6 @@ class ANNTrainingData(
   def compatibleWith(trainingData: ANNTrainingData): Boolean = {
     trainingData.inputDimensions == inputDimensions && trainingData.outputDimensions == outputDimensions
   }
-
 
   def normalised: ANNTrainingData = {
     def computeMagnitude(array: Array[Double]): Double = {
