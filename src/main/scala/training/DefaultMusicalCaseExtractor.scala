@@ -2,7 +2,7 @@ package training
 
 import cbr.MusicalCase
 import instruments.InstrumentType.InstrumentType
-import midi.{JMusicMIDIParser, MIDIParserFactory}
+import midi.{MIDIParser, JMusicMIDIParser, MIDIParserFactory}
 import representation.Phrase
 import utils.ImplicitConversions.toEnhancedIterable
 
@@ -10,13 +10,13 @@ import scala.collection.mutable.ListBuffer
 import scalaz.Scalaz._
 
 object MusicalCaseExtractors {
-  def getDefault(parserFactory: MIDIParserFactory = JMusicMIDIParser) =
+  def getDefault(parserFactory: (String) => MIDIParser = JMusicMIDIParser) =
     new DefaultMusicalCaseExtractor(parserFactory)
 }
 /**
  * Extracts cases from a midi file
  */
-class DefaultMusicalCaseExtractor(private val parserFactory: MIDIParserFactory = JMusicMIDIParser) extends CaseExtractor[MusicalCase] {
+class DefaultMusicalCaseExtractor(private val parserFactory: (String) => MIDIParser = JMusicMIDIParser) extends CaseExtractor[MusicalCase] {
   override def getCases(filename: String): List[(MusicalCase, MusicalCase)] = {
     val parser = parserFactory.apply(filename)
     val instrParts: List[(InstrumentType, List[Phrase])] = parser.getPartIndexByInstrument.toList.flatMap {

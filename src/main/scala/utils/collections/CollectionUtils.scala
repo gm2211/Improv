@@ -5,6 +5,7 @@ import scala.math
 import scala.util.{Random, Try}
 
 object CollectionUtils {
+
   def filterNonNumbers(array: Array[Double]): Array[Double] = {
     array.map {
       case d if d.isNaN || d.isInfinity => 0.0
@@ -57,6 +58,10 @@ object CollectionUtils {
 
   def print[Elem](elements: Traversable[Elem]): Unit = {
     println(s"{${elements.mkString(",")}}")
+  }
+
+  def printNewLine[Elem](elements: Traversable[Elem]): Unit = {
+    println(s"{${elements.mkString(",\n")}}")
   }
 }
 

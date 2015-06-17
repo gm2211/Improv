@@ -9,6 +9,7 @@ import instruments.InstrumentType._
 import instruments.JFugueInstrument
 import midi.JMusicMIDIParser
 import storage.KDTreeIndex
+import utils.UserInput
 
 object DemoMIDIOrchestra {
   private def createComposer(filename: String, partNumber: Int) = {
@@ -28,10 +29,13 @@ object DemoMIDIOrchestra {
     }
   }
 
-  def run(filename: String) = {
+  def run() = {
     val orchestra = Orchestra.builder
       .withDirector(WaitingDirector.builder)
       .build
+
+    val filename = UserInput.chooseASong()
+
     val parser = JMusicMIDIParser(filename)
 
     val musicianBuilder = (instrType: InstrumentType, partNumber: Int) => {

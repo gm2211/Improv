@@ -7,7 +7,8 @@ import instruments.JFugueUtils
 import midi.{JMusicMIDIParser, MIDIPlayer}
 import training.DefaultMusicalCaseExtractor
 import training.ann.ANNTrainingData
-import utils.IOUtils
+import training.segmentation.{PhraseSegmenter, LBDMSplitTimeFinder}
+import utils.{UserInput, IOUtils}
 import utils.collections.CollectionUtils
 
 import scala.util.Try
@@ -16,7 +17,6 @@ object DemoCreateTrainingDataANN extends Observer with App {
   val DEFAULT_DB_PATH: String = ANNTrainingData.DEFAULT_DB_PATH
   val DEFAULT_SAVE_PATH: String = "/tmp/annData"
 
-  val resource = scala.io.StdIn.readLine("Enter music filename: ")
 
   val savePath = {
     val path = scala.io.StdIn.readLine(s"Enter save path for output file[default:$DEFAULT_SAVE_PATH]: ")
@@ -28,9 +28,13 @@ object DemoCreateTrainingDataANN extends Observer with App {
     Option(path).filter(_.trim.nonEmpty).getOrElse(DEFAULT_DB_PATH)
   }
 
-  val filename = IOUtils.getResourcePath(s"trainingMIDIs/$resource.mid")
+  val restart = {
+    val restart = scala.io.StdIn.readLine("Do you want to start over [type YES!! to start over]:")
+    restart == "YES!!"
+  }
 
-  run(filename, savePath, dbPath)
+
+  run(UserInput.chooseASong(), savePath, dbPath, restart)
   def run(
       filename: String,
       savePath: String = DEFAULT_SAVE_PATH,
@@ -50,12 +54,12 @@ object DemoCreateTrainingDataANN extends Observer with App {
     println("DB content: ")
     CollectionUtils.print(db.keySet())
     val trainingData = db.get(filename).getOrElse(new ANNTrainingData(descriptionCreator.getMaxDescriptionSize, 1))
-
-    println(s"Starting from melody #${trainingData.dataPointsCount} out of ${cases.size}")
+    var currMelodyIdx = trainingData.dataPointsCount
 
     if (fromScratch) trainingData.clear()
 
     for ((_, sol) <- cases.toStream.drop(trainingData.dataPointsCount).takeWhile( _ => continue)) {
+      println(s"Melody #$currMelodyIdx out of ${cases.size}")
       val seq = JFugueUtils.toSequence(sol.phrase, sol.instrumentType)
       player.play(seq)
 
@@ -73,6 +77,8 @@ object DemoCreateTrainingDataANN extends Observer with App {
 
       rating.foreach(ratingVal => trainingData.addDataPoint(sig, Array(ratingVal)))
       trainingData.saveCSV(s"$savePath.csv")
+
+      currMelodyIdx += 1
 
       continue = scala.io.StdIn.readLine("Continue[y/n]: ").toLowerCase != "n"
     }

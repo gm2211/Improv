@@ -68,4 +68,7 @@ object IOUtils {
   def getBufferedWriter(path: String) = {
     Try(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path))))
   }
+
+  def getFilename(fullPath: String): String =
+    Files.getNameWithoutExtension(fullPath)
 }
