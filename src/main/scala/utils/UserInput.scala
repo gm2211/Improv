@@ -12,7 +12,7 @@ object UserInput {
     println()
 
     val resource = scala.io.StdIn.readLine("Choose a song: ")
-    IOUtils.getResourcePath(s"trainingMIDIs/$resource.mid")
+    IOUtils.getResourcePath(s"$songDir/$resource.mid")
   }
 
 }

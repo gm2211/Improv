@@ -15,44 +15,43 @@ import utils.builders.{AtLeastOnce, Count, IsAtLeastOnce, Zero}
 import utils.collections.CollectionUtils
 import utils.functional.FunctionalUtils
 
+import scala.language.implicitConversions
+
 case class AIMusicianBuilder
 [InstrumentCount <: Count,
- BehavioursCount <: Count,
  ActorSysCount <: Count](
   var instrument: Option[Instrument] = None,
-  var behaviours: Option[List[ActorBehaviour]] = None,
+  var behaviours: Option[List[ActorBehaviour]] = Some(AIMusician.getDefaultBehaviours),
   var actorSystem: Option[ActorSystem] = None,
   var composer: Option[Composer] = None,
   var messageOnly: Option[Boolean] = Some(false)) {
 
   def withInstrument(instrument: Instrument) =
-    copy[AtLeastOnce, BehavioursCount, ActorSysCount](instrument = Some(instrument))
+    copy[AtLeastOnce, ActorSysCount](instrument = Some(instrument))
   
   def addBehaviour(behaviour: ActorBehaviour) =
-    copy[InstrumentCount, AtLeastOnce, ActorSysCount](behaviours = Some(behaviours.toList.flatten :+ behaviour))
+    copy[InstrumentCount, ActorSysCount](behaviours = Some(behaviours.toList.flatten :+ behaviour))
 
   def withBehaviours(behaviours: List[ActorBehaviour]) =
-    copy[InstrumentCount, AtLeastOnce, ActorSysCount](behaviours = Some(behaviours))
+    copy[InstrumentCount, ActorSysCount](behaviours = Some(behaviours))
 
   def withActorSystem(actorSystem: ActorSystem) =
-    copy[InstrumentCount, BehavioursCount, AtLeastOnce](actorSystem = Some(actorSystem))
+    copy[InstrumentCount, AtLeastOnce](actorSystem = Some(actorSystem))
 
   def withComposer(composer: Composer) =
-    copy[InstrumentCount, BehavioursCount, ActorSysCount](composer = Some(composer))
+    copy[InstrumentCount, ActorSysCount](composer = Some(composer))
 
   def isMessageOnly =
-    copy[InstrumentCount, BehavioursCount, ActorSysCount](messageOnly = Some(true))
+    copy[InstrumentCount, ActorSysCount](messageOnly = Some(true))
 
   def build[
   A <: InstrumentCount : IsAtLeastOnce,
-  B <: BehavioursCount : IsAtLeastOnce,
   C <: ActorSysCount : IsAtLeastOnce]: AIMusician = {
-    new AIMusician(this.asInstanceOf[AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnce]])
+    new AIMusician(this.asInstanceOf[AIMusicianBuilder[AtLeastOnce, AtLeastOnce]])
   }
 
   def buildProps[
   A <: InstrumentCount : IsAtLeastOnce,
-  B <: BehavioursCount : IsAtLeastOnce,
   C <: ActorSysCount : IsAtLeastOnce]: Props = Props(build)
 }
 
@@ -67,10 +66,13 @@ object AIMusician {
     )
   }
 
-  def builder: AIMusicianBuilder[Zero, Zero, Zero] = new AIMusicianBuilder[Zero, Zero, Zero]
+  def builder: AIMusicianBuilder[Zero, Zero] = new AIMusicianBuilder[Zero, Zero]
+
+  implicit def toFunc(builder: AIMusicianBuilder[AtLeastOnce, Zero]): ActorSystem => AIMusician =
+    (actorSystem: ActorSystem) => builder.withActorSystem(actorSystem).build
 }
 
-class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnce])
+class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce])
     extends Musician with ActorLogging with Observer {
 
   private val instrument: Instrument = builder.instrument.get
