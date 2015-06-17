@@ -67,9 +67,6 @@ dependencies {
     // Machine Learning Tools
     compile name: "javaml-$javaml_version"
 
-    // Feature Extraction
-    compile name: "jSymbolic"
-
     // Artificial Neural Network
     compile name: "neuroph-core-2.9"
 

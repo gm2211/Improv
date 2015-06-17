@@ -32,6 +32,4 @@ object PhraseFeatureExtractors {
     )
   }
 
-  def getJSymbolicFeatureExtractor = JSymbolicPhraseWeightedFeatureExtractor.getDefault
-
 }
