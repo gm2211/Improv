@@ -9,7 +9,7 @@ object Main extends App {
     val filename = IOUtils.getResourcePath("musicScores/test.mid")
   //  val filename = IOUtils.getResourcePath("trainingMIDIs/myTrainingExample.mid")
   //  demos.DemoCompareParserOutput.run(filename)
-      demos.DemoMIDIOrchestra.run(filename)
+//      demos.DemoMIDIOrchestra.run(filename)
 //      demos.DemoRandomOrchestra.run()
   //      demos.DemoJMusicMIDIPlayer.run(filename)
   //  demos.DemoJFugueMIDIPlayer.run(filename)

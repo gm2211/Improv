@@ -48,7 +48,7 @@ object DemoCreateTrainingDataANN extends Observer with App {
       val sig = features.getSignature
 
       rating.foreach(ratingVal => trainingData.addDataPoint(sig, Array(ratingVal)))
-      trainingData.normalised.saveCSV(s"$savePath.csv")
+      trainingData.saveCSV(s"$savePath.csv")
 
       db.put(filename, trainingData)
       continue = scala.io.StdIn.readLine("Continue[y/n]: ").toLowerCase != "n"
