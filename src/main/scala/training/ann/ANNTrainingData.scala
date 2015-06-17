@@ -23,8 +23,12 @@ object ANNTrainingData {
     newDataSet
   }
 
+  def load(path: String) = {
+    MapDBMapStore.loadFromFile[String, ANNTrainingData](path)
+  }
+
   def loadDefaultDB = {
-    MapDBMapStore.loadFromFile[String, ANNTrainingData](DEFAULT_DB_PATH)
+    load(DEFAULT_DB_PATH)
   }
 
   implicit def toNeurophDataset(aNNTrainingData: ANNTrainingData): DataSet = {

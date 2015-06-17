@@ -69,7 +69,7 @@ dependencies {
 
     // Feature Extraction
     compile name: "jSymbolic"
-    
+
     // Artificial Neural Network
     compile name: "neuroph-core-2.9"
 
@@ -95,7 +95,8 @@ dependencies {
 }
 
 task run(type: JavaExec, dependsOn: classes) {
-    main = "Main"
+    main = "demos.DemoCreateTrainingDataANN"
+    standardInput = System.in
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.runtime
 }

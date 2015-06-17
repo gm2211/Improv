@@ -83,7 +83,7 @@ class MultiCache[K, V <: java.lang.Object](
   }
 
   override def entryExists(key: K, p: (V) => Boolean): Boolean = {
-    val pp = (uuid: UUID) => Option(cache.getIfPresent()).exists(p)
+    val pp = (uuid: UUID) => Option(cache.getIfPresent(uuid)).exists(p)
     multiMap.entryExists(key, pp)
   }
 
