@@ -38,8 +38,8 @@ class Orchestra(val builder: OrchestraBuilder) {
   ActorUtils.subscribe(director, classOf[Message])
 
 
-  def registerMusician(musician: => Musician): Unit = {
-    val actor = system.actorOf(Props(musician), s"musician$musicianCount")
+  def registerMusician(musician: ActorSystem => Musician): Unit = {
+    val actor = system.actorOf(Props(musician(system)), s"musician$musicianCount")
     ActorUtils.subscribe(actor, classOf[Message])
     musicianCount += 1
   }

@@ -3,6 +3,7 @@ package demos
 import actors.Orchestra
 import actors.directors.SimpleDirector
 import actors.musicians.AIMusician
+import actors.musicians.AIMusician._
 import actors.musicians.behaviour.{MusicMessageInfoReceivedBehaviour, SyncMessageReceivedBehaviour}
 import instruments.InstrumentType._
 import instruments.JFugueInstrument
@@ -22,8 +23,8 @@ object DemoRandomOrchestra {
     }
 
     instrSet
-      .map(t => musicianBuilder(t).withActorSystem(orchestra.system))
-      .foreach(m => orchestra.registerMusician(m.build))
+      .map(t => musicianBuilder(t))
+      .foreach(m => orchestra.registerMusician(m))
 
     orchestra.start()
 

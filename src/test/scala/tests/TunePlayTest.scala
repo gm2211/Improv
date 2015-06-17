@@ -4,6 +4,7 @@ import _root_.instruments.OvertoneInstrument
 import _root_.instruments.OvertoneInstrumentType._
 import actors.Orchestra
 import actors.musicians.AIMusician
+import actors.musicians.AIMusician._
 import actors.musicians.behaviour.SyncMessageReceivedBehaviour
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FlatSpec, Matchers}
@@ -21,8 +22,8 @@ class TunePlayTest extends FlatSpec with MockFactory with Matchers {
     }
 
     instrSet
-      .map(musicianBuilder(_).withActorSystem(orchestra.system))
-      .foreach(m => orchestra.registerMusician(m.build))
+      .map(musicianBuilder(_))
+      .foreach(m => orchestra.registerMusician(m))
 
     orchestra.start()
     Thread.sleep(10000L)
