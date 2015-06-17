@@ -7,11 +7,17 @@ import instruments.JFugueUtils
 import midi.{JMusicMIDIParser, MIDIPlayer}
 import training.DefaultMusicalCaseExtractor
 import training.ann.ANNTrainingData
+import utils.IOUtils
 
 import scala.util.Try
 
 object DemoCreateTrainingDataANN extends Observer with App {
-  def run(filename: String, fromScratch: Boolean = false) = {
+  val resource = scala.io.StdIn.readLine("Enter filename: ")
+  val savePath = scala.io.StdIn.readLine("Enter savePath: ")
+  val filename = IOUtils.getResourcePath(s"trainingMIDIs/$resource.mid")
+
+  run(filename, savePath)
+  def run(filename: String, savePath: String = "/tmp/dummy", fromScratch: Boolean = false) = {
     val extractor = new DefaultMusicalCaseExtractor(JMusicMIDIParser)
 
     val cases = extractor.getCases(filename)
@@ -42,7 +48,7 @@ object DemoCreateTrainingDataANN extends Observer with App {
       val sig = features.getSignature
 
       rating.foreach(ratingVal => trainingData.addDataPoint(sig, Array(ratingVal)))
-      trainingData.normalised.saveCSV("/tmp/dummy.csv")
+      trainingData.normalised.saveCSV(s"$savePath.csv")
 
       db.put(filename, trainingData)
       continue = scala.io.StdIn.readLine("Continue[y/n]: ").toLowerCase != "n"
