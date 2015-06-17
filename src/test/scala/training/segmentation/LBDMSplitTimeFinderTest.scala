@@ -15,7 +15,7 @@ class LBDMSplitTimeFinderTest extends FlatSpec {
     //  val filename = IOUtils.getResourcePath("musicScores/test.mid")
     val p1 = JMusicMIDIParser(filename)
     val phraseSegmenter = new LBDMSplitTimeFinder(false) with PhraseSegmenter
-    val p2 = JMusicMIDIParser(filename, phraseSegmenter)
+    val p2 = JMusicMIDIParser(phraseSegmenter)(filename)
 
     val phrases1 = p1.getMultiVoicePhrases(0)
     val phrases2 = p2.getMultiVoicePhrases(0)

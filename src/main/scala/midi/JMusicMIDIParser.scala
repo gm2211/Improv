@@ -19,13 +19,13 @@ import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
 import scala.util.Try
 import scalaz.Scalaz._
 
-object JMusicMIDIParser extends MIDIParserFactory {
+object JMusicMIDIParser extends MIDIParserFactory with Function[String, JMusicMIDIParser] {
   override def apply(filename: String) = {
     val score: Score = getScore(filename)
     new JMusicMIDIParser(score, PhraseSegmenter.getDefault())
   }
 
-  def apply(filename: String, phraseSegmenter: PhraseSegmenter) = {
+  def apply(phraseSegmenter: PhraseSegmenter)(filename: String) = {
     val score: Score = getScore(filename)
     new JMusicMIDIParser(score, phraseSegmenter)
   }
