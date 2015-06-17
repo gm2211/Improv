@@ -2,7 +2,7 @@ package demos
 
 import cbr.MusicalCase
 import cbr.description.PhraseDescriptionCreators
-import designPatterns.observer.Observer
+import designPatterns.observer.{EventNotification, Observer}
 import instruments.JFugueUtils
 import midi.{JMusicMIDIParser, MIDIPlayer}
 import training.DefaultMusicalCaseExtractor
