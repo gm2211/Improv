@@ -1,9 +1,4 @@
-import org.neuroph.core.data.DataSet
-import training.ann.{ANNTrainingData, NeuralNetworks}
 import utils.IOUtils
-import utils.collections.CollectionUtils
-
-import scala.util.Random
 
 object Main extends App {
   //  val filename = IOUtils.getResourcePath("musicScores/midi_export.mid")

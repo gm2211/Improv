@@ -39,8 +39,8 @@ class DefaultMusicalCaseExtractor(private val parserFactory: MIDIParserFactory =
       val successorPhrase = otherPart.inBounds(phraseIdx + 1).option(otherPart(phraseIdx + 1))
       successorPhrase.foreach{ successor =>
         if (!Phrase.allRest(phrase) && !Phrase.allRest(successor)) {
-          cases += ( (MusicalCase(instr, phrase),
-                      MusicalCase(otherInstr, successor)) )
+          cases += ( (MusicalCase(instr, phrase = phrase),
+                      MusicalCase(otherInstr, phrase = successor)) )
         }
       }
     }

@@ -48,7 +48,8 @@ class BoredomBehaviour(
       votedAlready = false
 
     case c: ConsensusMessage =>
-      () // Ignore
+      () // Ignore other consensus messages
+
     case _ =>
       if (boredom > extremeBoredomThreshold && ! votingInProgress) {
         musician.foreach{ mus =>

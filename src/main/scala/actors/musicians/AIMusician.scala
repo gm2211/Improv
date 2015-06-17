@@ -8,7 +8,7 @@ import designPatterns.observer.{EventNotification, Observer}
 import instruments.{AsyncInstrument, Instrument}
 import messages.consensus.{Termination, VoteRequest}
 import messages.{DirectorIdentityInfoMessage, FinishedPlaying, Message, MusicInfoMessage}
-import representation.Phrase
+import representation.{MusicGenre, Phrase}
 import utils.ActorUtils
 import utils.ImplicitConversions.toEnhancedIterable
 import utils.builders.{AtLeastOnce, Count, IsAtLeastOnce, Zero}
@@ -61,7 +61,9 @@ object AIMusician {
     List(
       new SyncMessageReceivedBehaviour,
       new MusicMessageInfoReceivedBehaviour,
-      new BoredomBehaviour
+      new BoredomBehaviour,
+      new GenreSelectionBehaviour,
+      new ReadyToPlayBehaviour
     )
   }
 
@@ -70,7 +72,9 @@ object AIMusician {
 
 class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnce])
     extends Musician with ActorLogging with Observer {
+
   private val instrument: Instrument = builder.instrument.get
+  var musicGenre: Option[MusicGenre] = None
   private val behaviours: List[ActorBehaviour] = builder.behaviours.get
   private val receiveBehaviours = behaviours.filterByType[ReceiveBehaviour]
   implicit private val actorSystem: ActorSystem = builder.actorSystem.get
@@ -89,15 +93,21 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
 
   behaviours.foreach{ case b: AIMusicianBehaviour => b.registerMusician(this) case _ => }
 
+  def readyToPlay: Boolean = musicGenre.isDefined
+
   def play(time: Long): Unit = {
-    val instrumentsAndPhrases = musicInfoMessageCache.get(time)
-      .map(_.map(m => MusicalCase(m.instrument, m.phrase))).getOrElse(Set())
+    musicGenre.foreach { genre =>
+      val instrumentsAndPhrases = musicInfoMessageCache.get(time)
+        .map(_.map(m => MusicalCase(m.instrument, genre, m.phrase))).getOrElse(Set())
 
-    musicInfoMessageCache.remove(time)
+      musicInfoMessageCache.remove(time)
 
-    val responsePhrase = musicComposer.compose(instrumentsAndPhrases, instrument.instrumentType)
-    log.debug("playing")
-    responsePhrase.foreach(play)
+      val constraints = getCompositionConstraints
+
+      val responsePhrase = musicComposer.compose(instrumentsAndPhrases, constraints)
+
+      responsePhrase.foreach(play)
+    }
   }
 
   override def play(phrase: Phrase): Unit = {
@@ -128,5 +138,11 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
     case BoredomBehaviour.Bored =>
       log.debug(s"${self.path.name} sending bored to ${directorIdentity.map(_.path.name)}")
       directorIdentity.foreach(_ ! VoteRequest(self, Termination))
+  }
+
+  private def getCompositionConstraints: List[MusicalCase => Boolean] = {
+    List(
+      (m) => m.instrumentType.sameInstrumentClass(instrument.instrumentType)
+    )
   }
 }

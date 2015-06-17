@@ -38,7 +38,7 @@ object DemoCreateTrainingDataANN extends Observer with App {
       print("Rating: ")
       val rating = Try(scala.io.StdIn.readDouble())
       player.stop()
-      val features = descriptionCreator.createCaseDescription(MusicalCase(sol.instrumentType, sol.phrase))
+      val features = descriptionCreator.createCaseDescription(MusicalCase(sol.instrumentType, phrase = sol.phrase))
       val sig = features.getSignature
 
       rating.foreach(ratingVal => trainingData.addDataPoint(sig, Array(ratingVal)))

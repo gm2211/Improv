@@ -17,7 +17,9 @@ class CBRComposer(
   private val populationSelector_ = populationSelector.getOrElse(new RandomSelector[MusicalCase])
 
 
-  override def compose(phrasesByOthers: Traversable[MusicalCase], targetInstrument: InstrumentType): Option[Phrase] = {
+  override def compose(
+      phrasesByOthers: Traversable[MusicalCase],
+      constraints: List[MusicalCase => Boolean]): Option[Phrase] = {
     var solutionPopulation: List[MusicalCase] = phrasesByOthers
       .flatMap(caseIndex.findSolutionsToSimilarProblems(_, CBRComposer.DEFAULT_NEIGHBOURS_COUNT)).toList
 
@@ -25,7 +27,6 @@ class CBRComposer(
       solutionPopulation = chooseRandom(caseIndex)
     }
 
-    val constraints: List[(MusicalCase) => Boolean] = List()//List((m) => m.instrumentType == targetInstrument)
     populationSelector_.selectSolution(solutionPopulation, constraints).map(_.phrase)
   }
 

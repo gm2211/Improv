@@ -17,7 +17,7 @@ import utils.ImplicitConversions.{anyToRunnable, toDouble, toEnhancedIterable}
 import scala.util.Try
 import scalaz.Scalaz._
 
-class JFugueInstrument(override val instrumentType: InstrumentType = PIANO()) extends AsyncInstrument with Observer {
+class JFugueInstrument(override val instrumentType: InstrumentType = InstrumentType.randomInstrument) extends AsyncInstrument with Observer {
   private val log = LoggerFactory.getLogger(getClass)
   private val threadPool = Executors.newSingleThreadExecutor()
   val player = new MIDIPlayer

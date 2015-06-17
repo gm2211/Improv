@@ -20,6 +20,12 @@ object InstrumentType {
     }
   }
 
+  def availableInstruments = List(
+    PIANO(), CHROMATIC_PERCUSSION(), ORGAN(), GUITAR(), BASS(), STRINGS(), ENSEMBLE(), BRASS(),
+    PIPE(), SYNTH_LEAD(), SYNTH_PAD(), SYNTH_EFFECTS(), ETHNIC(), PERCUSSIVE(), SOUND_EFFECTS())
+
+  def randomInstrument = CollectionUtils.chooseRandom(availableInstruments).get
+
   object PIANO extends InstrumentTypeObject[PIANO] {
     val range = 1 to 8
   }
@@ -93,6 +99,7 @@ object InstrumentType {
       @JsonProperty("instrumentNumber") val instrumentNumber: Int) extends Serializable {
     def range: Range
     require(range contains instrumentNumber, "Instrument number not in range")
+    def sameInstrumentClass(instrumentType: InstrumentType): Boolean = getClass == instrumentType.getClass
   }
 
   case class PIANO(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
