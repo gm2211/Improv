@@ -12,6 +12,7 @@ object DemoPopulateDB extends App {
     val dirPath = IOUtils.getResourcePath(resourceDirPath)
     val filenames = IOUtils.filesInDir(dirPath).getOrElse(List())
     val index = KDTreeIndex.loadOrCreateDefault[MusicalCase](PhraseDescriptionCreators.getDefault)
+    index.clear()
     val trainer = new SystemTrainer(index = index)
     trainer.addCasesToIndex(filenames)
   }

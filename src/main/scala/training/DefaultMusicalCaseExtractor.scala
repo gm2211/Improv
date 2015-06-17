@@ -3,8 +3,9 @@ package training
 import cbr.MusicalCase
 import instruments.InstrumentType.InstrumentType
 import midi.{MIDIParser, JMusicMIDIParser, MIDIParserFactory}
-import representation.Phrase
+import representation.{Rest, Phrase}
 import utils.ImplicitConversions.toEnhancedIterable
+import utils.functional.FunctionalUtils
 
 import scala.collection.mutable.ListBuffer
 import scalaz.Scalaz._
@@ -38,13 +39,20 @@ class DefaultMusicalCaseExtractor(private val parserFactory: (String) => MIDIPar
       val (otherInstr, otherPart) = instrParts(otherPartIdx)
       val successorPhrase = otherPart.inBounds(phraseIdx + 1).option(otherPart(phraseIdx + 1))
       successorPhrase.foreach{ successor =>
-        if (!Phrase.allRest(phrase) && !Phrase.allRest(successor)) {
+        if (getFilters(phrase) && getFilters(successor)) {
           cases += ( (MusicalCase(instr, phrase = phrase),
                       MusicalCase(otherInstr, phrase = successor)) )
         }
       }
     }
     cases.toList
+  }
+
+  def getFilters = (phrase: Phrase) => {
+    !Phrase.allRest(phrase) &&
+    !phrase.head.isInstanceOf[Rest] &&
+    !phrase.last.isInstanceOf[Rest] &&
+    !(phrase.collect{case r:Rest => r.getDurationNS}.sum >= (2.0/3.0 * phrase.getDurationNS.toLong).toLong)
   }
 }
 
