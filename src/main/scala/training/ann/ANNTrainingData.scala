@@ -11,6 +11,8 @@ import scala.util.Try
 import collection.JavaConversions._
 
 object ANNTrainingData {
+  val DEFAULT_DB_PATH: String = "/tmp/annDB"
+
   val INPUT = "inputDims"
   val OUTPUT = "outputDims"
 
@@ -59,6 +61,8 @@ object ANNTrainingData {
     dataSets.tail.foreach(newDataSet.addDataPoints)
     newDataSet
   }
+
+  def loadDefaultDB = loadDB(DEFAULT_DB_PATH)
 
   def loadDB(path: String) = {
     MapDBMapStore.loadFromFile[String, ANNTrainingData](path)

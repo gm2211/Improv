@@ -13,7 +13,7 @@ import utils.collections.CollectionUtils
 import scala.util.Try
 
 object DemoCreateTrainingDataANN extends Observer with App {
-  val DEFAULT_DB_PATH: String = "/tmp/annDB"
+  val DEFAULT_DB_PATH: String = ANNTrainingData.DEFAULT_DB_PATH
   val DEFAULT_SAVE_PATH: String = "/tmp/annData"
 
   val resource = scala.io.StdIn.readLine("Enter music filename: ")
