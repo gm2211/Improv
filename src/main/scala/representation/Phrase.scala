@@ -85,7 +85,7 @@ object Phrase {
     require(! phrase.polyphony)
     val timesBetweenStartTimes = ListBuffer[Double]()
     var prevElem: Option[MusicalElement] = None
-    for (elem <- phrase) {
+    for (elem <- phrase if ! elem.isInstanceOf[Rest]) {
       if (prevElem.isDefined) {
         timesBetweenStartTimes += elem.getStartTimeBPM(phrase.tempoBPM).toDouble -
           prevElem.get.getStartTimeBPM(phrase.tempoBPM).toDouble
@@ -166,9 +166,9 @@ object Phrase {
    * phrase
    * @param phrase
    */
-  def getLongestSubPhrase(phrase: Phrase) = {
+  def getLongestSubPhrase(phrase: Phrase, constraints: List[Phrase => Boolean]) = {
     if (phrase.polyphony)
-      phrase.musicalElements.asInstanceOf[List[Phrase]].maxBy(_.size)
+      phrase.musicalElements.asInstanceOf[List[Phrase]].filter(constraints).maxBy(_.size)
     else
       phrase
   }

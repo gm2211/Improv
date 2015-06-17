@@ -16,7 +16,7 @@ object MusicalCaseExtractors {
 /**
  * Extracts cases from a midi file
  */
-class DefaultMusicalCaseExtractor(private val parserFactory: MIDIParserFactory) extends CaseExtractor[MusicalCase] {
+class DefaultMusicalCaseExtractor(private val parserFactory: MIDIParserFactory = JMusicMIDIParser) extends CaseExtractor[MusicalCase] {
   override def getCases(filename: String): List[(MusicalCase, MusicalCase)] = {
     val parser = parserFactory.apply(filename)
     val instrParts: List[(InstrumentType, List[Phrase])] = parser.getPartIndexByInstrument.toList.flatMap {

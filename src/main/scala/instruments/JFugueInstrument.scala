@@ -87,9 +87,9 @@ object JFugueUtils {
   }
 
   def createPhrasePattern(phrase: Phrase, instrumentNumber: Int): Pattern = phrase match {
-    case polyphonicPhrase@Phrase(_, true, _) =>
+    case polyphonicPhrase@Phrase(_, true, _, _) =>
       new Pattern(convertPolyphonicPhrase(polyphonicPhrase, instrumentNumber))
-    case normalPhrase@Phrase(_, false, _) =>
+    case normalPhrase@Phrase(_, false, _, _) =>
       new Pattern(normalPhrase.map(createPatternHelper(_, instrumentNumber, phrase.tempoBPM).toString).mkString(" "))
   }
 

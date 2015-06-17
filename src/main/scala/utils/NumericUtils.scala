@@ -7,6 +7,9 @@ object NumericUtils {
   def max(num1: BigInt, num2: BigInt): BigInt = if (num1 > num2) num1 else num2
   def min(num1: BigInt, num2: BigInt): BigInt = if (num1 < num2) num1 else num2
 
+  def max(num1: BigDecimal, num2: BigDecimal): BigDecimal = if (num1 > num2) num1 else num2
+  def min(num1: BigDecimal, num2: BigDecimal): BigDecimal = if (num1 < num2) num1 else num2
+
   def round(value: BigDecimal, digits: Int): BigDecimal =
     value.setScale(digits, RoundingMode.HALF_EVEN)
 
@@ -26,11 +29,19 @@ object NumericUtils {
   def stdDev[K](traversable: Traversable[K])(implicit num: Numeric[K]): Double = scala.math.sqrt(variance(traversable))
 
   def normalise[K](numbers: Iterable[K])(implicit ev: Numeric[K]): Iterable[BigDecimal] = {
-    val total: BigDecimal = numbers.foldLeft(BigDecimal(0))((acc, num) => acc + ev.toDouble(num))
-    numbers.map(n => BigDecimal(ev.toDouble(n)) / total)
+    val maxVal = numbers.max
+    val minVal = numbers.min
+    val minMaxDiff = BigDecimal(scala.math.max(ev.toDouble(ev.minus(maxVal, minVal)), 1))
+
+    numbers.map(num => BigDecimal(ev.toDouble(ev.abs(ev.minus(num, minVal)))) / minMaxDiff)
   }
 
-  def normalise(numbers: Iterable[BigInt]): Iterable[BigDecimal] = {
+  def normaliseBySum[K](numbers: Iterable[K])(implicit ev: Numeric[K]): Iterable[BigDecimal] = {
+    val total: Double = numbers.foldLeft(0.0)((acc, num) => acc + ev.toDouble(num))
+    numbers.map(n => BigDecimal(ev.toDouble(n)) / scala.math.max(total, 1))
+  }
+
+  def normaliseBySum(numbers: Iterable[BigInt]): Iterable[BigDecimal] = {
     val total = BigDecimal(max(1, numbers.sum))
     numbers.map(n => BigDecimal(n) / total)
   }
@@ -52,5 +63,15 @@ object NumericUtils {
   def combine(array1: Array[Double], array2: Array[Double], op: (Double, Double) => Double): Array[Double] = {
     require(array1.length == array2.length, "Cannot sum two arrays with different lengths")
     array1.zipWithIndex.map{ case (value, idx) => op(value, array2(idx)) }
+  }
+
+  def euclid(a1: Array[Double], a2: Array[Double]): Double = {
+    require(a1.length == a2.length, "Arrays must have the same length")
+    var dist = 0.0
+
+    for ((e1, e2) <- a1.zip(a2)) {
+      dist += scala.math.pow(e1 - e2, 2)
+    }
+    scala.math.sqrt(dist)
   }
 }

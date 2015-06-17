@@ -29,12 +29,12 @@ class LBDMSplitTimeFinder(private val mergePolyphonic: Boolean = true) extends S
       notes(idx).getEndTimeNS
     }
 
-    var prevSplitTime = BigInt(0)
+    var prevSplitTime = BigDecimal(0)
     // TODO: if `mergePolyphonic`, make sure the splitTimes actually correspond to the non-merged phrase
     val relativeSplitTimes = splitTimes.map { splitTime =>
-      val relativeSplit = splitTime - prevSplitTime
-      prevSplitTime = splitTime
-      relativeSplit
+      val relativeSplit = BigDecimal(splitTime) - prevSplitTime
+      prevSplitTime = BigDecimal(splitTime)
+      BigInt(relativeSplit.toLong)
     }
 
     relativeSplitTimes
@@ -53,30 +53,30 @@ class LBDMSplitTimeFinder(private val mergePolyphonic: Boolean = true) extends S
     }
   }
 
-  def computePitchProfile(phrase: Phrase): List[BigInt] = {
+  def computePitchProfile(phrase: Phrase): List[BigDecimal] = {
     val phrase_ = processPolyphonic(phrase)
-    val getPitch = (note: Note) => BigInt(note.midiPitch)
+    val getPitch = (note: Note) => BigDecimal(note.midiPitch)
     computeProfile(phrase_, _ + _, getPitch, getPitch)
   }
 
-  def computeIOIProfile(phrase: Phrase): List[BigInt] = {
+  def computeIOIProfile(phrase: Phrase): List[BigDecimal] = {
     val phrase_ = processPolyphonic(phrase)
-    val getStartTime = (note: Note) => note.startTimeNS
+    val getStartTime = (note: Note) => BigDecimal(note.startTimeNS)
     computeProfile(phrase_, NumericUtils.min, getStartTime, getStartTime)
   }
 
-  def computeRestsProfile(phrase: Phrase): List[BigInt] = {
+  def computeRestsProfile(phrase: Phrase): List[BigDecimal] = {
     val phrase_ = processPolyphonic(phrase)
-    val getStartTime = (note: Note) => note.startTimeNS
-    val getEndTime = (note: Note) => note.getEndTimeNS
+    val getStartTime = (note: Note) => BigDecimal(note.startTimeNS)
+    val getEndTime = (note: Note) => BigDecimal(note.getEndTimeNS)
     computeProfile(phrase_, NumericUtils.min, getEndTime, getStartTime)
   }
 
   private def computeProfile(
       phrase: Phrase,
-      combineFN: (BigInt, BigInt) => BigInt,
-      paramFN1: Note => BigInt,
-      paramFN2: Note => BigInt): List[BigInt] = {
+      combineFN: (BigDecimal, BigDecimal) => BigDecimal,
+      paramFN1: Note => BigDecimal,
+      paramFN2: Note => BigDecimal): List[BigDecimal] = {
     require(!phrase.polyphony, "Cannot process polyphonic phrases")
     val intervals = computeIntervals(phrase, combineFN, paramFN1, paramFN2)
     computeProfile(intervals)
@@ -84,21 +84,21 @@ class LBDMSplitTimeFinder(private val mergePolyphonic: Boolean = true) extends S
 
   def computeIntervals(
       phrase: Phrase,
-      combineFN: (BigInt, BigInt) => BigInt,
-      paramFN1: Note => BigInt,
-      paramFN2: Note => BigInt): List[BigInt] = {
+      combineFN: (BigDecimal, BigDecimal) => BigDecimal,
+      paramFN1: Note => BigDecimal,
+      paramFN2: Note => BigDecimal): List[BigDecimal] = {
 
-    def extractValue(elem: MusicalElement, fn: Note => BigInt): Option[BigInt] = elem match {
+    def extractValue(elem: MusicalElement, fn: Note => BigDecimal): Option[BigDecimal] = elem match {
       case note: Note =>
         Some(fn(note) + 1)
       case chord: Chord =>
-        Some(chord.notes.foldLeft(BigInt(0))((acc, note) => combineFN(acc, fn(note) + 1)))
+        Some(chord.notes.foldLeft(BigDecimal(0))((acc, note) => combineFN(acc, fn(note) + 1)))
       case _ =>
         None
     }
 
-    var prevValue: Option[BigInt] = None
-    val intervals = ListBuffer[BigInt]()
+    var prevValue: Option[BigDecimal] = None
+    val intervals = ListBuffer[BigDecimal]()
 
     for (elem <- phrase) {
       val (nextPrevValue, curValueOpt) = (extractValue(elem, paramFN1), extractValue(elem, paramFN2))
@@ -117,14 +117,14 @@ class LBDMSplitTimeFinder(private val mergePolyphonic: Boolean = true) extends S
     intervals.toList
   }
 
-  def computeProfile(intervals: List[BigInt]) = {
-    val profile = ListBuffer[BigInt]()
-    var prevInterval: Option[BigInt] = None
-    var prevDegreeOfChange: Option[BigInt] = None
+  def computeProfile(intervals: List[BigDecimal]) = {
+    val profile = ListBuffer[BigDecimal]()
+    var prevInterval: Option[BigDecimal] = None
+    var prevDegreeOfChange: Option[BigDecimal] = None
 
     intervals.foreach { interval =>
       if (prevInterval.isDefined) {
-        var degreeOfChange: BigInt = 0
+        var degreeOfChange: BigDecimal = 0
         val intervalSum = interval + prevInterval.get
 
         if (intervalSum > 0) {
@@ -146,6 +146,6 @@ class LBDMSplitTimeFinder(private val mergePolyphonic: Boolean = true) extends S
     if (mergePolyphonic)
       JMusicParserUtils.mergePhrases(phrase).getOrElse(phrase)
     else
-      Phrase.getLongestSubPhrase(phrase)
+      Phrase.getLongestSubPhrase(phrase, List())
   }
 }

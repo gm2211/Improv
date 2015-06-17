@@ -45,6 +45,10 @@ class JMusicMIDIParser(
     phraseSegmenter.segment(phrase)
   }
 
+  override def getAllMultiVoicePhrases: List[List[Phrase]] = {
+    (0 until score.getPartList.size()).map(getMultiVoicePhrases).toList
+  }
+
   def getMultiVoicePhrase(partNum: Int): Option[Phrase] =
     JMusicParserUtils.convertPart(score.getPart(partNum))
 

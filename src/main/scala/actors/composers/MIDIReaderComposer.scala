@@ -1,6 +1,7 @@
 package actors.composers
 
 import cbr.MusicalCase
+import instruments.InstrumentType.InstrumentType
 import midi.{JMusicMIDIParser, MIDIParser, MIDIParserFactory}
 import representation.Phrase
 import utils.builders.{AtLeastOnce, Count, IsAtLeastOnce, Zero}
@@ -32,7 +33,7 @@ class MIDIReaderComposer(builder: MIDIReaderComposerBuilder[AtLeastOnce, AtLeast
   val midiReader: MIDIParser = builder.midiParserFactory.getOrElse(JMusicMIDIParser)(filename)
   val phraseIterator: Iterator[Phrase] = midiReader.getMultiVoicePhrases(partNum).toIterator
 
-  override def compose(phrasesByOthers: Traversable[MusicalCase]): Option[Phrase] = {
+  override def compose(phrasesByOthers: Traversable[MusicalCase], targetInstrument: InstrumentType): Option[Phrase] = {
     if (phraseIterator.hasNext)
       Some(phraseIterator.next())
     else

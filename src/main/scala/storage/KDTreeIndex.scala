@@ -17,21 +17,30 @@ object KDTreeIndex {
   private val DEFAULT_INDEX_RESOURCE: String = "knowledgeBase/caseIndex"
   private val DEFAULT_SOLUTION_STORE_RESOURCE: String = "knowledgeBase/solutionStore"
 
+  def create[Case: Manifest](
+      descriptionCreator: DescriptionCreator[Case],
+      storeSavePath: String,
+      indexSavePath: String): KDTreeIndex[Case] = {
+    val store = new MapDBSolutionStore[Case](storeSavePath)
+    new KDTreeIndex[Case](store, descriptionCreator, indexSavePath)
+  }
+
   def loadOrCreateDefault[Case : Manifest](
       descriptionCreator: DescriptionCreator[Case]): KDTreeIndex[Case] = {
-    val loaded = load[Case](DEFAULT_INDEX_RESOURCE)
+    val loaded = load[Case](IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
     loaded.getOrElse(createDefault(descriptionCreator))
   }
 
-  def loadDefault[Case : Manifest]: Option[KDTreeIndex[Case]] = load(DEFAULT_INDEX_RESOURCE)
+  def loadDefault[Case : Manifest]: Option[KDTreeIndex[Case]] = load(IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
 
   def load[Case : Manifest](filename: String): Option[KDTreeIndex[Case]] =
-    SerialisationUtils.deserialise[KDTreeIndex[Case]](IOUtils.getResourcePath(filename)).toOption
+    SerialisationUtils.deserialise[KDTreeIndex[Case]](filename).toOption
 
   def createDefault[Case : Manifest](descriptionCreator: DescriptionCreator[Case]): KDTreeIndex[Case] = {
     removeDefault()
-    val store = new MapDBSolutionStore[Case](IOUtils.getResourcePath(DEFAULT_SOLUTION_STORE_RESOURCE))
-    new KDTreeIndex[Case](store, descriptionCreator, IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
+    val storePath = IOUtils.getResourcePath(DEFAULT_SOLUTION_STORE_RESOURCE)
+    val indexPath = IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE)
+    create(descriptionCreator, storePath, indexPath)
   }
 
   def loadOrCreate[Case : Manifest](

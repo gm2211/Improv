@@ -95,7 +95,7 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce, AtLeastOnc
 
     musicInfoMessageCache.remove(time)
 
-    val responsePhrase = musicComposer.compose(instrumentsAndPhrases)
+    val responsePhrase = musicComposer.compose(instrumentsAndPhrases, instrument.instrumentType)
     log.debug("playing")
     responsePhrase.foreach(play)
   }

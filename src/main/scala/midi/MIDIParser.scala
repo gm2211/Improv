@@ -15,5 +15,7 @@ trait MIDIParser {
 
   def getMultiVoicePhrases(partNum: Int): List[Phrase]
 
+  def getAllMultiVoicePhrases: List[List[Phrase]]
+
   def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int]
 }
