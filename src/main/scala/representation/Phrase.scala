@@ -1,12 +1,20 @@
 package representation
 
+import java.util.concurrent.TimeUnit
+
 import representation.KeySignature.CMaj
-import utils.ImplicitConversions.toEnhancedIterable
+
+import utils.ImplicitConversions.{toEnhancedIterable,toFasterMutableList}
+import utils.collections.CollectionUtils
 import utils.functional.{FunctionalUtils, MemoizedFunc}
 
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
+import scala.concurrent.duration.TimeUnit
 import scala.concurrent.duration.{NANOSECONDS, TimeUnit}
+import scala.language.postfixOps
 import scala.math
+import scala.util.Try
 import scalaz.Scalaz._
 
 object Phrase {
@@ -98,7 +106,7 @@ object Phrase {
 
   def computeMaxChordSize(phrase: Phrase): Int = {
     phrase.musicalElements.foldLeft(1){
-      case (i, c: Chord) => math.max(i, c.notes.size)
+      case (i, c: Chord) => math.max(i, c.elements.size)
       case (i, _) => i
     }
   }
@@ -110,6 +118,129 @@ object Phrase {
       phrase.musicalElements.forall(_.isInstanceOf[Rest])
     }
   }
+
+  def unmerge(phrase: Phrase): Phrase = {
+    def elemMatch(e1: Option[MusicalElement], e2: MusicalElement): Boolean = e1.exists{ e11 =>
+      (e11, e2) match {
+        case (n1: Note, n2: Note) =>
+          Note.areEqual(n1, n2, duration = false)
+        case (r1: Rest, r2: Rest) =>
+          true
+        case _ =>
+          false
+      }
+    }
+
+    var activeElements = List[MusicalElement]()
+    val phrasesElements: List[mutable.MutableList[MusicalElement]] =
+      (0 until phrase.getMaxChordSize).map(i => mutable.MutableList[MusicalElement]()).toList
+    val musicalElements: List[MusicalElement] = phrase.musicalElements.sortBy(_.getStartTimeNS)
+
+    for (musicalElement <- musicalElements) {
+      musicalElement match {
+        case chord: Chord =>
+          activeElements = chord.elements
+        case elem =>
+          activeElements = List(elem)
+      }
+
+      val rest = Rest(
+        durationNS = musicalElement.getDurationNS,
+        startTimeNS = musicalElement.getStartTimeNS)
+
+      val availablePhrases = mutable.HashSet[Int](phrasesElements.indices.toArray:_*)
+
+      activeElements ++= (1 to phrasesElements.size - activeElements.size).map(i => rest)
+
+      activeElements.toStream.foreach{ element =>
+        val listIdx = Option(phrasesElements.indexWhere(l => elemMatch(l.lastOption, element)))
+          .filter(_ >= 0)
+          .getOrElse(CollectionUtils.chooseRandom(availablePhrases).get)
+
+        addToPhraseElements(element, phrasesElements(listIdx))
+        availablePhrases.remove(listIdx)
+      }
+    }
+
+    val phrases = phrasesElements.map(phraseElems => new Phrase(phraseElems.toList))
+    Phrase()
+      .withMusicalElements(phrases)
+      .withPolyphony()
+      .getOrElse(phrase)
+  }
+
+  val getNotesByStartTimeNS = FunctionalUtils.memoized { (phrase: Phrase) =>
+    phrase.musicalElements.groupByMultiMap[BigInt](_.getStartTime(NANOSECONDS))
+  }
+
+  /**
+   * @param musicalElements Iterable of stuff that either contains, is or can be converted to a jmData.Note
+   * @param endTime Time at which all notes terminate
+   * @return An optional musical element
+   */
+  def mergeNotes(
+    musicalElements: List[MusicalElement],
+    endTime: BigInt,
+    timeUnit: TimeUnit = NANOSECONDS): Option[MusicalElement] = {
+    def computeDuration(em: MusicalElement) = timeUnit.toNanos(endTime.toLong) - em.getStartTimeNS
+    musicalElements match {
+      case Nil =>
+        None
+      case element :: Nil =>
+        Some(element.withDuration(computeDuration(element)))
+      case elements =>
+        Some(Chord(elements.map(elem => elem.withDuration(computeDuration(elem)))))
+    }
+  }
+
+  def mergePhrases(phrase: Phrase): Option[Phrase] =
+    phrase.polyphony.option(mergePhrases(phrase.musicalElements.asInstanceOf[List[Phrase]]))
+
+  def mergePhrases(phrases: Traversable[Phrase]): Phrase = {
+    val notesByStartTime = CollectionUtils.mergeMultiMaps(phrases.toList: _*)(getNotesByStartTimeNS)
+    val phraseElements = mutable.MutableList[MusicalElement]()
+    var activeNotes: List[MusicalElement] = List()
+    val endTimes = notesByStartTime.flatMap { case (startTime, notes) =>
+      notes.map(note => startTime + note.getDurationNS)
+    }
+    val times = notesByStartTime.keySet.toList.++(endTimes).distinct.sorted
+
+    for (time <- times) {
+      mergeNotes(activeNotes, time)
+        .filter(_.getDuration(TimeUnit.MILLISECONDS) > 1) // Filter our spurious notes
+        .foreach(addToPhraseElements(_, phraseElements))
+
+      activeNotes = activeNotes.flatMap(MusicalElement.resizeIfActive(time, _))
+      activeNotes ++= notesByStartTime.getOrElse(time, Set()).toList
+    }
+
+    require(activeNotes.isEmpty, "All active notes must be consumed")
+    Phrase().withMusicalElements(phraseElements)
+  }
+
+  def addToPhraseElements(element: MusicalElement, phraseElements: mutable.MutableList[MusicalElement]): Unit = {
+    if (phraseElements.isEmpty) {
+      if (element.getStartTimeNS > 0) {
+        phraseElements += new Rest(durationNS = element.getStartTimeNS)
+      }
+      phraseElements += element
+    } else {
+      val previousElem = phraseElements.last
+      (previousElem, element) match {
+        case (previousNote: Note, note: Note) if Note.areEqual(note, previousNote, duration = false) =>
+          phraseElements.updateLast(previousNote.withDuration(previousNote.durationNS + note.durationNS))
+        case (previousRest: Rest, rest: Rest) =>
+          phraseElements.updateLast(previousRest.withDuration(previousRest.durationNS + rest.durationNS))
+        case _ =>
+          if (element.getStartTimeNS > phraseElements.last.getEndTimeNS + 1) {
+            phraseElements += new Rest(startTimeNS = phraseElements.last.getEndTimeNS)
+              .withEndTime(element.getStartTimeNS - 1)
+          }
+          phraseElements += element
+      }
+    }
+  }
+
 
   def split(phrase: Phrase, splitTimeNS: BigInt): (Option[Phrase], Option[Phrase]) = phrase match {
     case p@Phrase(_, true, _, _) =>

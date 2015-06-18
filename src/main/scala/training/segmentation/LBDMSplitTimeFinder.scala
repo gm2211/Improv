@@ -144,7 +144,7 @@ class LBDMSplitTimeFinder(private val mergePolyphonic: Boolean = true) extends S
 
   private def processPolyphonic(phrase: Phrase): Phrase = {
     if (mergePolyphonic)
-      JMusicParserUtils.mergePhrases(phrase).getOrElse(phrase)
+      Phrase.mergePhrases(phrase).getOrElse(phrase)
     else
       Phrase.getLongestSubPhrase(phrase, List())
   }
