@@ -55,11 +55,11 @@ class GASelector[Elem, Chromosome](
 
 
   def breed(survivors: List[Elem]): List[Elem] = {
-    survivors.combinations(2).map { case (parent1, parent2) =>
+    survivors.combinations(2).collect { case parent1 :: parent2 :: whatever =>
         val chromosome1 = chromosomeGenerator.createChromosome(parent1)
         val chromosome2 = chromosomeGenerator.createChromosome(parent2)
 
-        chromosomeGenerator.fromChromosome(geneticOperator.crossOver(chromosome1, chromosome2))
+        chromosomeGenerator.fromChromosome(geneticOperator.crossOver(chromosome1, chromosome2));
     }.toList
   }
 }
