@@ -60,6 +60,10 @@ dependencies {
     // DB server
     compile "org.mapdb:mapdb:$mapdb_version"
 
+    // Web Server
+    compile "org.scalatra:scalatra_2.11:$scalatra_version"
+    compile "org.scalatra:scalatra-atmosphere_2.11:$scalatra_version"
+
     // MIDI
     compile name: "jfugue-5.0.1"
     compile name: "jMusic1.6.4"

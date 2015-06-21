@@ -10,7 +10,7 @@ class SystemTrainer(
   def addCasesToIndex(filenames: List[String]): Unit = {
     filenames.foreach(addCasesToIndex)
     index.compact()
-    index.save()
+    index.save().failed.foreach(println)
   }
 
   def addCasesToIndex(filename: String): Unit = {

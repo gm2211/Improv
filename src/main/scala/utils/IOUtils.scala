@@ -49,9 +49,14 @@ object IOUtils {
   def getResourcePath(resourceName: String): String =
     ClassLoader.getSystemClassLoader.getResource(resourceName).getPath
 
+  def expandPath(path: String) = {
+    val expandedHomePath = path.replace("~", System.getProperty("user.home"))
+    Files.simplifyPath(expandedHomePath)
+  }
+
   def filesInDir(dirPath: String): Try[List[String]] = {
     Try{
-      val dir = new File(dirPath)
+      val dir = new File(expandPath(dirPath))
       Files.fileTreeTraverser()
         .breadthFirstTraversal(dir)
         .filter((file: File) => file.isFile)
