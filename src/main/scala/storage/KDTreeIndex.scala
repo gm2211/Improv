@@ -63,7 +63,8 @@ class KDTreeIndex[Problem] (
       @JsonProperty("path") private var path: String
     )  extends CaseIndex[Problem] with Saveable {
   @JsonProperty("kdTree")
-  private val kdTree = {
+//  @JsonSerialize(using=classOf[KDTreeSerialiser])
+  val kdTree = {
     new KDTree[List[String]](
       descriptionCreator.getMaxDescriptionSize,
       KDTreeIndex.DEFAULT_KDTREE_REBALANCING_THRESHOLD)
@@ -130,3 +131,4 @@ class KDTreeIndex[Problem] (
     SerialisationUtils.serialise(this, filePath)
   }
 }
+

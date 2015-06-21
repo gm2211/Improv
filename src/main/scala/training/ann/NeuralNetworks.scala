@@ -13,7 +13,7 @@ import utils.IOUtils
 import scala.util.Try
 
 object NeuralNetworks {
-  val DEFAULT_ANN_PATH: String = IOUtils.getResourcePath("ann")
+  val DEFAULT_ANN_PATH: String = IOUtils.getResourcePath("knowledgeBase/NN.nnet")
 
   def createNeurophDefault(data: List[ANNTrainingData]): NeuralNetwork[BackPropagation] = {
     val mergedTrainingData = ANNTrainingData.merge(data)
