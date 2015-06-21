@@ -14,7 +14,7 @@ case class OrchestraBuilder(
   var name: Option[String] = None,
   var actorSystem: Option[ActorSystem] = None,
   var director: Option[DirectorBuilder[_ <: Count]] = None) {
-  def withName(name: Option[String]) = copy(name = name)
+  def withName(name: String) = copy(name = Some(name))
 
   def withActorSystem(actorSystem: ActorSystem) = copy(actorSystem = Some(actorSystem))
 
@@ -34,6 +34,7 @@ class Orchestra(val builder: OrchestraBuilder) {
   private val director: ActorRef = {
     system.actorOf(Props(builder.director.getOrElse(SimpleDirector.builder).withActorSystem(system).build), "director")
   }
+
   private var musicianCount = 0
   ActorUtils.subscribe(director, classOf[Message])
 

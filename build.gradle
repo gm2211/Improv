@@ -63,6 +63,11 @@ dependencies {
     // Web Server
     compile "org.scalatra:scalatra_2.11:$scalatra_version"
     compile "org.scalatra:scalatra-atmosphere_2.11:$scalatra_version"
+    compile "org.scalatra:scalatra-json_2.11:$scalatra_version"
+    compile "org.scalatra:scalatra-scalate_2.11:$scalatra_version"
+    compile "org.json4s:json4s-jackson_2.11:$json4s_version"
+    compile "org.eclipse.jetty.websocket:websocket-server:$j_websocket_version"
+    compile "org.eclipse.jetty:jetty-webapp:$j_websocket_version"
 
     // MIDI
     compile name: "jfugue-5.0.1"
