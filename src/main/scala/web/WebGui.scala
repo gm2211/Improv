@@ -1,31 +1,24 @@
 package web
 
-import actors.Orchestra
-import org.json4s.{JValue, DefaultFormats, Formats}
-import org.scalatra.atmosphere._
-import org.scalatra.json.{JValueResult, JacksonJsonSupport}
-import org.scalatra.{ScalatraServlet, SessionSupport}
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.servlet.{ DefaultServlet, ServletContextHandler }
+import org.eclipse.jetty.webapp.WebAppContext
+import org.scalatra.servlet.ScalatraListener
 
+object WebGui extends App {
+  val port = if (System.getenv("PORT") != null) System.getenv("PORT").toInt else 8080
 
-class WebGui(orchestra: Orchestra) extends ScalatraServlet
-    with JValueResult
-    with JacksonJsonSupport
-    with SessionSupport
-    with AtmosphereSupport {
-  override protected implicit def jsonFormats: Formats = DefaultFormats
-  implicit val executionContext = orchestra.system.dispatcher
+  val server = new Server(port)
+  val context = new WebAppContext()
 
-  atmosphere("/the-chat") {
-    new AtmosphereClient {
-      def receive = {
-        case Connected =>
-        case Disconnected(disco, Some(error)) =>
-        case Error(Some(error)) =>
-        case TextMessage(text) => send("ECHO: " + text)
-        case JsonMessage(json) => broadcast(json)
-      }
-    }
-  }
+  context.setInitParameter(ScalatraListener.LifeCycleKey,
+    "web.WebGuiBootstrap")
 
-  override def render(value: JValue)(implicit formats: Formats): JValue = value
+  context setContextPath "/"
+  context.setResourceBase("src/main/resources/webapp")
+  context.addEventListener(new ScalatraListener)
+  server.setHandler(context)
+
+  server.start()
+  server.join()
 }
