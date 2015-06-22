@@ -16,7 +16,7 @@ object DemoCBROrchestra extends App{
   def run(): Unit = {
     val director = WaitingDirector.builder
     val orchestra = Orchestra.builder.withDirector(director).build
-    val numMusicians = 5
+    val numMusicians = 15
 
     def musicianBuilder = {
       val composer = new CBRComposer(KDTreeIndex.loadDefault[MusicalCase].get, Some(PhraseSelectors.getGASelector))
