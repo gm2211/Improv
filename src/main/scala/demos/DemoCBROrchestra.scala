@@ -18,7 +18,7 @@ object DemoCBROrchestra extends App{
 //    val syncFreq = NANOS.toMillis(PhraseSegmenter.DEFAULT_SUB_PHRASE_LENGTH_NS.toLong)
     val director = WaitingDirector.builder
     val orchestra = Orchestra.builder.withDirector(director).build
-    val numMusicians = 5
+    val numMusicians = 15
 
     def musicianBuilder = {
       val composer = new CBRComposer(KDTreeIndex.loadDefault[MusicalCase].get)
