@@ -15,7 +15,7 @@ object WebGui extends App {
     "web.WebGuiBootstrap")
 
   context setContextPath "/"
-  context.setResourceBase("src/main/resources/webapp")
+  context.setResourceBase("src/main/webapp")
   context.addEventListener(new ScalatraListener)
   server.setHandler(context)
 

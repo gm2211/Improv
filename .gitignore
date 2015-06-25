@@ -9,3 +9,8 @@ log/
 *.iws
 **/*.swp
 **/*.log
+
+.bowerrc
+_public/
+bower_components/
+node_modules/

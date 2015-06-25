@@ -56,7 +56,7 @@ class WebGuiController(orchestra: Orchestra) extends ScalatraServlet
 
   get("/") {
     contentType="text/html"
-    ssp("/index")
+    layoutTemplate("/views/index.jade")
   }
 
 
