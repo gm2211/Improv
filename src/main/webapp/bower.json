@@ -1,0 +1,20 @@
+{
+  "name": "Improv",
+  "version": "0.0.0",
+  "authors": [
+    "gm2211"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "1.4.1",
+    "bootstrap": "~3.3.5",
+    "jquery": "~2.1.4",
+    "lodash": "~3.10.0"
+  }
+}
