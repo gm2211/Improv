@@ -1,7 +1,7 @@
 package actors.composers
 
 import cbr.{CaseIndex, MusicalCase}
-import genetic.{PopulationSelector, RandomSelector}
+import genetic.{SolutionSelector, RandomSelector}
 import instruments.InstrumentType.InstrumentType
 import representation.Phrase
 import utils.collections.CollectionUtils
@@ -12,12 +12,13 @@ object CBRComposer {
 
 class CBRComposer(
     private val caseIndex: CaseIndex[MusicalCase],
-    populationSelector: Option[PopulationSelector[MusicalCase]] = None) extends Composer {
+    populationSelector: Option[SolutionSelector[MusicalCase]] = None) extends Composer {
 
   private val populationSelector_ = populationSelector.getOrElse(new RandomSelector[MusicalCase])
 
 
   override def compose(
+      previousSolution: MusicalCase,
       phrasesByOthers: Traversable[MusicalCase],
       constraints: List[MusicalCase => Boolean]): Option[Phrase] = {
     var solutionPopulation: List[MusicalCase] = phrasesByOthers
@@ -27,7 +28,7 @@ class CBRComposer(
       solutionPopulation = chooseRandom(caseIndex)
     }
 
-    populationSelector_.selectSolution(solutionPopulation, constraints).map(_.phrase)
+    populationSelector_.selectSolution(previousSolution, solutionPopulation, constraints).map(_.phrase)
   }
 
   def chooseRandom(caseIndex: CaseIndex[MusicalCase]): List[MusicalCase] = {

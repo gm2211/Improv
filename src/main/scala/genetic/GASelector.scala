@@ -4,14 +4,17 @@ import scala.collection.mutable.ListBuffer
 import scala.util.{Random, Try}
 
 class GASelector[Elem, Chromosome](
-    fitnessFunction: Elem => Double,
-    stoppingCriteria: StoppingCriteria = IterationLimitReached(20),
-    chromosomeGenerator: ChromosomeGenerator[Elem, Chromosome],
-    geneticOperator: GeneticOperator[Chromosome]) extends PopulationSelector[Elem] {
+      val fitnessFunction: Elem => Double,
+      val stoppingCriteria: StoppingCriteria = IterationLimitReached(20),
+      val chromosomeGenerator: ChromosomeGenerator[Elem, Chromosome],
+      val geneticOperator: GeneticOperator[Chromosome],
+      val similarityMeasure: SimilarityMeasure[Elem] = ((e1: Elem, e2: Elem) => 1).asInstanceOf[SimilarityMeasure[Elem]]
+    ) extends SolutionSelector[Elem] {
   val survivalRate = 2.0/3.0
 
 
   override def selectSolution(
+      previousSolution: Elem,
       candidates: List[Elem],
       constraints: List[(Elem) => Boolean]): Option[Elem] = {
 
@@ -19,8 +22,14 @@ class GASelector[Elem, Chromosome](
     var iterationCount = 0
 
     while (! shouldTerminate(iterationCount)) {
-      val ratedPopulation = candidates.map(candidate => (candidate, fitnessFunction(candidate)))
-      val survivors = stochasticSampling(ratedPopulation, (ratedPopulation.size * survivalRate).toInt)
+      val ratedPopulation = candidates.map{ candidate =>
+        val similarity = similarityMeasure(candidate, previousSolution)
+        val fitness = fitnessFunction(candidate)
+        (candidate, similarity * fitness)
+      }
+
+      val survivedPopulationSize: Int = (ratedPopulation.size * survivalRate).toInt
+      val survivors = stochasticSampling(ratedPopulation, survivedPopulationSize)
       population = survivors ++ breed(survivors)
       iterationCount += 1
     }

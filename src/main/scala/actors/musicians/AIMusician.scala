@@ -12,7 +12,7 @@ import representation.{MusicGenre, Phrase}
 import utils.ActorUtils
 import utils.ImplicitConversions.toEnhancedIterable
 import utils.builders.{AtLeastOnce, Count, IsAtLeastOnce, Zero}
-import utils.collections.CollectionUtils
+import utils.collections.{BoundedStack, CollectionUtils}
 import utils.functional.FunctionalUtils
 
 import scala.language.implicitConversions
@@ -82,6 +82,7 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce])
   implicit private val actorSystem: ActorSystem = builder.actorSystem.get
   private val musicComposer: Composer = builder.composer.getOrElse(new RandomComposer)
   private val messageOnly: Boolean = builder.messageOnly.get
+  private val playedPhrases = BoundedStack[Phrase](1)
   var directorIdentity: Option[ActorRef] = None
 
   instrument match {
@@ -90,7 +91,8 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce])
     case _ =>
   }
 
-  private[musicians] val musicInfoMessageCache = CollectionUtils.createHashMultimap[Long, MusicInfoMessage]
+  private[musicians] val musicInfoMessageCache =
+    CollectionUtils.createHashMultimap[Long, MusicInfoMessage]
   private[musicians] var currentMusicTime: Long = 0
 
   behaviours.foreach{ case b: AIMusicianBehaviour => b.registerMusician(this) case _ => }
@@ -105,10 +107,18 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce])
       musicInfoMessageCache.remove(time)
 
       val constraints = getCompositionConstraints
+      val previouslyPlayedPhrase = MusicalCase(instrument.instrumentType, phrase = playedPhrases.peek)
 
-      val responsePhrase = musicComposer.compose(instrumentsAndPhrases, constraints)
+      val responsePhrase = musicComposer.compose(
+        previouslyPlayedPhrase,
+        instrumentsAndPhrases,
+        constraints)
 
-      responsePhrase.foreach(play)
+      responsePhrase.foreach{phrase =>
+        play(phrase)
+        playedPhrases.push(phrase)
+      }
+
     }
   }
 

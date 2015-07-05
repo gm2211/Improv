@@ -17,7 +17,8 @@ object PhraseSelectors {
           chromosome
         }
       },
-      geneticOperator = new MusicalCaseCrossoverOperator
+      geneticOperator = new MusicalCaseCrossoverOperator,
+      similarityMeasure = SimilarityMeasures.musicalCaseSimilarity
     )
   }
 }
