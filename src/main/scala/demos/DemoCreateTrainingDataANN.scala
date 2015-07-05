@@ -7,8 +7,7 @@ import instruments.JFugueUtils
 import midi.{JMusicMIDIParser, MIDIPlayer}
 import training.DefaultMusicalCaseExtractor
 import training.ann.ANNTrainingData
-import training.segmentation.{PhraseSegmenter, LBDMSplitTimeFinder}
-import utils.{UserInput, IOUtils}
+import utils.UserInput
 import utils.collections.CollectionUtils
 
 import scala.util.Try
