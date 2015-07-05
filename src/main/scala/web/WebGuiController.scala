@@ -54,12 +54,6 @@ class WebGuiController(orchestra: Orchestra) extends ScalatraServlet
       }
     }
 
-  get("/") {
-    contentType="text/html"
-    jade("/views/index.jade")
-  }
-
-
   atmosphere("/the-chat") {
     atmosphereClient
   }

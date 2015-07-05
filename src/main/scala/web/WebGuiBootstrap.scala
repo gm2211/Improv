@@ -13,6 +13,7 @@ class WebGuiBootstrap extends LifeCycle {
 //      .withDirector(WaitingDirector.builder)
       .build
     
-    context.mount(new WebGuiController(orchestra), "/*")
+    context.mount(new WebGuiController(orchestra), "/api/*")
+    context.mount(new WebGuiController(orchestra), "/assets/*")
   }
 }

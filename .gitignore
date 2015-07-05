@@ -12,5 +12,5 @@ log/
 
 .bowerrc
 _public/
-bower_components/
+src/main/webapp/app/components/
 node_modules/

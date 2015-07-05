@@ -1,0 +1,21 @@
+{
+  "author": "gm2211",
+  "name": "Improv",
+  "description": "A Distributed Improvising Orchestra",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git"
+  },
+  "engines": {
+    "npm": "1.1.x"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "LiveScript": ">= 1.1.1",
+    "grunt-connect-proxy": "^0.2.0",
+    "grunt-contrib-watch": ">= 0.5.1",
+    "grunt-jade": ">= 0.5.1",
+    "grunt-livescript": ">= 0.5.4",
+    "grunt-serve": ">= 0.1.6"
+  }
+}
