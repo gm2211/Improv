@@ -54,7 +54,7 @@ class JMusicMIDIParser(
     JMusicParserUtils.convertPart(score.getPart(partNum))
 
   private val getPhrasesM = FunctionalUtils.memoized[Int, Traversable[Phrase]]((partNum: Int) => {
-    getMultiVoicePhrase(partNum).flatMap(phrase => Phrase.mergePhrases(phrase).map(split)).getOrElse(List())
+    getMultiVoicePhrase(partNum).map(phrase => split(Phrase.mergePhrases(phrase))).getOrElse(List())
   })
 
   override def getPhrases(partNum: Int): Traversable[Phrase] = getPhrasesM(partNum)

@@ -193,8 +193,8 @@ object Phrase {
     }
   }
 
-  def mergePhrases(phrase: Phrase): Option[Phrase] =
-    phrase.polyphony.option(mergePhrases(phrase.musicalElements.asInstanceOf[List[Phrase]]))
+  def mergePhrases(phrase: Phrase): Phrase =
+    phrase.polyphony.option(mergePhrases(phrase.musicalElements.asInstanceOf[List[Phrase]])).getOrElse(phrase)
 
   def mergePhrases(phrases: Traversable[Phrase]): Phrase = {
     val notesByStartTime = CollectionUtils.mergeMultiMaps(phrases.toList: _*)(getNotesByStartTimeNS)
