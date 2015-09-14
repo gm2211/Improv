@@ -1,9 +1,9 @@
 package utils.functional
 
-import scala.collection.mutable
+import scala.collection.concurrent
 
 class MemoizedFunc[From, To](private val function: From => To) extends Serializable with ((From) => To) {
-  private val results: mutable.Map[From, To] = new mutable.HashMap()
+  private val results: concurrent.Map[From, To] = concurrent.TrieMap()
 
   /**
    * Returns the memoized value of the function if available for the input,

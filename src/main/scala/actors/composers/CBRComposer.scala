@@ -18,7 +18,7 @@ class CBRComposer(
 
 
   override def compose(
-      previousSolution: MusicalCase,
+      previousSolution: Option[MusicalCase] = None,
       phrasesByOthers: Traversable[MusicalCase],
       constraints: List[MusicalCase => Boolean]): Option[Phrase] = {
     var solutionPopulation: List[MusicalCase] = phrasesByOthers

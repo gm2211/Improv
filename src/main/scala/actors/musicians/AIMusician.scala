@@ -107,7 +107,9 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce])
       musicInfoMessageCache.remove(time)
 
       val constraints = getCompositionConstraints
-      val previouslyPlayedPhrase = MusicalCase(instrument.instrumentType, phrase = playedPhrases.peek)
+      val previouslyPlayedPhrase = playedPhrases.peek.map{ phrase =>
+        MusicalCase(instrument.instrumentType, phrase = phrase)
+      }
 
       val responsePhrase = musicComposer.compose(
         previouslyPlayedPhrase,
@@ -118,7 +120,6 @@ class AIMusician(builder: AIMusicianBuilder[AtLeastOnce, AtLeastOnce])
         play(phrase)
         playedPhrases.push(phrase)
       }
-
     }
   }
 

@@ -51,7 +51,7 @@ object JFugueUtils {
 
   def createPattern(phrase: Phrase, instrumentType: InstrumentType): Pattern = {
     val tempo = Try(phrase.tempoBPM).getOrElse(MusicalElement.DEFAULT_TEMPO_BPM) * 4
-    createPatternHelper(phrase, instrumentType.instrumentNumber, tempo)
+    createPatternHelper(phrase, instrumentType.instrumentNumber - 1, tempo)
       .setInstrument(instrumentType.instrumentNumber - 1)
       .setTempo(tempo.toInt)
   }

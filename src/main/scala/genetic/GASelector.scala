@@ -14,7 +14,7 @@ class GASelector[Elem, Chromosome](
 
 
   override def selectSolution(
-      previousSolution: Elem,
+      previousSolution: Option[Elem],
       candidates: List[Elem],
       constraints: List[(Elem) => Boolean]): Option[Elem] = {
 
@@ -23,9 +23,9 @@ class GASelector[Elem, Chromosome](
 
     while (! shouldTerminate(iterationCount)) {
       val ratedPopulation = candidates.map{ candidate =>
-        val similarity = similarityMeasure(candidate, previousSolution)
+        val similarity = previousSolution.map(similarityMeasure(candidate, _)).getOrElse(1.0)
         val fitness = fitnessFunction(candidate)
-        (candidate, similarity * fitness)
+        (candidate, scala.math.pow(similarity, 3.5) * fitness)
       }
 
       val survivedPopulationSize: Int = (ratedPopulation.size * survivalRate).toInt
@@ -42,7 +42,7 @@ class GASelector[Elem, Chromosome](
     val maxFitness = ratedPopulation.maxBy(_._2)._2
     val sample = ListBuffer[Elem]()
 
-    while (sample.size < sample.size) {
+    while (sample.size < sampleSize) {
       var selectedElement: Option[Elem] = None
       while (selectedElement.isEmpty) {
         val candidate = ratedPopulation(Random.nextInt(ratedPopulation.size))
