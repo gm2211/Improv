@@ -28,9 +28,6 @@ apply plugin: "distribution"
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    // Overtone Wrapper
-    compile(project(':overtone-wrapper'))
-
     // Scala
     compile "org.scala-lang:scala-library:$scala_version"
     compile "org.scala-lang:scala-compiler:$scala_version"
