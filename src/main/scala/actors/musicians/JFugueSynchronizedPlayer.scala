@@ -1,9 +1,10 @@
 package actors.musicians
 
+import akka.actor.ActorLogging
 import instruments.JFugueUtils
 import messages.{MusicInfoMessage, SyncMessage}
 import org.jfugue.player.Player
-import representation.MusicalElement
+import representation.Phrase
 import utils.collections.MultiCache
 
 import scala.collection.mutable
@@ -12,11 +13,17 @@ import scala.collection.mutable
  * This musician listens to all the music messages sent by other musicians and plays them all at the same time on the
  * next sync message (this kind of acts like a sync barrier)
  */
-class JFugueSynchronizedPlayer extends Musician {
+class JFugueSynchronizedPlayer extends Musician with ActorLogging {
   private val musicInfoMessageCache: mutable.MultiMap[Long, MusicInfoMessage] = MultiCache.buildDefault(5000, 50)
+  val player: Player = new Player()
 
   private def prepare(messages: mutable.Set[MusicInfoMessage]): String = {
-    JFugueUtils.mergePatterns(messages.map(message => JFugueUtils.createPattern(message.musicalElement, message.instrument.instrumentNumber)))
+    val pattern = JFugueUtils.mergePatterns(
+      messages.map(message =>
+        JFugueUtils.createPattern(message.phrase, message.instrument))
+    )
+
+    pattern
   }
 
   override def receive: Receive = {
@@ -26,10 +33,11 @@ class JFugueSynchronizedPlayer extends Musician {
       val pattern = musicInfoMessageCache.get(syncMessage.time - 1)
         .map(prepare).getOrElse("")
 
-      new Player().play(pattern)
+      log.debug(s"Playing $pattern")
+      player.play(pattern)
 
       musicInfoMessageCache.remove(syncMessage.time - 1)
   }
 
-  override def play(musicalElement: MusicalElement): Unit = ()
+  override def play(phrase: Phrase): Unit = ()
 }

@@ -1,9 +1,9 @@
 package actors.musicians
 
 import akka.actor.Actor
-import representation.MusicalElement
+import representation.Phrase
 
 
 trait Musician extends Actor {
-  def play(musicalElement: MusicalElement): Unit
+  def play(phrase: Phrase): Unit
 }

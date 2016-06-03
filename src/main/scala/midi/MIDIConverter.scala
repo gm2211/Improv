@@ -6,62 +6,69 @@ import jm.midi.MidiUtil
 import jm.music.data.{Part, Score}
 import jm.music.{data => jmData}
 import representation.{MusicalElement, Note, Phrase, Rest}
+import utils.ImplicitConversions.toDouble
 
 object MIDIConverter {
   def toSequence(phrase: Phrase): Sequence = {
-    toSequence(JMusicConverterUtils.toPhrase(phrase))
+    toSequence(JMusicConverterUtils.toPart(phrase))
   }
 
-  def toSequence(phrase: jmData.Phrase): Sequence = {
-    MidiUtil.scoreToSeq(JMusicConverterUtils.wrapInScore(phrase))
+  def toSequence(part: jmData.Part): Sequence = {
+    MidiUtil.scoreToSeq(JMusicConverterUtils.wrapInScore(part))
   }
 
 }
 
 object JMusicConverterUtils {
 
-  def convertNote(note: Note): jmData.Note = {
+  def convertNote(note: Note, tempoBPM: Int): jmData.Note = {
     val jmNote = new jmData.Note()
-    val duration: Double = note.duration / 8
+    val duration: BigDecimal = MusicalElement.toBPM(note.durationNS, tempoBPM)
     jmNote.setDuration(duration)
     jmNote.setRhythmValue(duration / jmData.Note.DEFAULT_DURATION_MULTIPLIER)
     jmNote.setPitchType(jmData.Note.MIDI_PITCH)
-    jmNote.setPitch(note.pitch)
+    jmNote.setPitch(note.midiPitch)
     jmNote.setDynamic(note.loudness.loudness)
     jmNote
   }
 
   def convertRest(rest: Rest): jmData.Note =
-    new jmData.Rest(rest.getDuration / 8)
+    new jmData.Rest(rest.getDurationNS.toDouble)
 
-  def toNote(musicalElement: MusicalElement): Option[jmData.Note] = musicalElement match {
+  def toNote(musicalElement: MusicalElement, tempoBPM: Int): Option[jmData.Note] = musicalElement match {
     case note: Note =>
-      Some(convertNote(note))
+      Some(convertNote(note, tempoBPM))
     case rest: Rest =>
       Some(convertRest(rest))
     case _ =>
       None
   }
 
-  def toPart(multiVoicePhrase: Phrase): jmData.Part = {
-    require(multiVoicePhrase.polyphony)
+
+  def toPart(phrase: Phrase): jmData.Part = {
     val part = new jmData.Part()
-    val phrases = multiVoicePhrase.musicalElements.collect{ case phrase: Phrase => toPhrase(phrase) }
-    phrases.foreach{ phrase => phrase.setMyPart(part); part.add(phrase) }
+    var phrases = List(phrase)
+
+    if (phrase.polyphony) {
+       phrases = phrase.musicalElements.asInstanceOf[List[Phrase]]
+    }
+
+    phrases.map(toPhrase).foreach{ phrase => phrase.setMyPart(part); part.add(phrase) }
+    part.setTempo(phrase.tempoBPM)
     part
   }
 
   def toPhrase(phrase: Phrase): jmData.Phrase = {
     require(! phrase.polyphony)
     val jmPhrase = new jmData.Phrase()
-    val startTimeOrdering = Ordering.by((elem: MusicalElement) => elem.getStartTime)
-    jmPhrase.setDuration(phrase.getDuration)
-    jmPhrase.setStartTime(phrase.getStartTime)
+    val startTimeOrdering = Ordering.by((elem: MusicalElement) => elem.getStartTimeNS)
+    jmPhrase.setDuration(phrase.getDurationBPM(phrase.tempoBPM))
+    jmPhrase.setStartTime(phrase.getStartTimeBPM(phrase.tempoBPM))
     jmPhrase.setTempo(phrase.tempoBPM)
 
     phrase.musicalElements
       .sorted(startTimeOrdering)
-      .flatMap(toNote)
+      .flatMap(toNote(_, phrase.tempoBPM.toInt))
       .foreach{ note => note.setMyPhrase(jmPhrase); jmPhrase.add(note) }
 
     jmPhrase
@@ -71,8 +78,10 @@ object JMusicConverterUtils {
     val part = new Part()
     jmPhrase.setMyPart(part)
     part.addPhrase(jmPhrase)
+    part.setTempo(jmPhrase.getTempo)
     val score = new Score()
     part.setMyScore(score)
+    score.setTempo(part.getTempo)
     score.addPart(part)
     score
   }
@@ -80,6 +89,7 @@ object JMusicConverterUtils {
   def wrapInScore(jmPart: jmData.Part): Score = {
     val score = new Score()
     jmPart.setMyScore(score)
+    score.setTempo(jmPart.getTempo)
     score.addPart(jmPart)
     score
   }

@@ -1,15 +1,25 @@
 package demos
 
-import cbr.CaseDescription
+import cbr.MusicalCase
+import cbr.description.PhraseDescriptionCreators
+import com.fasterxml.jackson.databind.ObjectMapper
+import instruments.InstrumentType.PIANO
+import net.sf.javaml.core.kdtree.KDTree
 import representation.Phrase
 import storage.KDTreeIndex
-import utils.IOUtils
+import training.SystemTrainer
+import utils.{SerialisationUtils, IOUtils}
 
-object DemoPopulateDB {
-  def run(filename: String): Unit = {
-    val index = KDTreeIndex.loadOrCreate[CaseDescription, Phrase](IOUtils.getResourcePath("knowledgeBase/caseIndex"))
-    println(index.addCase(Array.fill[Double](10)(4.0), Phrase()))
-    println(index.findKNearestNeighbours(Array.fill[Double](10)(1.0), 10))
+object DemoPopulateDB extends App {
+  run("trainingMIDIs")
+  def run(resourceDirPath: String): Unit = {
+    val dirPath = IOUtils.getResourcePath(resourceDirPath)
+    val filenames = IOUtils.filesInDir(dirPath).getOrElse(List())
+    val index = KDTreeIndex.loadOrCreateDefault[MusicalCase](PhraseDescriptionCreators.getDefault)
+    val trainer = new SystemTrainer(index = index)
+    trainer.addCasesToIndex(filenames)
+    println(index.size)
     index.save()
   }
 }
+

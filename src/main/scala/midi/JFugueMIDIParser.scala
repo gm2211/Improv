@@ -3,7 +3,7 @@ package midi
 import java.io.File
 import javax.sound.midi.MidiSystem
 
-import instruments.InstrumentType.{InstrumentCategory, InstrumentType}
+import instruments.InstrumentType.InstrumentType
 import org.jfugue.midi.MidiParser
 import org.jfugue.parser.ParserListener
 import org.jfugue.theory.{Chord, Note}
@@ -13,7 +13,7 @@ import utils.collections.CollectionUtils
 import scala.collection.mutable
 
 object JFugueMIDIParser extends MIDIParserFactory {
- override def apply(filename: String, phraseLength: Int): JFugueMIDIParser = {
+ override def apply(filename: String): JFugueMIDIParser = {
     val parser = new MidiParser()
     val parserListener = new JFugueParseListener
     parser.addParserListener(parserListener)
@@ -24,13 +24,13 @@ object JFugueMIDIParser extends MIDIParserFactory {
 }
 
 class JFugueMIDIParser extends MIDIParser {
-  override def getInstrumentsCounts: Map[InstrumentCategory, Int] = Map()
-
   override def getPartIndexByInstrument: mutable.MultiMap[InstrumentType, Int] = CollectionUtils.createHashMultimap
 
   override def getPhrases(partNum: Int): Traversable[Phrase] = List()
 
-  override def getMultiVoicePhrases(partNum: Int): Traversable[Phrase] = List()
+  override def getMultiVoicePhrases(partNum: Int): List[Phrase] = List()
+
+  override def getAllMultiVoicePhrases: List[List[Phrase]] = List()
 }
 
 class JFugueParseListener extends ParserListener {

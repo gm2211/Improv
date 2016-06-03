@@ -2,6 +2,7 @@ package demos
 
 import java.io.File
 
+import instruments.InstrumentType.PIANO
 import instruments.JFugueUtils
 import midi.JMusicMIDIParser
 import org.jfugue.midi.MidiFileManager
@@ -9,14 +10,15 @@ import org.jfugue.player.Player
 
 object DemoCompareParserOutput {
   def run(filename: String) = {
-    val player = new Player()
+    import scala.concurrent.duration.MILLISECONDS
     val pattern = MidiFileManager.loadPatternFromMidi(new File(filename)).toString.split("V[0-9]").tail
-    val myPhrase = JMusicMIDIParser.apply(filename).getMultiVoicePhrases(1).toList.head
-    val myPattern = JFugueUtils.createPattern(myPhrase, 0)
+    val myPhrases = JMusicMIDIParser.apply(filename).getMultiVoicePhrases(0)
+    val myPatterns = myPhrases.map(JFugueUtils.createPattern(_, PIANO(1)))
     println(pattern(0))
-    println(myPattern)
+    myPhrases.foreach(p => println(p.getDuration(MILLISECONDS)))
+    myPatterns.foreach(println)
 
-    Thread.sleep(1000)
-    player.play(myPattern)
+    myPatterns.foreach{ p => new Player().play(p); println("done")}
+//    new Player().play(pattern(0))
   }
 }

@@ -1,3 +1,5 @@
 package messages
 
-case object Stop extends Message
+import akka.actor.ActorRef
+
+case class Stop(override val sender: ActorRef) extends Message

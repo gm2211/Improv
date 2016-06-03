@@ -16,6 +16,7 @@ object MapDBMapStore {
 }
 
 class MapDBMapStore[K, V](private val db: DB, mapName: String) extends MapStore[K, V] {
+
   private val db_map: HTreeMap[K, V] = db.hashMap(mapName)
 
   override def get(key: K): Option[V] = Option(db_map.get(key))
@@ -25,6 +26,8 @@ class MapDBMapStore[K, V](private val db: DB, mapName: String) extends MapStore[
   override def put(key: K, value: V): Unit = db_map.put(key, value)
 
   override def removeAll(): Unit = db_map.keySet().foreach(db_map.remove)
+
+  def contains(key: K): Boolean = db_map.containsKey(key)
 
   def keySet(): Set[K] = db_map.keySet().toSet
 

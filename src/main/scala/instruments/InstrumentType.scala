@@ -1,11 +1,15 @@
 package instruments
 
+import com.fasterxml.jackson.annotation.{JsonProperty, JsonTypeInfo}
 import utils.collections.CollectionUtils
 
+import scala.language.implicitConversions
 import scala.reflect.ClassTag
 
 object InstrumentType {
   type InstrumentType = InstrumentCategory
+
+  implicit def toInstrumentNumber(instrumentType: InstrumentType): Int = instrumentType.instrumentNumber
 
   sealed abstract class InstrumentTypeObject[T <: InstrumentCategory](implicit m: ClassTag[T]) {
     val range: Range
@@ -15,6 +19,12 @@ object InstrumentType {
       m.runtimeClass.getConstructors()(0).newInstance(instrumentNumber).asInstanceOf[InstrumentType]
     }
   }
+
+  def availableInstruments = List(
+    PIANO(), CHROMATIC_PERCUSSION(), ORGAN(), GUITAR(), BASS(), STRINGS(), ENSEMBLE(), BRASS(),
+    PIPE(), SYNTH_LEAD(), SYNTH_PAD(), SYNTH_EFFECTS(), ETHNIC(), PERCUSSIVE(), SOUND_EFFECTS())
+
+  def randomInstrument = CollectionUtils.chooseRandom(availableInstruments).get
 
   object PIANO extends InstrumentTypeObject[PIANO] {
     val range = 1 to 8
@@ -84,43 +94,98 @@ object InstrumentType {
     val range = 129 to Int.MaxValue
   }
 
-  sealed abstract class InstrumentCategory(val instrumentNumber: Int, val instrTypeObj: InstrumentTypeObject[_]) {
-    require(instrTypeObj.range contains instrumentNumber)
+  @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
+  sealed abstract class InstrumentCategory(
+      @JsonProperty("instrumentNumber") val instrumentNumber: Int) extends Serializable {
+    def range: Range
+    require(range contains instrumentNumber, "Instrument number not in range")
+    def sameInstrumentClass(instrumentType: InstrumentType): Boolean = getClass == instrumentType.getClass
   }
 
-  case class PIANO(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, PIANO)
+  case class PIANO(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = PIANO.range
+  }
 
-  case class CHROMATIC_PERCUSSION(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, CHROMATIC_PERCUSSION)
+  case class CHROMATIC_PERCUSSION(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = CHROMATIC_PERCUSSION.range
+  }
 
-  case class ORGAN(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, ORGAN)
+  case class ORGAN(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = ORGAN.range
+  }
 
-  case class GUITAR(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, GUITAR)
+  case class GUITAR(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber){
+    override def range: Range = GUITAR.range
+  }
 
-  case class BASS(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, BASS)
+  case class BASS(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber){
+    override def range: Range = BASS.range
+  }
 
-  case class STRINGS(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, STRINGS)
+  case class STRINGS(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = STRINGS.range
+  }
 
-  case class ENSEMBLE(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, ENSEMBLE)
+  case class ENSEMBLE(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = ENSEMBLE.range
+  }
 
-  case class BRASS(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, BRASS)
+  case class BRASS(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = BRASS.range
+  }
 
-  case class REED(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, REED)
+  case class REED(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = REED.range
+  }
 
-  case class PIPE(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, PIPE)
+  case class PIPE(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = PIPE.range
+  }
 
-  case class SYNTH_LEAD(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, SYNTH_LEAD)
+  case class SYNTH_LEAD(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = SYNTH_LEAD.range
+  }
 
-  case class SYNTH_PAD(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, SYNTH_PAD)
+  case class SYNTH_PAD(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = SYNTH_PAD.range
+  }
 
-  case class SYNTH_EFFECTS(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, SYNTH_EFFECTS)
+  case class SYNTH_EFFECTS(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = SYNTH_EFFECTS.range
+  }
 
-  case class ETHNIC(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, ETHNIC)
+  case class ETHNIC(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = ETHNIC.range
+  }
 
-  case class PERCUSSIVE(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, PERCUSSIVE)
+  case class PERCUSSIVE(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = PERCUSSIVE.range
+  }
 
-  case class SOUND_EFFECTS(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, SOUND_EFFECTS)
+  case class SOUND_EFFECTS(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = SOUND_EFFECTS.range
+  }
 
-  case class UNKNOWN(override val instrumentNumber: Int) extends InstrumentCategory(instrumentNumber, UNKNOWN)
+  case class UNKNOWN(@JsonProperty("instrumentNumber") override val instrumentNumber: Int)
+    extends InstrumentCategory(instrumentNumber) {
+    override def range: Range = UNKNOWN.range
+  }
 
   def classify(instrNumber: Int): InstrumentCategory = instrNumber + 1 match {
     case it if PIANO.range contains it => PIANO(it)

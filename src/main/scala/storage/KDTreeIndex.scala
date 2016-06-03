@@ -1,8 +1,10 @@
 package storage
 
-import cbr.{CaseDescription, CaseIndex, CaseSolutionStore}
+import cbr.description.{CaseDescription, DescriptionCreator}
+import cbr.{CaseIndex, CaseSolutionStore}
 import com.fasterxml.jackson.annotation.{JsonCreator, JsonProperty}
 import net.sf.javaml.core.kdtree.KDTree
+import utils.ImplicitConversions.NotNullOption
 import utils.{IOUtils, SerialisationUtils}
 
 import scala.collection.JavaConversions._
@@ -11,56 +13,100 @@ import scala.math
 import scala.util.Try
 
 object KDTreeIndex {
-  val DEFAULT_KDTREE_REBALANCING_THRESHOLD = 1000
+  private val DEFAULT_KDTREE_REBALANCING_THRESHOLD = 1000
+  private val DEFAULT_INDEX_RESOURCE: String = "knowledgeBase/caseIndex"
+  private val DEFAULT_SOLUTION_STORE_RESOURCE: String = "knowledgeBase/solutionStore"
 
-  def loadOrCreate[CD <: CaseDescription : Manifest, CS : Manifest](
+  def create[Case: Manifest](
+      descriptionCreator: DescriptionCreator[Case],
+      storeSavePath: String,
+      indexSavePath: String): KDTreeIndex[Case] = {
+    val store = new MapDBSolutionStore[Case](storeSavePath)
+    new KDTreeIndex[Case](store, descriptionCreator, indexSavePath)
+  }
+
+  def loadOrCreateDefault[Case : Manifest](
+      descriptionCreator: DescriptionCreator[Case]): KDTreeIndex[Case] = {
+    val loaded = load[Case](IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
+    loaded.getOrElse(createDefault(descriptionCreator))
+  }
+
+  def loadDefault[Case : Manifest]: Option[KDTreeIndex[Case]] = load(IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
+
+  def load[Case : Manifest](filename: String): Option[KDTreeIndex[Case]] =
+    SerialisationUtils.deserialise[KDTreeIndex[Case]](filename).toOption
+
+  def createDefault[Case : Manifest](descriptionCreator: DescriptionCreator[Case]): KDTreeIndex[Case] = {
+    removeDefault()
+    val storePath = IOUtils.getResourcePath(DEFAULT_SOLUTION_STORE_RESOURCE)
+    val indexPath = IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE)
+    create(descriptionCreator, storePath, indexPath)
+  }
+
+  def loadOrCreate[Case : Manifest](
       filename: String,
-      descriptionSize: Int = 10): KDTreeIndex[CD, CS] = {
-    SerialisationUtils.deserialise[KDTreeIndex[CD, CS]](filename).toOption.getOrElse{
-      val store = new MapDBSolutionStore[CS](IOUtils.getResourcePath("knowledgeBase/solutionStore"))
-      new KDTreeIndex[CD, CS](store, descriptionSize, IOUtils.getResourcePath("knowledgeBase/caseIndex"))
-    }
+      descriptionCreator: DescriptionCreator[Case]): KDTreeIndex[Case] = {
+    load(filename).getOrElse(createDefault(descriptionCreator))
+  }
+
+  private def removeDefault(): Unit = {
+    IOUtils.deleteContent(IOUtils.getResourcePath(DEFAULT_INDEX_RESOURCE))
+    IOUtils.deleteContent(IOUtils.getResourcePath(DEFAULT_SOLUTION_STORE_RESOURCE))
   }
 }
 
 
 @JsonCreator
-class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
-      @JsonProperty("store") private val store: CaseSolutionStore[CaseSolution],
-      @JsonProperty("ignored") descriptionSize: Int,
+class KDTreeIndex[Problem] (
+      @JsonProperty("store") private val store: CaseSolutionStore[Problem],
+      @JsonProperty("descriptionCreator") override val descriptionCreator: DescriptionCreator[Problem],
       @JsonProperty("path") private var path: String
-    )  extends CaseIndex[CD, CaseSolution] with FileSerialisable {
+    )  extends CaseIndex[Problem] with Saveable {
   @JsonProperty("kdTree")
-  private val kdTree = new KDTree[String](descriptionSize, KDTreeIndex.DEFAULT_KDTREE_REBALANCING_THRESHOLD)
-
-  def addCase(caseDescription: CD, caseSolution: CaseSolution): Unit = {
-    removeCase(caseDescription) // The implementation of KDTree I'm using does not support multiple keys
-    val storedSolutionID = store.addSolution(caseSolution)
-    kdTree.insert(caseDescription.getSignature, storedSolutionID)
+//  @JsonSerialize(using=classOf[KDTreeSerialiser])
+  val kdTree = {
+    new KDTree[List[String]](
+      descriptionCreator.getMaxDescriptionSize,
+      KDTreeIndex.DEFAULT_KDTREE_REBALANCING_THRESHOLD)
   }
 
-  override def findKNearestNeighbours(caseDescription: CD, k: Int): Traversable[CaseSolution] = {
+ override def addSolutionToProblem(problemDescription: CaseDescription[Problem], solution: Solution): Unit = {
+    val existingSolutions = searchExact(problemDescription)
+    val storedSolutionID = store.addSolution(solution)
+    val newSolutions = existingSolutions.getOrElse(List[String]()) :+ storedSolutionID
+
+    if (existingSolutions.isDefined) {
+      // Necessary because insert does not overwrite the value of a node
+      kdTree.delete(problemDescription.getSignature)
+    }
+
+    kdTree.insert(problemDescription.getSignature, newSolutions)
+  }
+
+  override def findSolutionsToSimilarProblems(caseDescription: CaseDescription[Problem], k: Int): List[Solution] = {
     val maxNumOfNeighbours = math.min(k, kdTree.getNodeCount)
-    Try(kdTree.nearest(caseDescription.getSignature, maxNumOfNeighbours).toList)
+    val solutionIDs = Try(kdTree.nearest(caseDescription.getSignature, maxNumOfNeighbours).toList)
       .toOption
-      .map(_.flatMap(store.getSolution)).getOrElse(List())
+      .map(_.flatten)
+      .getOrElse(List[String]())
+    solutionIDs.flatMap(store.getSolution)
   }
 
-  override def save(path: Option[String] = None): Boolean = {
-    store.commit()
-    val filePath = path.getOrElse(this.path)
-    this.path = filePath
-    SerialisationUtils.serialise(this, filePath).isSuccess
+  override def removeSolutionsToProblem(caseDescription: CaseDescription[Problem]): Boolean = {
+    searchExact(caseDescription).exists { solutionIDs =>
+      solutionIDs.foreach(store.removeSolution)
+      kdTree.delete(caseDescription.getSignature)
+      true
+    }
   }
 
-  override def removeCase(caseDescription: CD): Boolean = {
-    val key: Array[Double] = caseDescription.getSignature
+  def searchExact(caseDescription: CaseDescription[Problem]): Option[List[String]] =
+    Try(kdTree.search(caseDescription.getSignature)).toNotNullOption
 
-    removeEntry(key)
-  }
-
-  override def foreach[U](f: (CaseDescription) => U): Unit = {
-    kdTree.withFilter(!_.isDeleted).foreach( node => f(node.getKey.getCoord))
+  override def clear(): KDTreeIndex.this.type = {
+    this.foreach(node => removeSolutionsToProblem(node.getSignature))
+    store.clear()
+    this
   }
 
   /**
@@ -69,21 +115,20 @@ class KDTreeIndex[CD <: CaseDescription, CaseSolution] (
    * Note: My modified version of KDTree will already re-balance itself every time
    * a certain threshold of nodes marked as deleted
    */
-  def compact(): Unit = {
+  def compact(): KDTreeIndex.this.type = {
     kdTree.rebalance()
-  }
-
-  override def clear(): KDTreeIndex.this.type = {
-    this.foreach(node => removeEntry(node.getSignature))
-    store.clear()
     this
   }
 
-  private def removeEntry(key: Array[Double]): Boolean = {
-    Try(kdTree.search(key)).map { solutionID =>
-      store.removeSolution(solutionID)
-      kdTree.delete(key)
-    }.isSuccess
+  override def foreach[U](f: (CaseDescription[Problem]) => U): Unit = {
+    kdTree.withFilter(!_.isDeleted).foreach( node => f(node.getKey.getCoord))
+  }
+
+  override def save(path: Option[String] = None): Try[Boolean] = {
+    store.commit()
+    val filePath = path.getOrElse(this.path)
+    this.path = filePath
+    SerialisationUtils.serialise(this, filePath)
   }
 }
 

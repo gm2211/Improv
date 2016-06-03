@@ -2,12 +2,9 @@ package cbr
 
 import java.util.UUID
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import representation.Phrase
-import storage.MapDBSolutionStore
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonTypeInfo}
 
-@JsonDeserialize(as = classOf[MapDBSolutionStore[Phrase]])
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 trait CaseSolutionStore[CaseSolution] {
 
   @JsonIgnore

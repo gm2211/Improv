@@ -28,9 +28,6 @@ apply plugin: "distribution"
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    // Overtone Wrapper
-    compile(project(':overtone-wrapper'))
-
     // Scala
     compile "org.scala-lang:scala-library:$scala_version"
     compile "org.scala-lang:scala-compiler:$scala_version"
@@ -60,10 +57,22 @@ dependencies {
     // DB server
     compile "org.mapdb:mapdb:$mapdb_version"
 
+    // Web Server
+    compile "org.scalatra:scalatra_2.11:$scalatra_version"
+    compile "org.scalatra:scalatra-atmosphere_2.11:$scalatra_version"
+
     // MIDI
     compile name: "jfugue-5.0.1"
     compile name: "jMusic1.6.4"
+
+    // Machine Learning Tools
     compile name: "javaml-$javaml_version"
+
+    // Artificial Neural Network
+    compile name: "neuroph-core-2.9"
+
+    // Plotting
+    compile "com.quantifind:wisp_2.11:$wisp_version"
 
     // Dependency Injection
     //compile "net.codingwell:scala-guice_2.10:$scala_guice_version"
@@ -84,7 +93,8 @@ dependencies {
 }
 
 task run(type: JavaExec, dependsOn: classes) {
-    main = "Main"
+    main = "demos.DemoCreateTrainingDataANN"
+    standardInput = System.in
     classpath sourceSets.main.runtimeClasspath
     classpath configurations.runtime
 }

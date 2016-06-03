@@ -5,5 +5,5 @@ sealed trait Count
 
 case class Zero() extends Count
 
-case class Once() extends Count
+case class AtLeastOnce() extends Count
 

@@ -1,4 +1,6 @@
 package messages
 
-case class SyncMessage(time: Long) extends Message {
+import akka.actor.ActorRef
+
+case class SyncMessage(override val sender: ActorRef, time: Long) extends Message {
 }

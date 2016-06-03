@@ -1,9 +1,9 @@
 package utils.functional
 
-import scala.collection.mutable
+import scala.collection.concurrent
 
-class MemoizedFunc[From, To](private val function: From => To) extends Serializable {
-  private val results: mutable.Map[From, To] = new mutable.HashMap()
+class MemoizedFunc[From, To](private val function: From => To) extends Serializable with ((From) => To) {
+  private val results: concurrent.Map[From, To] = concurrent.TrieMap()
 
   /**
    * Returns the memoized value of the function if available for the input,
@@ -26,4 +26,11 @@ class MemoizedFunc[From, To](private val function: From => To) extends Serializa
    */
   def update(from: From, to: To) = results.put(from, to)
 
+  /**
+   * Returns another memoized function with a clean cache
+   * @return
+   */
+  def getFreshCopy: MemoizedFunc[From, To] = new MemoizedFunc[From, To](function)
+
+  override def apply(v1: From): To = apply(v1, refresh = false)
 }

@@ -2,10 +2,18 @@ package utils.collections
 
 import scala.collection.mutable
 import scala.math
-import scala.util.Random
+import scala.util.{Random, Try}
 
 object CollectionUtils {
-  
+
+  def filterNonNumbers(array: Array[Double]): Array[Double] = {
+    array.map {
+      case d if d.isNaN || d.isInfinity => 0.0
+      case d => d
+    }
+  }
+
+
   def mergeMultiMaps[K, V, A](multiMaps: A*)(implicit fn: A => mutable.MultiMap[K, V]): mutable.MultiMap[K, V] = {
     val mergedMMap = createHashMultimap[K, V]
     for (mmap <- multiMaps; (key, values) <- mmap; value <- values) {
@@ -39,9 +47,21 @@ object CollectionUtils {
   }
 
   def createHashMultimap[Keys, Values]: mutable.MultiMap[Keys, Values] = {
-    new mutable.HashMap[Keys, mutable.Set[Values]]() with mutable.MultiMap[Keys, Values] {
+    new mutable.HashMap[Keys, mutable.Set[Values]]() with Serializable with mutable.MultiMap[Keys, Values] {
       override def makeSet = new mutable.LinkedHashSet()
     }
+  }
+
+  def mostFrequent[Element](elements: Iterable[Element]): Option[Element] = {
+    Try(elements.groupBy(identity).maxBy(_._2.size)._1).toOption
+  }
+
+  def print[Elem](elements: Traversable[Elem]): Unit = {
+    println(s"{${elements.mkString(",")}}")
+  }
+
+  def printNewLine[Elem](elements: Traversable[Elem]): Unit = {
+    println(s"{${elements.mkString(",\n")}}")
   }
 }
 
