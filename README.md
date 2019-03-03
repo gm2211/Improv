@@ -1,5 +1,8 @@
 # Improv
-Distributed improvising orchestra
+Distributed improvising orchestra.
+
+[paper](https://github.com/gm2211/Improv/blob/develop/finalReport.pdf)
+
 # Compilation
 Just run ./gradlew build
 # Development
